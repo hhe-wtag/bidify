@@ -1,1 +1,1 @@
-# nilam-auction-platform
+# bidify-auction-platform
