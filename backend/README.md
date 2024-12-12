@@ -127,14 +127,14 @@ dummy data:
 {
   "firstName": "afnan",
   "lastName": "mumu",
-  "email": "afns@gmail.com",
+  "email": "abc@gmail.com",
   "contactNumber": "01773046092",
-   "password": "abc12345"
+   "password": "Abc123sd"
 }
 For Login POST req -
 http://localhost:8080/api/v1/users/login
 dummy data:
 {
-  "email": "afns@gmail.com",
-   "password": "abc12345"
+  "email": "abc@gmail.com",
+   "password": "Abc123sd"
 }
