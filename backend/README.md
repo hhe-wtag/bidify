@@ -118,3 +118,23 @@
       "exclude": ["node_modules", "dist"]
     }
     ```
+
+
+
+For Registration POST req - 
+http://localhost:8080/api/v1/users/create
+dummy data:
+{
+  "firstName": "afnan",
+  "lastName": "mumu",
+  "email": "afns@gmail.com",
+  "contactNumber": "01773046092",
+   "password": "abc12345"
+}
+For Login POST req -
+http://localhost:8080/api/v1/users/login
+dummy data:
+{
+  "email": "afns@gmail.com",
+   "password": "abc12345"
+}

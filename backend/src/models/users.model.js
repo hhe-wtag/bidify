@@ -4,13 +4,15 @@ import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema(
   {
     // required fields
-    username: {
+    firstName: {
       type: String,
-      required: [true, 'Username is required'],
-      unique: true,
       trim: true,
-      minlength: [3, 'Username must be at least 3 characters long'],
-      maxlength: [50, 'Username cannot exceed 50 characters'],
+      maxlength: [50, 'First name cannot exceed 50 characters'],
+    },
+    lastName: {
+      type: String,
+      trim: true,
+      maxlength: [50, 'Last name cannot exceed 50 characters'],
     },
     email: {
       type: String,
@@ -41,57 +43,49 @@ const userSchema = new mongoose.Schema(
     },
 
     // optional fields
-    firstName: {
-      type: String,
-      trim: true,
-      maxlength: [50, 'First name cannot exceed 50 characters'],
-    },
-    lastName: {
-      type: String,
-      trim: true,
-      maxlength: [50, 'Last name cannot exceed 50 characters'],
-    },
-    balance: {
-      type: Number,
-      default: 0,
-      min: [0, 'Balance cannot be negative'],
-    },
     address: {
       street: {
         type: String,
         trim: true,
+        default: null,
       },
       city: {
         type: String,
         trim: true,
+        default: null,
       },
       state: {
         type: String,
         trim: true,
+        default: null,
       },
       zipCode: {
         type: String,
         trim: true,
-        match: [/^\d{5}(-\d{4})?$/, 'Please provide a valid ZIP code'],
+        match: [/^\d{4}$/, 'Please provide a valid ZIP code'],
+        default: null,
       },
       country: {
         type: String,
         trim: true,
+        default: null,
       },
+    },
+    balance: {
+      type: Number,
+      min: [0, 'Balance cannot be negative'],
+      default: 0,
     },
   },
   {
-    timestamps: true,
+    timestamps: { createdAt: 'registrationDate' },
   }
 );
 
-// Pre-save middleware to hash password
 userSchema.pre('save', async function (next) {
-  // Only hash the password if it has been modified (or is new)
   if (!this.isModified('password')) return next();
 
   try {
-    // Hash password with bcrypt
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
@@ -100,7 +94,6 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// Method to compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
