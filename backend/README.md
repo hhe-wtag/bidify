@@ -121,20 +121,31 @@
 
 
 
-For Registration POST req - 
-http://localhost:8080/api/v1/users/create
-dummy data:
+### 1. **User Registration**
+
+**POST Request:**  
+`http://localhost:8080/api/v1/users/create`
+
+#### Request Body (Example):
+```json
 {
   "firstName": "afnan",
   "lastName": "mumu",
   "email": "abc@gmail.com",
   "contactNumber": "01773046092",
-   "password": "Abc123sd"
+  "password": "Abc123sd"
 }
-For Login POST req -
-http://localhost:8080/api/v1/users/login
-dummy data:
+```
+
+### 2. **User Login**
+
+**POST Request:**  
+`http://localhost:8080/api/v1/users/login`
+
+#### Request Body (Example):
+```json
 {
   "email": "abc@gmail.com",
-   "password": "Abc123sd"
+  "password": "Abc123sd"
 }
+```
