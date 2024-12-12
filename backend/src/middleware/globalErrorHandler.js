@@ -6,7 +6,7 @@ const formatErrorMessage = (message, path = '') => ({
   message,
 });
 
-const globalErrorHandler = (error, req, res) => {
+const globalErrorHandler = (error, req, res, next) => {
   let statusCode = 500;
   let message = 'Something went wrong!';
   let errorMessages = [];
