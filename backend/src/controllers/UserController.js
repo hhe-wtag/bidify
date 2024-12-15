@@ -1,29 +1,31 @@
 import BaseController from './BaseController.js';
 import UserService from '../services/UserService.js';
 import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import HTTP_STATUS from '../utils/httpStatus.js';
 
 class UserController extends BaseController {
   constructor() {
     super(new UserService());
   }
 
-  create = asyncHandler(async (req, res) => {
+  register = asyncHandler(async (req, res) => {
     const { firstName, lastName, email, contactNumber, password } = req.body;
 
     if (!firstName || !lastName || !email || !contactNumber || !password) {
       throw new ApiError(400, 'All required fields must be provided!');
     }
 
-    const user = { firstName, lastName, email, contactNumber, password };
+    const userData = { firstName, lastName, email, contactNumber, password };
 
-    const result = await this.service.create(user);
+    const user = await this.service.register(userData);
 
-    res.status(201).json({
-      success: true,
-      message: 'User created successfully!',
-      data: result,
-    });
+    res
+      .status(HTTP_STATUS.CREATED)
+      .json(
+        new ApiResponse(HTTP_STATUS.CREATED, user, 'User created successfully!')
+      );
   });
 
   login = asyncHandler(async (req, res) => {
@@ -33,13 +35,11 @@ class UserController extends BaseController {
       throw new ApiError(400, 'Email and Password are required!');
     }
 
-    const user = await this.service.login(email, password);
+    const userData = await this.service.login(email, password);
 
-    res.status(200).json({
-      success: true,
-      message: 'Login successful!',
-      data: user,
-    });
+    res
+      .status(HTTP_STATUS.OK)
+      .json(new ApiResponse(HTTP_STATUS.OK, userData, 'Login Successful!'));
   });
 }
 

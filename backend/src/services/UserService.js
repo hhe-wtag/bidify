@@ -18,13 +18,14 @@ class UserService {
     return user;
   }
 
-  async create(data) {
+  async register(data) {
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new ApiError(400, 'Email already exists.');
     }
 
-    return this.userRepository.create(data);
+    await this.userRepository.create(data);
+    return;
   }
 
   async update(id, updateData) {
@@ -46,20 +47,17 @@ class UserService {
   async login(email, password) {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      throw new ApiError(401, 'Invalid email or password');
-    }
-
-    if (!user.password) {
-      throw new ApiError(401, 'User has no password');
+      throw new ApiError(401, 'No user found with this email address');
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      throw new ApiError(401, 'Invalid email or password');
+      throw new ApiError(401, 'Incorrect password');
     }
 
-    const { password: _, ...userData } = user.toObject();
-    return userData;
+    const token = await user.generateAuthToken();
+
+    return { token, user };
   }
 }
 

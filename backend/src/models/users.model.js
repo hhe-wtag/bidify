@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
@@ -20,19 +21,26 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email address'],
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        'Please provide a valid email address',
+      ],
     },
     contactNumber: {
       type: String,
       required: [true, 'Contact number is required'],
       trim: true,
-      match: [/^(?:\+?88)?01[3-9]\d{8}$/, 'Please provide a valid Bangladeshi mobile number'],
+      match: [
+        /^(?:\+?88)?01[3-9]\d{8}$/,
+        'Please provide a valid Bangladeshi mobile number',
+      ],
       validate: {
         validator: function (v) {
           // Validate exact 11 digits for Bangladeshi mobile numbers
           return /^(?:\+?88)?01[3-9]\d{8}$/.test(v);
         },
-        message: 'Contact number must be a valid 11-digit Bangladeshi mobile number',
+        message:
+          'Contact number must be a valid 11-digit Bangladeshi mobile number',
       },
     },
     password: {
@@ -102,7 +110,25 @@ userSchema.pre('save', async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+  const user = await this.constructor
+    .findOne({ email: this.email })
+    .select('+password');
+
+  if (!user) {
+    return false;
+  }
+
+  return bcrypt.compare(candidatePassword, user.password);
+};
+
+userSchema.methods.generateAuthToken = function () {
+  return jwt.sign(
+    { id: this._id, email: this.email },
+    process.env.JWT_ACCESS_SECRET,
+    {
+      expiresIn: '1d',
+    }
+  );
 };
 
 export const User = mongoose.model('User', userSchema);
