@@ -4,7 +4,10 @@ import asyncHandler from '../utils/asyncHandler.js';
 class BaseController {
   constructor(service) {
     if (!service) {
-      throw new ApiError(500, 'Service instance is required for BaseController');
+      throw new ApiError(
+        500,
+        'Service instance is required for BaseController'
+      );
     }
     this.service = service;
   }
