@@ -13,7 +13,11 @@ const globalErrorHandler = (error, req, res, next) => {
   let errorMessages = [];
 
   if (error?.name === 'ValidationError') {
-    const { statusCode: code, message: msg, errorMessages: errors } = handleValidationError(error);
+    const {
+      statusCode: code,
+      message: msg,
+      errorMessages: errors,
+    } = handleValidationError(error);
     statusCode = code;
     message = msg;
     errorMessages = errors;

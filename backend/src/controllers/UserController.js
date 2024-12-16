@@ -14,16 +14,24 @@ class UserController extends BaseController {
     const { email } = req.query;
 
     if (!email) {
-      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Email query parameter is required');
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'Email query parameter is required'
+      );
     }
 
     const user = await this.repository.findByEmail(email);
 
     if (!user) {
-      throw new ApiError(HTTP_STATUS.NOT_FOUND, `User with email ${email} not found`);
+      throw new ApiError(
+        HTTP_STATUS.NOT_FOUND,
+        `User with email ${email} not found`
+      );
     }
 
-    res.status(HTTP_STATUS.OK).json(new ApiResponse(HTTP_STATUS.OK, user, 'User found Successfully'));
+    res
+      .status(HTTP_STATUS.OK)
+      .json(new ApiResponse(HTTP_STATUS.OK, user, 'User found Successfully'));
   });
 }
 

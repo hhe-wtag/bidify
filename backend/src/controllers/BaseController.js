@@ -5,7 +5,10 @@ import HTTP_STATUS from '../utils/httpStatus.js';
 class BaseController {
   constructor(repository) {
     if (!repository) {
-      throw new ApiError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Respository instance is required for BaseController');
+      throw new ApiError(
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        'Respository instance is required for BaseController'
+      );
     }
     this.repository = repository;
   }
@@ -23,7 +26,10 @@ class BaseController {
     const result = await this.repository.findById(id);
 
     if (!result) {
-      throw new ApiError(HTTP_STATUS.NOT_FOUND, `Resource with ID ${id} not found`);
+      throw new ApiError(
+        HTTP_STATUS.NOT_FOUND,
+        `Resource with ID ${id} not found`
+      );
     }
 
     res.status(HTTP_STATUS.OK).json({
@@ -59,7 +65,10 @@ class BaseController {
     const result = await this.repository.update(id, data);
 
     if (!result) {
-      throw new ApiError(HTTP_STATUS.NOT_FOUND, `Resource with ID ${id} not found`);
+      throw new ApiError(
+        HTTP_STATUS.NOT_FOUND,
+        `Resource with ID ${id} not found`
+      );
     }
 
     res.status(HTTP_STATUS.OK).json({
@@ -74,7 +83,10 @@ class BaseController {
     const result = await this.repository.delete(id);
 
     if (!result) {
-      throw new ApiError(HTTP_STATUS.NOT_FOUND, `Resource with ID ${id} not found`);
+      throw new ApiError(
+        HTTP_STATUS.NOT_FOUND,
+        `Resource with ID ${id} not found`
+      );
     }
 
     res.status(HTTP_STATUS.OK).json({
