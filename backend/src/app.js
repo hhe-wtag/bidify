@@ -16,8 +16,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/v1/users', UserRoutes);
+app.use('/api/auth', UserRoutes);
 
-app.use(globalErrorHandler);
+// app.use(globalErrorHandler);
 
 export default app;

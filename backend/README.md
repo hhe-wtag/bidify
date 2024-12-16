@@ -124,7 +124,7 @@
 ### 1. **User Registration**
 
 **POST Request:**  
-`http://localhost:8080/api/v1/users/create`
+`http://localhost:8080/api/auth/register`
 
 #### Request Body (Example):
 ```json
@@ -140,7 +140,7 @@
 ### 2. **User Login**
 
 **POST Request:**  
-`http://localhost:8080/api/v1/users/login`
+`http://localhost:8080/api/auth/login`
 
 #### Request Body (Example):
 ```json
