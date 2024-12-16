@@ -1,62 +1,38 @@
 import BaseController from './BaseController.js';
-import UserService from '../services/UserService.js';
+import UserRepository from '../repositories/UserRepository.js';
 import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import HTTP_STATUS from '../utils/httpStatus.js';
 
 class UserController extends BaseController {
   constructor() {
-    super(new UserService());
+    super(new UserRepository());
   }
 
   register = async (req, res) => {
     const { firstName, lastName, email, contactNumber, password } = req.body;
 
-    if (!firstName || !lastName || !email || !contactNumber || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'All required fields must be provided!',
-      });
+    if (!email) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'Email query parameter is required'
+      );
     }
 
-    const user = { firstName, lastName, email, contactNumber, password };
+    const user = await this.repository.findByEmail(email);
 
-    try {
-      const result = await this.service.create(user);
-
-      res.status(201).json({
-        success: true,
-        message: 'User created successfully!',
-        data: result,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message || 'An error occurred while creating the user.',
-      });
-    }
-  };
-
-  login = async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      throw new ApiError(400, 'Email and Password are required!');
+    if (!user) {
+      throw new ApiError(
+        HTTP_STATUS.NOT_FOUND,
+        `User with email ${email} not found`
+      );
     }
 
-    try {
-      const user = await this.service.login(email, password);
-
-      res.status(200).json({
-        success: true,
-        message: 'Login successful!',
-        data: user,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message || 'An error occurred during login.',
-      });
-    }
-  };
+    res
+      .status(HTTP_STATUS.OK)
+      .json(new ApiResponse(HTTP_STATUS.OK, user, 'User found Successfully'));
+  });
 }
 
 export default new UserController();
