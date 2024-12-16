@@ -1,38 +1,39 @@
-# Frontend
+# frontend
 
-## Bootsraping idea from the blog -
-https://dev.to/drfcozapata/how-to-get-eslint-9111-to-run-in-vue-3-4cjh
+This template should help get you started developing with Vue 3 in Vite.
 
-## Features
+## Recommended IDE Setup
 
-- **Vue 3**: Modern JavaScript framework for building user interfaces.
-- **Vite**: Fast build tool for faster development and optimized production builds.
-- **Vue Router**: Client-side routing for the application.
-- **Pinia**: State management solution for Vue 3.
-- **Shadcn**: UI components library.
-- **TailwindCSS**: Utility-first CSS framework for rapid styling.
-- **ESLint** & **Prettier**: Code quality and formatting tools.
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-### Prerequisites
+## Type Support for `.vue` Imports in TS
 
-- Node.js (version >= 20.x)
-- npm or yarn
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
 
-### Installation
+## Customize configuration
 
-1. Install dependencies
-```bash
-yarn install
+See [Vite Configuration Reference](https://vite.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
 ```
-2. Project run
-```bash
-yarn dev
+
+### Compile and Hot-Reload for Development
+
+```sh
+npm run dev
 ```
-3. Building for Production
-```bash
-yarn build
+
+### Type-Check, Compile and Minify for Production
+
+```sh
+npm run build
 ```
-3. Linting and Formatting
-```bash
-yarn lint
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
 ```
