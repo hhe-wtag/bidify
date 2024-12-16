@@ -2,15 +2,15 @@ import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 class BaseController {
-  constructor(service) {
-    if (!service) {
-      throw new ApiError(500, 'Service instance is required for BaseController');
+  constructor(repository) {
+    if (!repository) {
+      throw new ApiError(500, 'Respository instance is required for BaseController');
     }
-    this.service = service;
+    this.repository = repository;
   }
 
   getAll = asyncHandler(async (req, res) => {
-    const result = await this.service.getAll();
+    const result = await this.repository.findAll();
     res.status(200).json({
       success: true,
       data: result,
@@ -19,7 +19,7 @@ class BaseController {
 
   getById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const result = await this.service.getById(id);
+    const result = await this.repository.findById(id);
 
     if (!result) {
       throw new ApiError(404, `Resource with ID ${id} not found`);
@@ -38,7 +38,7 @@ class BaseController {
       throw new ApiError(400, 'Request body is missing');
     }
 
-    const result = await this.service.create(data);
+    const result = await this.repository.create(data);
 
     res.status(201).json({
       success: true,
@@ -55,7 +55,7 @@ class BaseController {
       throw new ApiError(400, 'Request body is missing');
     }
 
-    const result = await this.service.update(id, data);
+    const result = await this.repository.update(id, data);
 
     if (!result) {
       throw new ApiError(404, `Resource with ID ${id} not found`);
@@ -70,7 +70,7 @@ class BaseController {
 
   delete = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const result = await this.service.delete(id);
+    const result = await this.repository.delete(id);
 
     if (!result) {
       throw new ApiError(404, `Resource with ID ${id} not found`);

@@ -1,11 +1,11 @@
 import BaseController from './BaseController.js';
-import UserService from '../services/UserService.js';
+import UserRepository from '../repositories/UserRepository.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 class UserController extends BaseController {
   constructor() {
-    super(new UserService());
+    super(new UserRepository());
   }
 
   findByEmail = asyncHandler(async (req, res) => {
@@ -15,7 +15,7 @@ class UserController extends BaseController {
       throw new ApiError(400, 'Email query parameter is required');
     }
 
-    const user = await this.service.findByEmail(email);
+    const user = await this.repository.findByEmail(email);
 
     if (!user) {
       throw new ApiError(404, `User with email ${email} not found`);
