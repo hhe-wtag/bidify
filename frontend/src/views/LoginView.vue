@@ -16,6 +16,11 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+
+const router = useRouter()
+const userStore = useUserStore()
 
 const formSchema = toTypedSchema(
   z.object({
@@ -34,13 +39,24 @@ const onSubmit = handleSubmit(async (data) => {
       email: data.email,
       password: data.password,
     })
+    console.log('Response data:', response.data)
 
-    localStorage.setItem('token', response.data.token)
+    const token = response.data.data.token
+    const profile = response.data.data.user
+
+    if (token) {
+      userStore.setToken(token) // Store token in Pinia
+      userStore.setUserProfile(profile) // Store profile in Pinia
+    } else {
+      console.error('Token not found in response')
+    }
 
     toast({
       title: 'Login Successful',
       description: 'You have logged in successfully.',
     })
+
+    router.push('/profile')
   } catch (error) {
     console.error('Error logging in:', error.response?.data)
     toast({
@@ -59,7 +75,7 @@ const onSubmit = handleSubmit(async (data) => {
         <CardDescription>Enter your credentials to access your account</CardDescription>
       </CardHeader>
       <CardContent>
-        <form @submit="onSubmit" class="space-y-4">
+        <form @submit.prevent="onSubmit" class="space-y-4">
           <!-- Email Field -->
           <FormField name="email" v-slot="{ componentField }">
             <FormItem>
