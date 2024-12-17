@@ -126,7 +126,7 @@ userSchema.methods.generateAuthToken = function () {
     { id: this._id, email: this.email },
     process.env.JWT_ACCESS_SECRET,
     {
-      expiresIn: '1d',
+      expiresIn: process.env.JWT_ACCESS_EXPIRY,
     }
   );
 };
