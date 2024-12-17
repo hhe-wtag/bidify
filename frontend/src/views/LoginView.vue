@@ -8,13 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toast'
 
@@ -22,17 +16,15 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { h } from 'vue'
 import * as z from 'zod'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+
+const router = useRouter()
 
 const formSchema = toTypedSchema(
   z.object({
     email: z.string().email('Please enter a valid email address.').nonempty('Email is required.'),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters.')
-      .regex(/[A-Z]/, 'Password must include at least one uppercase letter.')
-      .regex(/[a-z]/, 'Password must include at least one lowercase letter.')
-      .regex(/[0-9]/, 'Password must include at least one number.')
-      .nonempty('Password is required.'),
+    password: z.string().nonempty('Password is required.'),
   }),
 )
 
@@ -40,16 +32,26 @@ const { handleSubmit } = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = handleSubmit((values) => {
-  console.log('Submitted values:', values)
-  toast({
-    title: 'Login Successful',
-    description: h(
-      'pre',
-      { class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4' },
-      h('code', { class: 'text-white' }, JSON.stringify(values, null, 2)),
-    ),
-  })
+const onSubmit = handleSubmit(async (data) => {
+  try {
+    const response = await axios.post('http://localhost:8080/api/auth/login', {
+      email: data.email,
+      password: data.password,
+    })
+
+    localStorage.setItem('token', response.data.token)
+
+    toast({
+      title: 'Login Successful',
+      description: 'You have logged in successfully.',
+    })
+  } catch (error) {
+    console.error('Error logging in:', error.response?.data)
+    toast({
+      title: 'Login Failed',
+      description: error.response?.data?.message || 'Please try again.',
+    })
+  }
 })
 </script>
 

@@ -8,19 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toast'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { h } from 'vue'
 import * as z from 'zod'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const formSchema = toTypedSchema(
   z.object({
@@ -51,16 +49,35 @@ const { handleSubmit } = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = handleSubmit((values) => {
-  console.log('Submitted values:', values)
-  toast({
-    title: 'Registration Successful',
-    description: h(
-      'pre',
-      { class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4' },
-      h('code', { class: 'text-white' }, JSON.stringify(values, null, 2)),
-    ),
-  })
+const onSubmit = handleSubmit(async (data) => {
+  try {
+    const response = await axios.post('http://localhost:8080/api/auth/register', {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      contactNumber: data.contactNumber,
+      password: data.password,
+    })
+
+    localStorage.setItem('token', response.data.token)
+
+    toast({
+      title: 'Registration Successful',
+      description: h(
+        'pre',
+        { class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4' },
+        h('code', { class: 'text-white' }, JSON.stringify(data, null, 2)),
+      ),
+    })
+
+    router.push({ name: 'login' })
+  } catch (error) {
+    console.error('Error registering user:', error.response.data)
+    toast({
+      title: 'Registration Failed',
+      description: error.response?.data?.message || 'Please try again.',
+    })
+  }
 })
 </script>
 

@@ -8,6 +8,14 @@ export default [
   {
     files: ['**/*.{js,mjs,cjs,ts,vue}'],
   },
+  {
+    'vue/multi-word-component-names': [
+      'error',
+      {
+        ignores: [],
+      },
+    ],
+  },
   { languageOptions: { globals: globals.browser } },
   {
     rules: {
