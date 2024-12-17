@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -10,7 +17,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toast'
-
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { h } from 'vue'
@@ -59,66 +65,90 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <form class="w-2/3 space-y-6" @submit="onSubmit">
+  <div class="flex justify-center items-center min-h-screen bg-gray-100">
+    <Card class="w-[500px]">
+      <CardHeader>
+        <CardTitle>Register</CardTitle>
+        <CardDescription>Create your account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form @submit="onSubmit" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <!-- First Name Field -->
+            <FormField name="firstName" v-slot="{ componentField }">
+              <FormItem>
+                <FormLabel>
+                  First Name
+                  <span class="text-red-500 ml-1">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input type="text" placeholder="John" v-bind="componentField" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
 
-    <FormField v-slot="{ componentField }" name="firstName">
-      <FormItem>
-        <FormLabel>First Name</FormLabel>
-        <FormControl>
-          <Input type="text" placeholder="John" v-bind="componentField" />
-        </FormControl>
-        <FormDescription> Enter your first name. </FormDescription>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+            <!-- Last Name Field -->
+            <FormField name="lastName" v-slot="{ componentField }">
+              <FormItem>
+                <FormLabel>
+                  Last Name
+                  <span class="text-red-500 ml-1">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input type="text" placeholder="Doe" v-bind="componentField" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
 
-    <FormField v-slot="{ componentField }" name="lastName">
-      <FormItem>
-        <FormLabel>Last Name</FormLabel>
-        <FormControl>
-          <Input type="text" placeholder="Doe" v-bind="componentField" />
-        </FormControl>
-        <FormDescription> Enter your last name. </FormDescription>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+          <!-- Email Field -->
+          <FormField name="email" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>
+                Email
+                <span class="text-red-500 ml-1">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="you@example.com" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-    <FormField v-slot="{ componentField }" name="email">
-      <FormItem>
-        <FormLabel>Email</FormLabel>
-        <FormControl>
-          <Input type="email" placeholder="you@example.com" v-bind="componentField" />
-        </FormControl>
-        <FormDescription> Enter your email address. </FormDescription>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+          <!-- Contact Number Field -->
+          <FormField name="contactNumber" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>
+                Contact Number
+                <span class="text-red-500 ml-1">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input type="text" placeholder="01234567890" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-    <FormField v-slot="{ componentField }" name="contactNumber">
-      <FormItem>
-        <FormLabel>Contact Number</FormLabel>
-        <FormControl>
-          <Input type="text" placeholder="1234567890" v-bind="componentField" />
-        </FormControl>
-        <FormDescription> Enter your 10-digit contact number. </FormDescription>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-
-    <FormField v-slot="{ componentField }" name="password">
-      <FormItem>
-        <FormLabel>Password</FormLabel>
-        <FormControl>
-          <Input type="password" placeholder="Enter your password" v-bind="componentField" />
-        </FormControl>
-        <FormDescription>
-          Your password must be at least 8 characters, include one uppercase letter, one lowercase
-          letter, and one number.
-        </FormDescription>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-
-    <Button type="submit"> Register </Button>
-  </form>
+          <!-- Password Field -->
+          <FormField name="password" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>
+                Password
+                <span class="text-red-500 ml-1">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Enter your password" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <Button type="submit" class="w-full" @click="onSubmit"> Register </Button>
+      </CardFooter>
+    </Card>
+  </div>
 </template>

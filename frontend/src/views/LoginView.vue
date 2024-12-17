@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -47,35 +54,41 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <form class="w-2/3 space-y-6" @submit="onSubmit">
-    <!-- Email Field -->
-    <FormField v-slot="{ componentField }" name="email">
-      <FormItem>
-        <FormLabel>Email</FormLabel>
-        <FormControl>
-          <Input type="email" placeholder="you@example.com" v-bind="componentField" />
-        </FormControl>
-        <FormDescription> Enter your registered email address. </FormDescription>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+  <div class="flex justify-center items-center min-h-screen bg-gray-100">
+    <Card class="w-[350px]">
+      <CardHeader>
+        <CardTitle>Login</CardTitle>
+        <CardDescription>Enter your credentials to access your account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form @submit="onSubmit" class="space-y-4">
+          <!-- Email Field -->
+          <FormField name="email" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>Email<span class="text-red-500 ml-1">*</span></FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="you@example.com" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-    <!-- Password Field -->
-    <FormField v-slot="{ componentField }" name="password">
-      <FormItem>
-        <FormLabel>Password</FormLabel>
-        <FormControl>
-          <Input type="password" placeholder="Enter your password" v-bind="componentField" />
-        </FormControl>
-        <FormDescription>
-          Your password must be at least 8 characters, include one uppercase letter, one lowercase
-          letter, and one number.
-        </FormDescription>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-
-    <!-- Submit Button -->
-    <Button type="submit"> Login </Button>
-  </form>
+          <!-- Password Field -->
+          <FormField name="password" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>Password<span class="text-red-500 ml-1">*</span></FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Enter your password" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </form>
+      </CardContent>
+      <CardFooter class="flex justify-between">
+        <Button variant="outline"> Forgot Password </Button>
+        <Button @click="onSubmit"> Login </Button>
+      </CardFooter>
+    </Card>
+  </div>
 </template>
