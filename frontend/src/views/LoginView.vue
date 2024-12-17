@@ -14,12 +14,8 @@ import { toast } from '@/components/ui/toast'
 
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import { h } from 'vue'
 import * as z from 'zod'
-import { useRouter } from 'vue-router'
 import axios from 'axios'
-
-const router = useRouter()
 
 const formSchema = toTypedSchema(
   z.object({
