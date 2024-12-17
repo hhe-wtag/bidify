@@ -9,39 +9,45 @@ class UserRepository extends BaseRepository {
   }
 
   async findByEmail(email) {
-    return this.model.findOne({ email }).select('+password');
+    return this.model.findOne({ email });
   }
 
   async register(data) {
+  async register(data) {
     const existingUser = await this.findByEmail(data.email);
+
     if (existingUser) {
-      throw new ApiError(HTTP_STATUS.CONFLICT, 'Email already exists.');
+      throw new ApiError(HTTP_STATUS.CONFLICT, 'Email already exists');
     }
-    return this.create(data);
+
+    const newUser = new this.model(data);
+    await newUser.validate();
+
+    const user = await this.model.create(data);
+    user.password = undefined;
+
+    const token = user.generateAuthToken();
+
+    return { user, token };
   }
 
   async login(email, password) {
     const user = await this.findByEmail(email);
-
     if (!user) {
       throw new ApiError(
         HTTP_STATUS.UNAUTHORIZED,
-        'Invalid email or password.'
+        'No user found with this email address'
       );
     }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      throw new ApiError(
-        HTTP_STATUS.UNAUTHORIZED,
-        'Invalid email or password.'
-      );
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Incorrect password');
     }
-    
-    const userWithoutPassword = user.toObject();
-    delete userWithoutPassword.password;
 
-    return userWithoutPassword;
+    const token = await user.generateAuthToken();
+
+    return { user, token };
   }
 }
 
