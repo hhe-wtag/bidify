@@ -12,46 +12,39 @@ class UserController extends BaseController {
 
   login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password) {
-      throw new ApiError(400, 'Email and Password are required!');
+
+    if (!email) {
+      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Email is required');
+    }
+    if (!password) {
+      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Password is required');
     }
 
-    const user = await this.repository.findByEmail(email);
-    if (!user) {
-      throw new ApiError(HTTP_STATUS.NOT_FOUND, 'User not found');
-    }
-
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Incorrect password');
-    }
+    const data = await this.repository.login(email, password);
 
     res
       .status(HTTP_STATUS.OK)
-      .json(new ApiResponse(HTTP_STATUS.OK, user, 'Login Successful!'));
+      .json(new ApiResponse(HTTP_STATUS.OK, data, 'Login Successful!'));
   });
 
   register = asyncHandler(async (req, res) => {
-    const { firstName, lastName, email, contactNumber, password } = req.body;
+    const newUserData = req.body;
 
-    if (!firstName || !lastName || !email || !contactNumber || !password) {
-      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'All fields are required');
+    const requiredFields = [
+      { field: 'firstName', message: 'First Name is required' },
+      { field: 'lastName', message: 'Last Name is required' },
+      { field: 'email', message: 'Email is required' },
+      { field: 'contactNumber', message: 'Contact Number is required' },
+      { field: 'password', message: 'Password is required' },
+    ];
+
+    for (const { field, message } of requiredFields) {
+      if (!newUserData[field]) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, message);
+      }
     }
 
-    const existingUser = await this.repository.findByEmail(email);
-    if (existingUser) {
-      throw new ApiError(HTTP_STATUS.CONFLICT, 'Email already exists');
-    }
-
-    const newUser = {
-      firstName,
-      lastName,
-      email,
-      contactNumber,
-      password,
-    };
-
-    const createdUser = await this.repository.create(newUser);
+    const createdUser = await this.repository.register(newUserData);
 
     res
       .status(HTTP_STATUS.CREATED)
