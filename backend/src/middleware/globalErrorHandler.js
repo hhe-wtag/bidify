@@ -43,7 +43,12 @@ const globalErrorHandler = (error, req, res, next) => {
 
   // Log the error for debugging (only in development mode)
   if (process.env.NODE_ENV !== 'production') {
-    console.error(error);
+    console.error(
+      '\x1b[31m',
+      '\n\n-------------------- ERROR --------------------\n',
+      message,
+      '\n -----------------------------------------------\n'
+    );
   }
 
   res.status(statusCode).json({

@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 
+import passport from './middleware/auth.js';
 import globalErrorHandler from './middleware/globalErrorHandler.js';
 import { UserRoutes } from './routes/users.route.js';
 
@@ -16,8 +17,11 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/auth', UserRoutes);
+app.use(passport.initialize());
 
-// app.use(globalErrorHandler);
+app.use('/api/auth', UserRoutes);
+app.use('/api/users', UserRoutes);
+
+app.use(globalErrorHandler);
 
 export default app;
