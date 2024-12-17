@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 app.use('/api/v1/auth', UserRoutes);
-app.use('/api/v1/users', UserRoutes);
+app.use('/api/auth', UserRoutes);
 
 app.use(globalErrorHandler);
 

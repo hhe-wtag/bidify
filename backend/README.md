@@ -135,7 +135,7 @@ node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 ### 1. **User Registration**
 
 **POST Request:**  
-`http://localhost:8080/api/v1/auth/create`
+`http://localhost:8080/api/auth/register`
 
 #### Request Body (Example):
 
@@ -152,7 +152,7 @@ node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 ### 2. **User Login**
 
 **POST Request:**  
-`http://localhost:8080/api/v1/auth/login`
+`http://localhost:8080/api/auth/login`
 
 #### Request Body (Example):
 
