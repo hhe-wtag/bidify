@@ -7,6 +7,6 @@ const router = express.Router();
 
 router.post('/register', UserController.register);
 router.post('/login', UserController.login);
-router.get('/me', isAuthenticated, UserController.getCurrentUser);
+router.get('/profile', isAuthenticated, UserController.getCurrentUser);
 
 export const UserRoutes = router;
