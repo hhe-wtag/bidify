@@ -1,6 +1,25 @@
+## Initial Project Setup Steps:
+
+1. Project init
+
+   ```bash
+     yarn init
+   ```
+
+2. Install required packages for initial setup
+
+   ```bash
+     yarn add express mongoose
+
+     yarn add -D eslint prettier
+     yarn add -D eslint-config-prettier eslint-plugin-prettier eslint-plugin-import
+   ```
+
+3. Create essential config files for prettier, eslint and `jsconfig.json`
+
 ## Authentication and Authorization
 
-Run this command to generate `JWT Secrets` used in .env
+Run this command to generate `JWT Access Secrets` used in .env
 
 ```node
 node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
@@ -43,6 +62,9 @@ node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 
 #### Request Header (Example):
 
+**GET Request:**
+`http://localhost:8080/api/user/profile`
+
 ```bash
-AUTH BEARER <TOKEN>
+Authorization: Bearer <token>
 ```

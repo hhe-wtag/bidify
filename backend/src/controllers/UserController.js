@@ -63,7 +63,7 @@ class UserController extends BaseController {
       .json(
         new ApiResponse(
           HTTP_STATUS.OK,
-          req.user,
+          { user: req.user },
           'User details retrieved successfully'
         )
       );
