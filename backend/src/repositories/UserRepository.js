@@ -12,13 +12,36 @@ class UserRepository extends BaseRepository {
     return this.model.findOne({ email }).select('+password');
   }
 
-  async create(data) {
+  async register(data) {
     const existingUser = await this.findByEmail(data.email);
     if (existingUser) {
       throw new ApiError(HTTP_STATUS.CONFLICT, 'Email already exists.');
     }
+    return this.create(data);
+  }
 
-    return this.model.create(data);
+  async login(email, password) {
+    const user = await this.findByEmail(email);
+
+    if (!user) {
+      throw new ApiError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Invalid email or password.'
+      );
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      throw new ApiError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Invalid email or password.'
+      );
+    }
+    
+    const userWithoutPassword = user.toObject();
+    delete userWithoutPassword.password;
+
+    return userWithoutPassword;
   }
 }
 
