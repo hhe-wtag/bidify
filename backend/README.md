@@ -63,7 +63,7 @@ node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 #### Request Header (Example):
 
 **GET Request:**
-`http://localhost:8080/api/users/profile`
+`http://localhost:8080/api/user/profile`
 
 ```bash
 Authorization: Bearer <token>
