@@ -18,9 +18,11 @@ import * as z from 'zod'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
 const userStore = useUserStore()
+const { handleError } = useErrorHandler()
 
 const formSchema = toTypedSchema(
   z.object({
@@ -58,18 +60,22 @@ const onSubmit = handleSubmit(async (data) => {
 
     router.push('/profile')
   } catch (error) {
-    console.error('Error logging in:', error.response?.data)
+    console.error('Error logging in:', handleError(error))
     toast({
       title: 'Login Failed',
-      description: error.response?.data?.message || 'Please try again.',
+      description: handleError(error) || 'Please try again.',
     })
   }
 })
+
+const redirectToRegister = () => {
+  router.push('/register')
+}
 </script>
 
 <template>
   <div class="flex justify-center items-center min-h-screen bg-gray-100">
-    <Card class="w-[350px]">
+    <Card class="w-[500px]">
       <CardHeader>
         <CardTitle>Login</CardTitle>
         <CardDescription>Enter your credentials to access your account</CardDescription>
@@ -100,7 +106,7 @@ const onSubmit = handleSubmit(async (data) => {
         </form>
       </CardContent>
       <CardFooter class="flex justify-between">
-        <Button variant="outline"> Forgot Password </Button>
+        <Button variant="outline" @click="redirectToRegister"> Register </Button>
         <Button @click="onSubmit"> Login </Button>
       </CardFooter>
     </Card>

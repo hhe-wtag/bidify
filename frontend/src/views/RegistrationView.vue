@@ -17,7 +17,9 @@ import { h } from 'vue'
 import * as z from 'zod'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
+const { handleError } = useErrorHandler()
 const router = useRouter()
 
 const formSchema = toTypedSchema(
@@ -72,13 +74,17 @@ const onSubmit = handleSubmit(async (data) => {
 
     router.push({ name: 'login' })
   } catch (error) {
-    console.error('Error registering user:', error.response.data)
+    console.error('Error registering user:', handleError(error))
     toast({
       title: 'Registration Failed',
-      description: error.response?.data?.message || 'Please try again.',
+      description: handleError(error) || 'Please try again.',
     })
   }
 })
+
+const redirectToLogin = () => {
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -163,8 +169,9 @@ const onSubmit = handleSubmit(async (data) => {
           </FormField>
         </form>
       </CardContent>
-      <CardFooter>
-        <Button type="submit" class="w-full" @click="onSubmit"> Register </Button>
+      <CardFooter class="flex justify-between">
+        <Button variant="outline" @click="redirectToLogin"> Login </Button
+        ><Button @click="onSubmit"> Register </Button>
       </CardFooter>
     </Card>
   </div>
