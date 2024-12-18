@@ -1,4 +1,4 @@
-## Initial Project Setup Steps:
+## Initial Project Setup Steps
 
 1. Project init
 
@@ -25,11 +25,11 @@ Run this command to generate `JWT Access Secrets` used in .env
 node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 ```
 
-## API Endpoints
+## Auth API Endpoints
 
 ### 1. **User Registration**
 
-**POST Request:**  
+**POST Request:**
 `http://localhost:8080/api/auth/register`
 
 #### Request Body (Example):
@@ -46,7 +46,7 @@ node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 
 ### 2. **User Login**
 
-**POST Request:**  
+**POST Request:**
 `http://localhost:8080/api/auth/login`
 
 #### Request Body (Example):
@@ -58,7 +58,9 @@ node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 }
 ```
 
-### 3. **User Profile**
+## User API Endpoints
+
+### **1. User Profile**
 
 #### Request Header (Example):
 
@@ -67,4 +69,23 @@ node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 
 ```bash
 Authorization: Bearer <token>
+```
+
+## Item API Endpoints
+
+### 1. Item Create
+
+#### Request Body (Example):
+
+**POST Request**
+`http://localhost:8080/api/item/create`
+
+```json
+{
+  "title": "Vintage Wooden Table ",
+  "description": "A beautiful handcrafted vintage wooden table, perfect for your living room or study.",
+  "startingBid": 100,
+  "minimumBidIncrement": 10,
+  "endTime": "2024-12-31T23:59:59Z"
+}
 ```
