@@ -15,14 +15,11 @@ import { toast } from '@/components/ui/toast'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
 const userStore = useUserStore()
-const { handleError } = useErrorHandler()
 
 const formSchema = toTypedSchema(
   z.object({
@@ -36,40 +33,25 @@ const { handleSubmit } = useForm({
 })
 
 const onSubmit = handleSubmit(async (data) => {
-  try {
-    const response = await axios.post('http://localhost:8080/api/auth/login', {
-      email: data.email,
-      password: data.password,
-    })
-    console.log('Response data:', response.data)
+  const { email, password } = data
+  const result = await userStore.login(email, password)
 
-    const token = response.data.data.token
-    const profile = response.data.data.user
-
-    if (token) {
-      userStore.setToken(token) // Store token in Pinia
-      userStore.setUserProfile(profile) // Store profile in Pinia
-    } else {
-      console.error('Token not found in response')
-    }
-
+  if (result.success) {
     toast({
       title: 'Login Successful',
-      description: 'You have logged in successfully.',
+      description: result.message,
     })
-
-    router.push('/profile')
-  } catch (error) {
-    console.error('Error logging in:', handleError(error))
+    router.push({ name: 'profile' })
+  } else {
     toast({
       title: 'Login Failed',
-      description: handleError(error) || 'Please try again.',
+      description: result.message,
     })
   }
 })
 
 const redirectToRegister = () => {
-  router.push('/register')
+  router.push({ name: 'register' })
 }
 </script>
 
@@ -82,7 +64,6 @@ const redirectToRegister = () => {
       </CardHeader>
       <CardContent>
         <form @submit.prevent="onSubmit" class="space-y-4">
-          <!-- Email Field -->
           <FormField name="email" v-slot="{ componentField }">
             <FormItem>
               <FormLabel>Email<span class="text-red-500 ml-1">*</span></FormLabel>
@@ -93,7 +74,6 @@ const redirectToRegister = () => {
             </FormItem>
           </FormField>
 
-          <!-- Password Field -->
           <FormField name="password" v-slot="{ componentField }">
             <FormItem>
               <FormLabel>Password<span class="text-red-500 ml-1">*</span></FormLabel>

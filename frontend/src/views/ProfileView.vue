@@ -3,48 +3,46 @@
     <Card class="w-[500px]">
       <CardHeader>
         <div class="flex flex-col items-center">
-          <!-- Avatar -->
           <Avatar>
             <AvatarImage src="https://github.com/radix-vue.png" alt="@radix-vue" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
 
-          <!-- Title and Description -->
           <CardTitle class="mt-4">User Profile</CardTitle>
           <CardDescription>Details of your account</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
-        <!-- Show Loading Spinner -->
         <div v-if="loading" class="flex justify-center items-center flex-col">
           <p>Loading profile...</p>
           <div class="spinner mt-4"></div>
         </div>
 
-        <!-- Show Profile Details -->
         <div v-else-if="userStore.profile" class="space-y-4">
           <div class="space-y-2">
             <div class="flex items-center space-x-2">
               <User class="h-5 w-5 text-gray-600" />
               <span>
-                <strong>Name:</strong> {{ userStore.profile?.firstName || 'N/A' }}
-                {{ userStore.profile?.lastName || 'N/A' }}
+                <strong>Name:</strong> {{ userStore.profile.firstName || 'N/A' }}
+                {{ userStore.profile.lastName || 'N/A' }}
               </span>
             </div>
 
             <div class="flex items-center space-x-2">
               <Mail class="h-5 w-5 text-gray-600" />
-              <span> <strong>Email:</strong> {{ userStore.profile.email }} </span>
+              <span> <strong>Email:</strong> {{ userStore.profile.email || 'N/A' }} </span>
             </div>
 
             <div class="flex items-center space-x-2">
               <Phone class="h-5 w-5 text-gray-600" />
-              <span> <strong>Contact Number:</strong> {{ userStore.profile.contactNumber }} </span>
+              <span>
+                <strong>Contact Number:</strong> {{ userStore.profile.contactNumber || 'N/A' }}
+              </span>
             </div>
 
             <div class="flex items-center space-x-2">
               <DollarSign class="h-5 w-5 text-gray-600" />
-              <span> <strong>Balance:</strong> {{ userStore.profile.balance }} </span>
+              <span> <strong>Balance:</strong> {{ userStore.profile.balance || 'N/A' }} </span>
             </div>
 
             <div class="flex items-center space-x-2">
@@ -56,7 +54,6 @@
             </div>
           </div>
 
-          <!-- Logout Button -->
           <Button
             class="w-full mt-4 bg-red-500 hover:bg-red-600 flex items-center justify-center space-x-2"
             @click="handleLogout"
@@ -66,7 +63,6 @@
           </Button>
         </div>
 
-        <!-- Show Error Message -->
         <div v-else class="text-red-500">
           Unable to load profile details.
           <span v-if="userStore.error">{{ userStore.error }}</span>
@@ -104,6 +100,6 @@ onMounted(async () => {
 
 const handleLogout = () => {
   userStore.logout()
-  router.push('/login')
+  router.push({ name: 'login' })
 }
 </script>

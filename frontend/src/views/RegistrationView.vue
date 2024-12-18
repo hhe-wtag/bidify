@@ -15,12 +15,11 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { h } from 'vue'
 import * as z from 'zod'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useUserStore } from '@/stores/user.ts'
 
-const { handleError } = useErrorHandler()
 const router = useRouter()
+const userStore = useUserStore()
 
 const formSchema = toTypedSchema(
   z.object({
@@ -52,17 +51,9 @@ const { handleSubmit } = useForm({
 })
 
 const onSubmit = handleSubmit(async (data) => {
-  try {
-    const response = await axios.post('http://localhost:8080/api/auth/register', {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      contactNumber: data.contactNumber,
-      password: data.password,
-    })
+  const result = await userStore.register(data)
 
-    localStorage.setItem('token', response.data.token)
-
+  if (result.success) {
     toast({
       title: 'Registration Successful',
       description: h(
@@ -71,19 +62,17 @@ const onSubmit = handleSubmit(async (data) => {
         h('code', { class: 'text-white' }, JSON.stringify(data, null, 2)),
       ),
     })
-
     router.push({ name: 'login' })
-  } catch (error) {
-    console.error('Error registering user:', handleError(error))
+  } else {
     toast({
       title: 'Registration Failed',
-      description: handleError(error) || 'Please try again.',
+      description: result.message || 'Please try again.',
     })
   }
 })
 
 const redirectToLogin = () => {
-  router.push('/login')
+  router.push({ name: 'login' })
 }
 </script>
 
@@ -97,7 +86,6 @@ const redirectToLogin = () => {
       <CardContent>
         <form @submit="onSubmit" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
-            <!-- First Name Field -->
             <FormField name="firstName" v-slot="{ componentField }">
               <FormItem>
                 <FormLabel>
@@ -111,7 +99,6 @@ const redirectToLogin = () => {
               </FormItem>
             </FormField>
 
-            <!-- Last Name Field -->
             <FormField name="lastName" v-slot="{ componentField }">
               <FormItem>
                 <FormLabel>
@@ -126,7 +113,6 @@ const redirectToLogin = () => {
             </FormField>
           </div>
 
-          <!-- Email Field -->
           <FormField name="email" v-slot="{ componentField }">
             <FormItem>
               <FormLabel>
@@ -140,7 +126,6 @@ const redirectToLogin = () => {
             </FormItem>
           </FormField>
 
-          <!-- Contact Number Field -->
           <FormField name="contactNumber" v-slot="{ componentField }">
             <FormItem>
               <FormLabel>
@@ -154,7 +139,6 @@ const redirectToLogin = () => {
             </FormItem>
           </FormField>
 
-          <!-- Password Field -->
           <FormField name="password" v-slot="{ componentField }">
             <FormItem>
               <FormLabel>
