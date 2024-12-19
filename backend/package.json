@@ -22,12 +22,13 @@
   },
   "homepage": "https://github.com/hhe-wtag/bidify#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "mongoose": "^8.8.4"
+    "mongoose": "^8.9.0"
   },
   "devDependencies": {
-    "eslint": "^9.16.0",
+    "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",

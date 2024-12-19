@@ -118,3 +118,34 @@
       "exclude": ["node_modules", "dist"]
     }
     ```
+
+
+
+### 1. **User Registration**
+
+**POST Request:**  
+`http://localhost:8080/api/auth/register`
+
+#### Request Body (Example):
+```json
+{
+  "firstName": "afnan",
+  "lastName": "mumu",
+  "email": "abc@gmail.com",
+  "contactNumber": "01773046092",
+  "password": "Abc123sd"
+}
+```
+
+### 2. **User Login**
+
+**POST Request:**  
+`http://localhost:8080/api/auth/login`
+
+#### Request Body (Example):
+```json
+{
+  "email": "abc@gmail.com",
+  "password": "Abc123sd"
+}
+```
