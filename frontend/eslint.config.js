@@ -20,6 +20,7 @@ export default [
       ],
       '@typescript-eslint/no-require-imports': 'off',
       'no-undef': 'off',
+      '@typescript-eslint/no-this-alias': 'off',
     },
   },
   {
@@ -38,5 +39,8 @@ export default [
       '@typescript-eslint/no-require-imports': 'off',
       'no-undef': 'off',
     },
+  },
+  {
+    ignores: ['dist/**/*'],
   },
 ]
