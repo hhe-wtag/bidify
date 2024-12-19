@@ -56,6 +56,18 @@ class UserController extends BaseController {
         )
       );
   });
+
+  getCurrentUser = asyncHandler(async (req, res) => {
+    res
+      .status(HTTP_STATUS.OK)
+      .json(
+        new ApiResponse(
+          HTTP_STATUS.OK,
+          { user: req.user },
+          'User details retrieved successfully'
+        )
+      );
+  });
 }
 
 export default new UserController();
