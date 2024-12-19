@@ -4,7 +4,6 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
-    // required fields
     firstName: {
       type: String,
       trim: true,
@@ -36,7 +35,6 @@ const userSchema = new mongoose.Schema(
       ],
       validate: {
         validator: function (v) {
-          // Validate exact 11 digits for Bangladeshi mobile numbers
           return /^(?:\+?88)?01[3-9]\d{8}$/.test(v);
         },
         message:
@@ -57,7 +55,6 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
-    // optional fields
     address: {
       street: {
         type: String,
@@ -121,7 +118,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, user.password);
 };
 
-userSchema.methods.generateAuthToken = function () {
+userSchema.methods.generateAuthToken = async function () {
   return jwt.sign(
     { id: this._id, email: this.email },
     process.env.JWT_ACCESS_SECRET,
