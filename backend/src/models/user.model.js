@@ -121,7 +121,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, user.password);
 };
 
-userSchema.methods.generateAuthToken = function () {
+userSchema.methods.generateAuthToken = async function () {
   return jwt.sign(
     { id: this._id, email: this.email },
     process.env.JWT_ACCESS_SECRET,

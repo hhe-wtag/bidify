@@ -3,7 +3,6 @@ import UserRepository from '../repositories/UserRepository.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import asyncHandler from '../utils/asyncHandler.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
 
 class UserController extends BaseController {
@@ -13,15 +12,7 @@ class UserController extends BaseController {
 
   login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-  login = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
 
-    if (!email) {
-      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Email is required');
-    }
-    if (!password) {
-      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Password is required');
-    }
     if (!email) {
       throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Email is required');
     }
@@ -30,27 +21,7 @@ class UserController extends BaseController {
     }
 
     const data = await this.repository.login(email, password);
-    const data = await this.repository.login(email, password);
 
-    res
-      .status(HTTP_STATUS.OK)
-      .json(new ApiResponse(HTTP_STATUS.OK, data, 'Login Successful!'));
-  });
-
-  register = asyncHandler(async (req, res) => {
-    const newUserData = req.body;
-
-    const requiredFields = [
-      { field: 'firstName', message: 'First Name is required' },
-      { field: 'lastName', message: 'Last Name is required' },
-      { field: 'email', message: 'Email is required' },
-      { field: 'contactNumber', message: 'Contact Number is required' },
-      { field: 'password', message: 'Password is required' },
-    ];
-
-    for (const { field, message } of requiredFields) {
-      if (!newUserData[field]) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, message);
     res
       .status(HTTP_STATUS.OK)
       .json(new ApiResponse(HTTP_STATUS.OK, data, 'Login Successful!'));
@@ -71,9 +42,6 @@ class UserController extends BaseController {
       if (!newUserData[field]) {
         throw new ApiError(HTTP_STATUS.BAD_REQUEST, message);
       }
-    }
-
-    const createdUser = await this.repository.register(newUserData);
     }
 
     const createdUser = await this.repository.register(newUserData);
