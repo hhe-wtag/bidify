@@ -18,6 +18,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth', UserRoutes);
 
-// app.use(globalErrorHandler);
+app.use(globalErrorHandler);
 
 export default app;
