@@ -25,6 +25,13 @@ class ItemController extends BaseController {
   create = asyncHandler(async (req, res) => {
     const newItemData = { ...req.body, sellerId: req.user._id };
 
+    if (newItemData.endTime && new Date(newItemData.endTime) <= new Date()) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'End time must be a future date'
+      );
+    }
+
     const createdItem = await this.repository.create(newItemData);
 
     res
@@ -42,6 +49,13 @@ class ItemController extends BaseController {
     const { id } = req.params;
     const updates = req.body;
     const userId = req.user.id;
+
+    if (updates.endTime && new Date(updates.endTime) <= new Date()) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'End time must be a future date'
+      );
+    }
 
     const updatedItem = await this.repository.updateItem(id, userId, updates);
 
