@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.get('/all', ItemController.getAll);
 router.post('/create', isAuthenticated, ItemController.create);
+router.patch('/update/:id', isAuthenticated, ItemController.update);
 
 export const ItemRoutes = router;

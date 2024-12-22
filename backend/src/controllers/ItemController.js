@@ -24,6 +24,18 @@ class ItemController extends BaseController {
         )
       );
   });
+
+  update = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+    const userId = req.user.id;
+
+    const updatedItem = await this.repository.updateItem(id, userId, updates);
+
+    res
+      .status(HTTP_STATUS.OK)
+      .json(new ApiResponse(HTTP_STATUS.OK, updatedItem, 'Item updated!'));
+  });
 }
 
 export default new ItemController();
