@@ -11,6 +11,10 @@ class BaseRepository {
     return this.model.findById(id);
   }
 
+  async findOne(filter) {
+    return this.model.findOne(filter);
+  }
+
   async create(data) {
     return this.model.create(data);
   }

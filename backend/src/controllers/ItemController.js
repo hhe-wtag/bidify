@@ -1,5 +1,6 @@
 import BaseController from './BaseController.js';
 import ItemRepository from '../repositories/ItemRepository.js';
+import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
@@ -8,6 +9,18 @@ class ItemController extends BaseController {
   constructor() {
     super(new ItemRepository());
   }
+
+  getBySlug = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    const item = await this.repository.findOne({ slug });
+
+    if (!item) {
+      throw new ApiError(HTTP_STATUS.NOT_FOUND, 'Item not found!');
+    }
+    res
+      .status(HTTP_STATUS.OK)
+      .json(new ApiResponse(HTTP_STATUS.OK, item, 'Item found!'));
+  });
 
   create = asyncHandler(async (req, res) => {
     const newItemData = { ...req.body, sellerId: req.user._id };
