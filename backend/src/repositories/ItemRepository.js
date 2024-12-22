@@ -33,6 +33,12 @@ class ItemRepository extends BaseRepository {
 
     return updatedItem;
   }
+
+  async deleteItem(id, userId) {
+    await this.checkIfTheOperationIsAllowed(id, userId);
+
+    return this.deleteById(id);
+  }
 }
 
 export default ItemRepository;

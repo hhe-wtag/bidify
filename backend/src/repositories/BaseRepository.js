@@ -23,7 +23,7 @@ class BaseRepository {
   }
 
   async deleteById(id) {
-    return this.model.findByIdAndDelete(id);
+    return this.model.deleteOne({ _id: id });
   }
 }
 

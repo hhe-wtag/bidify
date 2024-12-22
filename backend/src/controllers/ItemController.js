@@ -36,6 +36,17 @@ class ItemController extends BaseController {
       .status(HTTP_STATUS.OK)
       .json(new ApiResponse(HTTP_STATUS.OK, updatedItem, 'Item updated!'));
   });
+
+  delete = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    await this.repository.deleteItem(id, userId);
+
+    res
+      .status(HTTP_STATUS.OK)
+      .json(new ApiResponse(HTTP_STATUS.OK, null, 'Item deleted!'));
+  });
 }
 
 export default new ItemController();

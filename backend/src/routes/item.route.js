@@ -8,5 +8,6 @@ const router = express.Router();
 router.get('/all', ItemController.getAll);
 router.post('/create', isAuthenticated, ItemController.create);
 router.patch('/update/:id', isAuthenticated, ItemController.update);
+router.delete('/delete/:id', isAuthenticated, ItemController.delete);
 
 export const ItemRoutes = router;
