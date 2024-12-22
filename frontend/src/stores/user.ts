@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import axiosInstance from '@/plugins/axios'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
 interface UserProfile {
@@ -9,6 +9,15 @@ interface UserProfile {
   contactNumber: string
   balance: number
   registrationDate: string
+  address: Address | null
+}
+
+interface Address {
+  street: string | null
+  city: string | null
+  state: string | null
+  zipCode: string | null
+  country: string | null
 }
 
 export const useUserStore = defineStore('user', {
@@ -17,12 +26,15 @@ export const useUserStore = defineStore('user', {
     profile: null as UserProfile | null,
     error: null as string | null,
   }),
+  getters: {
+    isAuthenticated: (state) => !!state.token,
+  },
   actions: {
     async login(email: string, password: string) {
       const { handleError } = useErrorHandler()
 
       try {
-        const response = await axios.post('http://localhost:8080/api/auth/login', {
+        const response = await axiosInstance.post('/auth/login', {
           email,
           password,
         })
@@ -53,7 +65,7 @@ export const useUserStore = defineStore('user', {
       const { handleError } = useErrorHandler()
 
       try {
-        await axios.post('http://localhost:8080/api/auth/register', userData)
+        await axiosInstance.post('/auth/register', userData)
 
         return { success: true, message: 'Registration successful' }
       } catch (error) {
@@ -67,29 +79,28 @@ export const useUserStore = defineStore('user', {
       const { handleError } = useErrorHandler()
 
       try {
-        const token = localStorage.getItem('token')
-        if (!token) throw new Error('Token not found')
-
-        const response = await axios.get('http://localhost:8080/api/auth/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-
+        const response = await axiosInstance.get('/user/profile')
         this.setUserProfile(response.data.data.user)
         this.error = null
+        return { success: true, message: 'Profile fetched successfully' }
       } catch (error) {
         this.profile = null
         this.error = handleError(error) || 'Failed to fetch profile'
         console.error('Error fetching user profile:', this.error)
-        throw error
+        return { success: false, message: this.error }
       }
     },
+
     setToken(token: string) {
       this.token = token
       localStorage.setItem('token', token)
     },
+
     setUserProfile(profile: UserProfile) {
+      console.log('Setting Profile:', profile)
       this.profile = profile
     },
+
     logout() {
       this.token = null
       this.profile = null

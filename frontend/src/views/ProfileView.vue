@@ -42,7 +42,7 @@
 
             <div class="flex items-center space-x-2">
               <DollarSign class="h-5 w-5 text-gray-600" />
-              <span> <strong>Balance:</strong> {{ userStore.profile.balance || 'N/A' }} </span>
+              <span> <strong>Balance:</strong> {{ userStore.profile.balance ?? 'N/A' }} </span>
             </div>
 
             <div class="flex items-center space-x-2">
@@ -51,6 +51,20 @@
                 <strong>Registration Date:</strong>
                 {{ new Date(userStore.profile.registrationDate).toLocaleString() }}
               </span>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center space-x-2">
+                <MapPin class="h-5 w-5 text-gray-600" />
+                <span><strong>Address:</strong></span>
+              </div>
+              <div class="pl-12 text-gray-700">
+                <p>Street: {{ userStore.profile.address?.street ?? 'N/A' }}</p>
+                <p>City: {{ userStore.profile.address?.city ?? 'N/A' }}</p>
+                <p>State: {{ userStore.profile.address?.state ?? 'N/A' }}</p>
+                <p>Zip Code: {{ userStore.profile.address?.zipCode ?? 'N/A' }}</p>
+                <p>Country: {{ userStore.profile.address?.country ?? 'N/A' }}</p>
+              </div>
             </div>
           </div>
 
@@ -79,7 +93,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { Mail, Calendar, Phone, DollarSign, User, LogOut } from 'lucide-vue-next'
+import { Mail, Calendar, Phone, DollarSign, User, LogOut, MapPin } from 'lucide-vue-next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
