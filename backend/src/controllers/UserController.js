@@ -68,6 +68,34 @@ class UserController extends BaseController {
         )
       );
   });
+
+  updateUser = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const updateData = req.body;
+
+    const validFields = [
+      'firstName',
+      'lastName',
+      'address',
+      'balance',
+      'contactNumber',
+    ];
+
+    if (!Object.keys(updateData).some((field) => validFields.includes(field))) {
+      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'No valid fields to update');
+    }
+
+    const updatedUser = await this.repository.updateUserById(
+      userId,
+      updateData
+    );
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: 'User updated successfully!',
+      data: updatedUser,
+    });
+  });
 }
 
 export default new UserController();

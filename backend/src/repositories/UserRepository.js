@@ -8,10 +8,6 @@ class UserRepository extends BaseRepository {
     super(User);
   }
 
-  async findByEmail(email) {
-    return this.model.findOne({ email });
-  }
-
   async register(data) {
     const existingUser = await this.findByEmail(data.email);
 
@@ -22,7 +18,7 @@ class UserRepository extends BaseRepository {
     const newUser = new this.model(data);
     await newUser.validate();
 
-    const user = await this.model.create(data);
+    const user = await this.create(data);
     user.password = undefined;
 
     const token = await user.generateAuthToken();
@@ -47,6 +43,16 @@ class UserRepository extends BaseRepository {
     const token = await user.generateAuthToken();
 
     return { user, token };
+  }
+
+  async updateUserById(id, updateData) {
+    const user = await this.updateById(id, updateData);
+
+    if (!user) {
+      throw new ApiError(HTTP_STATUS.NOT_FOUND, 'User not found');
+    }
+
+    return user;
   }
 }
 

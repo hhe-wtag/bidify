@@ -11,6 +11,10 @@ class BaseRepository {
     return this.model.findById(id);
   }
 
+  async findByEmail(email) {
+    return this.model.findOne({ email });
+  }
+
   async create(data) {
     return this.model.create(data);
   }
