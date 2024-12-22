@@ -5,6 +5,7 @@ import { isAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();
 
+router.get('/all', ItemController.getAll);
 router.post('/create', isAuthenticated, ItemController.create);
 
 export const ItemRoutes = router;
