@@ -91,3 +91,20 @@ Authorization: Bearer <token>
   }
 }
 ```
+
+### 4. **User Password Update**
+
+#### Request Header (Example):
+
+**PUT Request:**
+`http://localhost:8080/api/user/profile/password-change`
+
+```bash
+Authorization: Bearer <token>
+```
+```bash
+{
+  "currentPassword": "Abc123sdwq1",
+  "newPassword": "Abc123sdwq"
+}
+```
