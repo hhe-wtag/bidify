@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Backend",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["dev-backend"],
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/backend/.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "VueJS: Chrome",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "breakOnLoad": true,
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${workspaceFolder}/frontend/src/*",
+        "webpack:///*": "${workspaceFolder}/*"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "backendProgramPath",
+      "description": "Enter the path to the backend entry file"
+    },
+    {
+      "type": "promptString",
+      "id": "frontendProgramPath",
+      "description": "Enter the path to the frontend entry file"
+    }
+  ]
+}
