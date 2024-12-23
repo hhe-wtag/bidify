@@ -60,6 +60,10 @@ const router = createRouter({
       component: ItemsView,
       meta: { requiresAuth: false },
     },
+    {
+      path: '/items/:slug',
+      component: () => import('@/components/items/ItemDetails.vue'),
+    },
   ],
 })
 
