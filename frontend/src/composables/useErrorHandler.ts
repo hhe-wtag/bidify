@@ -3,7 +3,16 @@ import { AxiosError } from 'axios'
 export const useErrorHandler = () => {
   const handleError = (error: unknown): string => {
     if (error instanceof AxiosError) {
-      return error.response?.data?.message || 'An unexpected error occurred.'
+      const apiError = error.response?.data
+
+      if (apiError?.errorMessages) {
+        return (
+          apiError.errorMessages.map((err: { message: string }) => `${err.message}`).join('. \n') +
+          '.'
+        )
+      }
+
+      return apiError?.message || 'An unexpected error occurred.'
     }
 
     if (error instanceof Error) {
