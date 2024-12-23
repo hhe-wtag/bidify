@@ -28,3 +28,16 @@ export interface UpdateItemData {
   minimumBidIncrement?: number
   endTime?: string
 }
+
+export interface ItemStoreState {
+  items: Item[]
+  currentItem: Item | null
+  loading: boolean
+  error: string | null
+}
+
+export interface StoreResponse<T = void> {
+  success: boolean
+  message: string
+  data?: T
+}
