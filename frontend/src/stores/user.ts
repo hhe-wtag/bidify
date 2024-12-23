@@ -1,24 +1,7 @@
 import { defineStore } from 'pinia'
 import axiosInstance from '@/plugins/axios'
 import { useErrorHandler } from '@/composables/useErrorHandler'
-
-interface UserProfile {
-  firstName: string
-  lastName: string
-  email: string | null
-  contactNumber: string
-  balance: number
-  registrationDate: string
-  address: Address | null
-}
-
-export interface Address {
-  street: string | null
-  city: string | null
-  state: string | null
-  zipCode: string | null
-  country: string | null
-}
+import type { UserProfile } from '@/interfaces/user'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
