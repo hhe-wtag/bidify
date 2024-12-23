@@ -68,3 +68,43 @@ node -e "console.log(require('crypto').randomBytes(128).toString('base64'));"
 ```bash
 Authorization: Bearer <token>
 ```
+
+### 4. **User Profile Update**
+
+#### Request Header (Example):
+
+**PUT Request:**
+`http://localhost:8080/api/user/profile/update`
+
+```bash
+Authorization: Bearer <token>
+```
+```bash
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "contactNumber": "01334567890",
+  "address": {
+    "street": "134566 Main St",
+    "city": "Dhaka",
+    "country": "Bangladesh"
+  }
+}
+```
+
+### 4. **User Password Update**
+
+#### Request Header (Example):
+
+**PUT Request:**
+`http://localhost:8080/api/user/profile/password-change`
+
+```bash
+Authorization: Bearer <token>
+```
+```bash
+{
+  "currentPassword": "Abc123sdwq1",
+  "newPassword": "Abc123sdwq"
+}
+```

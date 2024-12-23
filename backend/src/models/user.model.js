@@ -107,15 +107,7 @@ userSchema.pre('save', async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  const user = await this.constructor
-    .findOne({ email: this.email })
-    .select('+password');
-
-  if (!user) {
-    return false;
-  }
-
-  return bcrypt.compare(candidatePassword, user.password);
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 userSchema.methods.generateAuthToken = async function () {
