@@ -35,9 +35,3 @@ export interface ItemStoreState {
   loading: boolean
   error: string | null
 }
-
-export interface StoreResponse<T = void> {
-  success: boolean
-  message: string
-  data?: T
-}
