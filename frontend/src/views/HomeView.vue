@@ -19,7 +19,7 @@ const navigateToRegister = () => router.push('/register')
 
 <template>
   <div
-    class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center"
+    class="min-h-screen-minus-nav bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center"
   >
     <!-- Hero Section -->
     <div class="container mx-auto px-4">
