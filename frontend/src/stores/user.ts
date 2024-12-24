@@ -40,6 +40,7 @@ export const useUserStore = defineStore('user', {
         })
 
         const token = response.data.data.token
+        this.setUserProfile(response.data.data.user)
 
         if (token) {
           this.setToken(token)
@@ -97,7 +98,6 @@ export const useUserStore = defineStore('user', {
     },
 
     setUserProfile(profile: UserProfile) {
-      console.log('Setting Profile:', profile)
       this.profile = profile
     },
 

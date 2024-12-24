@@ -77,7 +77,7 @@ const redirectToLogin = () => {
 </script>
 
 <template>
-  <div class="flex justify-center items-center min-h-screen bg-gray-100">
+  <div class="flex justify-center items-center min-h-screen-minus-nav bg-gray-100">
     <Card class="w-[500px]">
       <CardHeader>
         <CardTitle>Register</CardTitle>
