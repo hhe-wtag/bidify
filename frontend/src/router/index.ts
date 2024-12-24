@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import ItemsView from '@/views/ItemsView.vue'
 import { useUserStore } from '@/stores/user'
 
 const router = createRouter({
@@ -31,6 +32,16 @@ const router = createRouter({
       name: 'profile',
       component: ProfileView,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/items',
+      name: 'items',
+      component: ItemsView,
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/items/:slug',
+      component: () => import('@/components/items/ItemDetails.vue'),
     },
   ],
 })

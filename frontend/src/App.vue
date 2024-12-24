@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import Navbar from './components/shared/Navbar.vue'
+import TooltipProvider from './components/ui/tooltip/TooltipProvider.vue'
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
-    <Navbar class="flex-none" />
-    <main class="flex-1">
-      <router-view />
-    </main>
-    <Toaster />
-  </div>
+  <TooltipProvider>
+    <div class="flex min-h-screen flex-col">
+      <Navbar class="flex-none" />
+      <main class="flex-1">
+        <router-view />
+      </main>
+      <Toaster />
+    </div>
+  </TooltipProvider>
 </template>
 
 <style>
