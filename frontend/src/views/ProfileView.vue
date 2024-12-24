@@ -103,12 +103,15 @@ const loading = ref(true)
 const router = useRouter()
 
 onMounted(async () => {
-  try {
-    await userStore.fetchUserProfile()
-  } catch (error) {
-    console.error('Error occurred:', handleError(error))
-  } finally {
+  if (userStore.profile) {
     loading.value = false
+  } else {
+    try {
+      await userStore.fetchUserProfile()
+      loading.value = false
+    } catch (error) {
+      handleError(error)
+    }
   }
 })
 
