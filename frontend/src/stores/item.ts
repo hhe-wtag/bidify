@@ -1,18 +1,7 @@
 import { defineStore } from 'pinia'
-import type {
-  Item,
-  CreateItemData,
-  UpdateItemData,
-  ItemStoreState,
-  StoreResponse,
-} from '@/interfaces/item'
+import type { Item, CreateItemData, UpdateItemData, ItemStoreState } from '@/interfaces/item'
 import axiosInstance from '@/plugins/axios'
 import { useErrorHandler } from '@/composables/useErrorHandler'
-
-// API Response types
-interface ApiResponse<T> {
-  data: T
-}
 
 // API endpoints
 const API_PATHS = {
@@ -46,10 +35,7 @@ export const useItemStore = defineStore('item', {
 
   actions: {
     // Generic API call handler
-    async handleApiCall<T>(
-      apiCall: () => Promise<T>,
-      errorMessage: string,
-    ): Promise<StoreResponse<T>> {
+    async handleApiCall<Item>(apiCall: () => Promise<Item>, errorMessage: string) {
       const { handleError } = useErrorHandler()
       this.loading = true
       this.error = null
@@ -71,17 +57,17 @@ export const useItemStore = defineStore('item', {
       }
     },
 
-    async fetchAllItems(): Promise<StoreResponse<Item[]>> {
+    async fetchAllItems() {
       return this.handleApiCall(async () => {
-        const { data } = await axiosInstance.get<ApiResponse<Item[]>>(API_PATHS.ALL)
+        const { data } = await axiosInstance.get(API_PATHS.ALL)
         this.items = data.data
         return data.data
       }, 'Failed to fetch items')
     },
 
-    async fetchItemBySlug(slug: string): Promise<StoreResponse<Item>> {
+    async fetchItemBySlug(slug: string) {
       return this.handleApiCall(async () => {
-        const { data } = await axiosInstance.get<ApiResponse<Item>>(API_PATHS.SINGLE(slug))
+        const { data } = await axiosInstance.get(API_PATHS.SINGLE(slug))
         const item = data.data
         this.currentItem = item
 
@@ -94,21 +80,18 @@ export const useItemStore = defineStore('item', {
       }, 'Failed to fetch item')
     },
 
-    async createItem(itemData: CreateItemData): Promise<StoreResponse<Item>> {
+    async createItem(itemData: CreateItemData) {
       return this.handleApiCall(async () => {
-        const { data } = await axiosInstance.post<ApiResponse<Item>>(API_PATHS.CREATE, itemData)
+        const { data } = await axiosInstance.post(API_PATHS.CREATE, itemData)
         const newItem = data.data
         this.items.push(newItem)
         return newItem
       }, 'Failed to create item')
     },
 
-    async updateItem(id: string, updateData: UpdateItemData): Promise<StoreResponse<Item>> {
+    async updateItem(id: string, updateData: UpdateItemData) {
       return this.handleApiCall(async () => {
-        const { data } = await axiosInstance.patch<ApiResponse<Item>>(
-          API_PATHS.UPDATE(id),
-          updateData,
-        )
+        const { data } = await axiosInstance.patch(API_PATHS.UPDATE(id), updateData)
         const updatedItem = data.data
 
         const index = this.items.findIndex((item) => item._id === id)
@@ -124,7 +107,7 @@ export const useItemStore = defineStore('item', {
       }, 'Failed to update item')
     },
 
-    async deleteItem(id: string): Promise<StoreResponse<void>> {
+    async deleteItem(id: string) {
       return this.handleApiCall(async () => {
         await axiosInstance.delete(API_PATHS.DELETE(id))
 
