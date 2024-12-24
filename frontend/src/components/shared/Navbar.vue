@@ -10,11 +10,26 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { LogOut, User } from 'lucide-vue-next'
+import { computed, onMounted } from 'vue'
+import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const { isAuthenticated, profile } = userStore
+onMounted(() => {
+  if (userStore.isAuthenticated) {
+    userStore.fetchUserProfile()
+  }
+})
+
+const firstLetter = computed(() => {
+  return userStore.profile?.firstName?.[0]?.toUpperCase()
+})
+
+const firstName = computed(() => {
+  const firstName = userStore.profile?.firstName || ''
+  return firstName ? `${firstName}` : 'User'
+})
 
 const handleLogout = async () => {
   await userStore.logout()
@@ -34,16 +49,20 @@ const handleLogout = async () => {
       <div class="flex-1" />
 
       <!-- Auth Section -->
-      <div v-if="isAuthenticated" class="flex items-center gap-4">
+      <div v-if="userStore.isAuthenticated" class="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Avatar>
               <AvatarFallback>
-                {{ profile?.firstName?.[0]?.toUpperCase() }}
+                {{ firstLetter }}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" class="w-56">
+            <div class="px-2 py-1.5 text-sm">
+              Hello, <span class="font-bold">{{ firstName }}</span>
+            </div>
+            <DropdownMenuSeparator />
             <DropdownMenuItem @click="router.push('/profile')">
               <User class="mr-2 h-4 w-4" />
               Profile
