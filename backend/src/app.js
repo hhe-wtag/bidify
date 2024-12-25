@@ -4,6 +4,7 @@ import express from 'express';
 import passport from './middleware/auth.js';
 import globalErrorHandler from './middleware/globalErrorHandler.js';
 import { AuthRoutes } from './routes/auth.route.js';
+import { ItemRoutes } from './routes/item.route.js';
 import { UserRoutes } from './routes/user.route.js';
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(passport.initialize());
 
 app.use('/api/auth', AuthRoutes);
 app.use('/api/user', UserRoutes);
+app.use('/api/item', ItemRoutes);
 
 app.use(globalErrorHandler);
 

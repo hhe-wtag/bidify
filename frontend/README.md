@@ -1,39 +1,32 @@
 # frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Develop a scalable auction-style e-commerce platform that enables sellers to list products for bidding or direct purchase, and buyers to participate in auctions or make instant purchases. Future provisions for notifications, payment integration, and live updates via WebSockets will ensure real-time interactions, enhancing user engagement.
 
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Description
+This project is a user management application that allows users to register, log in, and view their profile page. The application includes the following features:
+- User registration `/register`
+- User login `/login`
+- Profile page view with logout option `/profile`
+- Click the "Logout" button to end the session and redirect you to the login page
 
 ## Project Setup
 
+1. Initiailize Project
 ```sh
-npm install
+yarn
 ```
 
-### Compile and Hot-Reload for Development
-
+2. Run the Project
 ```sh
-npm run dev
+yarn dev
 ```
 
-### Type-Check, Compile and Minify for Production
-
+3. Build the Project
 ```sh
-npm run build
+yarn build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
-
+4. Lint the Project
 ```sh
-npm run lint
+yarn lint
 ```

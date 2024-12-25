@@ -11,8 +11,8 @@ class BaseRepository {
     return this.model.findById(id);
   }
 
-  async findByEmail(email) {
-    return this.model.findOne({ email });
+  async findOne(filter) {
+    return this.model.findOne(filter);
   }
 
   async create(data) {
@@ -20,7 +20,7 @@ class BaseRepository {
   }
 
   async deleteById(id) {
-    return this.model.findByIdAndDelete(id);
+    return this.model.deleteOne({ _id: id });
   }
 }
 

@@ -61,8 +61,10 @@ class BaseController {
     if (!data || Object.keys(data).length === 0) {
       throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Request body is missing');
     }
-
-    const result = await this.repository.updateById(id, data);
+    const result = await this.repository.updateById(id, data, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!result) {
       throw new ApiError(
