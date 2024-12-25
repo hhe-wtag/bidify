@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-center items-center min-h-screen bg-gray-100">
+  <div class="flex justify-center items-center min-h-screen-minus-nav bg-gray-100">
     <Card class="w-[500px]">
       <CardHeader>
         <div class="flex flex-col items-center">
@@ -103,12 +103,15 @@ const loading = ref(true)
 const router = useRouter()
 
 onMounted(async () => {
-  try {
-    await userStore.fetchUserProfile()
-  } catch (error) {
-    console.error('Error occurred:', handleError(error))
-  } finally {
+  if (userStore.profile) {
     loading.value = false
+  } else {
+    try {
+      await userStore.fetchUserProfile()
+      loading.value = false
+    } catch (error) {
+      handleError(error)
+    }
   }
 })
 
