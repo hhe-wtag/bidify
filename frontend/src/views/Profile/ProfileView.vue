@@ -3,73 +3,75 @@
     <h3 class="text-lg font-medium">Profile</h3>
     <p class="text-sm text-muted-foreground">Details of your account</p>
   </div>
+
   <Separator class="mt-8 mb-8" />
+
   <div v-if="loading" class="flex justify-center items-center flex-col">
     <p>Loading profile...</p>
     <div class="spinner mt-4"></div>
   </div>
+
   <div v-else-if="userStore.profile" class="space-y-8">
-    <div class="space-y-2">
-      <h4 class="text-md font-medium flex items-center gap-2"><User class="h-5 w-5"/>Username</h4>
-      <p class="text-md text-muted-foreground">
-        {{ userStore.profile.firstName || '' }} {{ userStore.profile.lastName || '' }}
-      </p>
-    </div>
-    <div class="space-y-2">
-      <h4 class="text-md font-medium flex items-center gap-2"><Mail class="h-5 w-5"/>Email</h4>
-      <p class="text-md text-muted-foreground">{{ userStore.profile.email || '' }}</p>
-    </div>
-    <div class="space-y-2">
-      <h4 class="text-md font-medium flex items-center gap-2"><Phone class="h-5 w-5"/>Contact Number</h4>
-      <p class="text-md text-muted-foreground">{{ userStore.profile.contactNumber || '' }}</p>
-    </div>
-    <div class="space-y-2">
-      <h4 class="text-md font-medium flex items-center gap-2"><DollarSign class="h-5 w-5"/>Balance</h4>
-      <p class="text-md text-muted-foreground">{{ userStore.profile.balance ?? 'N/A' }}</p>
-    </div>
-    <div class="space-y-2">
-      <h4 class="text-md font-medium flex items-center gap-2"><Calendar class="h-5 w-5"/>Registration Date</h4>
-      <p class="text-md text-muted-foreground">
-        {{ new Date(userStore.profile.registrationDate).toLocaleString() }}
-      </p>
-    </div>
-    <div class="space-y-2">
-      <h4 class="text-md font-medium flex items-center gap-2"><MapPin class="h-5 w-5"/>Address</h4>
-      <div>
-        <p class="text-md text-muted-foreground">
-          <strong>Street: </strong>
-          {{ userStore.profile.address?.street ?? 'N/A' }}
-        </p>
-        <p class="text-md text-muted-foreground">
-          <strong>City: </strong>
-          {{ userStore.profile.address?.city ?? 'N/A' }}
-        </p>
-        <p class="text-md text-muted-foreground">
-          <strong>State:</strong>
-          {{ userStore.profile.address?.state ?? 'N/A' }}
-        </p>
-        <p class="text-md text-muted-foreground">
-          <strong>Zip Code:</strong> {{ userStore.profile.address?.zipCode ?? 'N/A' }}
-        </p>
-        <p class="text-md text-muted-foreground">
-          
-          <strong>Country: </strong>{{ userStore.profile.address?.country ?? 'N/A' }}
-        </p>
-      </div>
-    </div>
+    <ProfileField
+      icon="User"
+      label="Full Name"
+      :value="`${userStore.profile.firstName || ''} ${userStore.profile.lastName || ''}`"
+    />
+
+    <ProfileField icon="Mail" label="Email" :value="userStore.profile.email || 'N/A'" />
+
+    <ProfileField
+      icon="Phone"
+      label="Contact Number"
+      :value="userStore.profile.contactNumber || ''"
+    />
+
+    <ProfileField
+      icon="DollarSign"
+      label="Balance"
+      :value="userStore.profile.balance?.toString() ?? '0'"
+    />
+
+    <ProfileField
+      icon="Calendar"
+      label="Registration Date"
+      :value="new Date(userStore.profile.registrationDate).toLocaleString()"
+    />
+
+    <ProfileField icon="MapPin" label="Address" :value="formatAddress(userStore.profile.address)" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user'
 import { ref, onMounted } from 'vue'
-import { Mail, Calendar, Phone, DollarSign, User, LogOut, MapPin } from 'lucide-vue-next'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { Separator } from '@/components/ui/separator'
+import ProfileField from '@/components/shared/ProfileField.vue'
 
 const { handleError } = useErrorHandler()
 const userStore = useUserStore()
 const loading = ref(true)
+
+interface Address {
+  street?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  country?: string | null
+}
+
+const formatAddress = (address: Address | null): string => {
+  if (!address) return 'N/A'
+  const { street, city, state, zipCode, country } = address
+  return [
+    `Street: ${street || 'N/A'}`,
+    `City: ${city || 'N/A'}`,
+    `State: ${state || 'N/A'}`,
+    `Zip Code: ${zipCode || 'N/A'}`,
+    `Country: ${country || 'N/A'}`,
+  ].join(', ')
+}
 
 onMounted(async () => {
   try {

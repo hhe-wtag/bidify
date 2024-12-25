@@ -12,7 +12,7 @@ interface UserProfile {
   address: Address | null
 }
 
-interface Address {
+export interface Address {
   street: string | null
   city: string | null
   state: string | null
