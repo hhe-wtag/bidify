@@ -21,7 +21,6 @@ onMounted(async () => {
   if (slug) {
     await itemStore.fetchItemBySlug(slug)
   }
-  await userStore.fetchUserProfile()
 })
 
 const formatDate = (date: string) => {

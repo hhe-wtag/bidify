@@ -38,11 +38,7 @@ const showForm = ref(false)
 const selectedItem: Ref<Item | null> = ref(null)
 
 onMounted(async () => {
-  try {
-    await Promise.all([itemStore.fetchAllItems(), userStore.fetchUserProfile()])
-  } catch (error) {
-    console.error('Failed to fetch initial data:', error)
-  }
+  await itemStore.fetchAllItems()
 })
 
 const filteredItems = computed(() => {
