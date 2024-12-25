@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
-import { DropdownMenuSeparator, type DropdownMenuSeparatorProps } from 'radix-vue'
+import { DialogTitle, type DialogTitleProps } from 'radix-vue'
 import { computed, type HTMLAttributes } from 'vue'
 
-const props = defineProps<
-  DropdownMenuSeparatorProps & {
-    class?: HTMLAttributes['class']
-  }
->()
+const props = defineProps<DialogTitleProps & { class?: HTMLAttributes['class'] }>()
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
@@ -17,8 +13,10 @@ const delegatedProps = computed(() => {
 </script>
 
 <template>
-  <DropdownMenuSeparator
+  <DialogTitle
+    :class="cn('text-lg font-semibold text-foreground', props.class)"
     v-bind="delegatedProps"
-    :class="cn('-mx-1 my-1 h-px bg-muted', props.class)"
-  />
+  >
+    <slot />
+  </DialogTitle>
 </template>

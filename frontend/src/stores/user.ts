@@ -5,14 +5,14 @@ import { useErrorHandler } from '@/composables/useErrorHandler'
 interface UserProfile {
   firstName: string
   lastName: string
-  email: string
+  email: string | null
   contactNumber: string
   balance: number
   registrationDate: string
   address: Address | null
 }
 
-interface Address {
+export interface Address {
   street: string | null
   city: string | null
   state: string | null
@@ -88,6 +88,68 @@ export const useUserStore = defineStore('user', {
         this.profile = null
         this.error = handleError(error) || 'Failed to fetch profile'
         console.error('Error fetching user profile:', this.error)
+        return { success: false, message: this.error }
+      }
+    },
+
+    async updatePassword(currentPassword: string, newPassword: string) {
+      const { handleError } = useErrorHandler()
+
+      try {
+        const response = await axiosInstance.put(
+          '/user/profile/password-change',
+          {
+            currentPassword,
+            newPassword,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          },
+        )
+
+        return { success: true, message: 'Password updated successfully' }
+      } catch (error) {
+        this.error = handleError(error) || 'Failed to update password'
+        console.error('Error updating password:', this.error)
+        return { success: false, message: this.error }
+      }
+    },
+
+    async updateUserInfo(updatedProfile: {
+      firstName: string
+      lastName: string
+      contactNumber: string
+      balance: number
+      address: {
+        street: string | null
+        city: string | null
+        state: string | null
+        zipCode: string | null
+        country: string | null
+      }
+    }) {
+      const { handleError } = useErrorHandler()
+
+      try {
+        const response = await axiosInstance.put('/user/profile/update', updatedProfile, {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        })
+
+        if (response.status === 200) {
+          this.setUserProfile(response.data.data)
+          console.log('Profile updated successfully:', response.data.message)
+          return { success: true, message: 'Profile updated successfully' }
+        } else {
+          console.error('Failed to update profile:', response.data.message)
+          return { success: false, message: response.data.message }
+        }
+      } catch (error) {
+        this.error = handleError(error) || 'Failed to update profile'
+        console.error('Error updating profile:', this.error)
         return { success: false, message: this.error }
       }
     },
