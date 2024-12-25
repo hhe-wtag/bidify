@@ -16,6 +16,10 @@ const sidebarNavItems = [
     title: 'Update Profile',
     route: { name: 'update-profile' },
   },
+  {
+    title: 'Change Password',
+    route: { name: 'change-password' },
+  },
 ]
 
 const handleLogout = () => {
