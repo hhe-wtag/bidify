@@ -28,7 +28,7 @@ const handleLogout = () => {
 }
 
 const navigateTo = (route: object) => {
-  router.push(route) 
+  router.push(route)
 }
 </script>
 
@@ -41,10 +41,10 @@ const navigateTo = (route: object) => {
       :class="
         cn(
           'w-full text-left justify-start',
-          $route.name === item.route.name && 'bg-muted hover:bg-muted', 
+          $route.name === item.route.name && 'bg-muted hover:bg-muted',
         )
       "
-      @click="navigateTo(item.route)" 
+      @click="navigateTo(item.route)"
     >
       {{ item.title }}
     </Button>

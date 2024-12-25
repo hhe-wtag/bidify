@@ -9,23 +9,24 @@ class UserRepository extends BaseRepository {
   }
 
   async register(data) {
-    const existingUser = await this.findByEmail(data.email);
+    const existingUser = await this.model.findOne({ email: data.email });
 
     if (existingUser) {
       throw new ApiError(HTTP_STATUS.CONFLICT, 'Email already exists');
     }
 
-    const newUser = new this.model(data);
-    await newUser.validate();
-    await newUser.save();
+    const user = new this.model(data);
+    await user.validate();
+    await user.save();
 
-    const token = await newUser.generateAuthToken();
+    const token = await user.generateAuthToken();
 
-    return { newUser, token };
+    user.password = undefined;
+    return { user, token };
   }
 
   async login(email, password) {
-    const user = await this.findByEmailWithPassword(email);
+    const user = await this.model.findOne({ email }).select('+password');
     if (!user) {
       throw new ApiError(
         HTTP_STATUS.UNAUTHORIZED,
@@ -45,7 +46,10 @@ class UserRepository extends BaseRepository {
   }
 
   async updateUserById(id, updateData) {
-    const user = await this.updateById(id, updateData);
+    const user = await this.model.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!user) {
       throw new ApiError(HTTP_STATUS.NOT_FOUND, 'User not found');
@@ -55,7 +59,7 @@ class UserRepository extends BaseRepository {
   }
 
   async changePassword(userId, currentPassword, newPassword) {
-    const user = await this.findByIdWithPassword(userId);
+    const user = await this.model.findById(userId).select('+password');
 
     if (!user) {
       throw new ApiError(HTTP_STATUS.NOT_FOUND, 'User not found');
