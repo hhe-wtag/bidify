@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
+import ItemsView from '@/views/ItemsView.vue'
 import { useUserStore } from '@/stores/user'
 import BaseProfile from '@/views/Profile/BaseProfile.vue'
 import EditProfile from '@/views/Profile/EditProfile.vue'
@@ -52,6 +53,16 @@ const router = createRouter({
           meta: { requiresAuth: true },
         },
       ],
+    },
+    {
+      path: '/items',
+      name: 'items',
+      component: ItemsView,
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/items/:slug',
+      component: () => import('@/components/items/ItemDetails.vue'),
     },
   ],
 })

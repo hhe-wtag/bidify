@@ -39,14 +39,23 @@ const handleLogout = async () => {
 
 <template>
   <nav class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-    <div class="container flex h-14 items-center">
+    <div class="container flex h-14 items-center gap-16">
       <!-- Brand -->
       <div class="flex cursor-pointer" @click="router.push('/')">
-        <h2 class="text-xl font-bold">Bidify</h2>
+        <h2 class="text-2xl font-bold">Bidify</h2>
       </div>
 
       <!-- Navigation -->
-      <div class="flex-1" />
+      <div class="flex-1">
+        <ul class="flex gap-4 font-bold text-base">
+          <li>
+            <a href="/" class="hover:text-primary hover:underline">Profile</a>
+          </li>
+          <li>
+            <a href="/items" class="hover:text-primary hover:underline">Items</a>
+          </li>
+        </ul>
+      </div>
 
       <!-- Auth Section -->
       <div v-if="userStore.isAuthenticated" class="flex items-center gap-4">
