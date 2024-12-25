@@ -57,6 +57,7 @@ const onSubmit = handleSubmit(async (data) => {
       description: result.message,
       variant: 'default',
     })
+    resetForm() 
   } else {
     toast({
       title: 'Password Update Failed',
