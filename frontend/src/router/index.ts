@@ -2,8 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
-import ProfileView from '@/views/ProfileView.vue'
 import { useUserStore } from '@/stores/user'
+import BaseProfile from '@/views/Profile/BaseProfile.vue'
+import EditProfile from '@/views/Profile/EditProfile.vue'
+import ProfileView from '@/views/Profile/ProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,9 +30,21 @@ const router = createRouter({
     },
     {
       path: '/profile',
-      name: 'profile',
-      component: ProfileView,
-      meta: { requiresAuth: true },
+      component: BaseProfile,
+      children: [
+        {
+          path: '',
+          name: 'profile',
+          component: ProfileView,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'update',
+          name: 'update-profile',
+          component: EditProfile,
+          meta: { requiresAuth: true },
+        },
+      ],
     },
   ],
 })
