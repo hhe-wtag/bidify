@@ -16,12 +16,11 @@ const sidebarNavItems = [
     title: 'Update Profile',
     route: { name: 'update-profile' },
   },
+  {
+    title: 'Change Password',
+    route: { name: 'change-password' },
+  },
 ]
-
-const handleLogout = () => {
-  userStore.logout()
-  router.push({ name: 'login' })
-}
 
 const navigateTo = (route: object) => {
   router.push(route)
@@ -43,13 +42,6 @@ const navigateTo = (route: object) => {
       @click="navigateTo(item.route)"
     >
       {{ item.title }}
-    </Button>
-    <Button
-      variant="ghost"
-      class="w-full text-left justify-start text-red-500 hover:bg-red-100"
-      @click="handleLogout"
-    >
-      Logout
     </Button>
   </nav>
 </template>

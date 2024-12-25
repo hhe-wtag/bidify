@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/user'
 import BaseProfile from '@/views/Profile/BaseProfile.vue'
 import EditProfile from '@/views/Profile/EditProfile.vue'
 import ProfileView from '@/views/Profile/ProfileView.vue'
+import ChangePassword from '@/views/Profile/ChangePassword.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,12 @@ const router = createRouter({
           path: 'update',
           name: 'update-profile',
           component: EditProfile,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'change-password',
+          name: 'change-password',
+          component: ChangePassword,
           meta: { requiresAuth: true },
         },
       ],
