@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+/// <reference types="node" />
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { Button } from '@/components/ui/button'
@@ -16,11 +17,39 @@ const route = useRoute()
 const itemStore = useItemStore()
 const userStore = useUserStore()
 
+const timeRemaining = ref('')
+let timer: NodeJS.Timeout
+
+const updateTimeRemaining = () => {
+  const endTime = new Date(itemStore.currentItem?.endTime || '').getTime()
+  const now = new Date().getTime()
+  const distance = endTime - now
+
+  if (distance < 0) {
+    timeRemaining.value = 'Auction Ended'
+    clearInterval(timer)
+    return
+  }
+
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000)
+
+  timeRemaining.value = `${days}d ${hours}h ${minutes}m ${seconds}s`
+}
+
 onMounted(async () => {
   const slug = route.params.slug as string
   if (slug) {
     await itemStore.fetchItemBySlug(slug)
   }
+  updateTimeRemaining()
+  timer = setInterval(updateTimeRemaining, 1000)
+})
+
+onUnmounted(() => {
+  clearInterval(timer)
 })
 
 const formatDate = (date: string) => {
@@ -177,13 +206,11 @@ const placeBidDisabledReason = computed(() => {
                   <span
                     class="font-medium"
                     :class="{
-                      'text-yellow-600':
-                        getTimeRemaining(itemStore.currentItem.endTime) !== 'Auction ended',
-                      'text-red-600':
-                        getTimeRemaining(itemStore.currentItem.endTime) === 'Auction ended',
+                      'text-yellow-600': timeRemaining !== 'Auction Ended',
+                      'text-red-600': timeRemaining === 'Auction Ended',
                     }"
                   >
-                    {{ getTimeRemaining(itemStore.currentItem.endTime) }}
+                    {{ timeRemaining }}
                   </span>
                 </div>
               </CardContent>

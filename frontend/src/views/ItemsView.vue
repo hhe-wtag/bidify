@@ -93,7 +93,7 @@ const handleFormSubmit = async (formData: CreateItemData | UpdateItemData): Prom
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
+  <div class="container space-y-6 py-6">
     <!-- Header and Search -->
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold">Items</h1>
@@ -124,8 +124,8 @@ const handleFormSubmit = async (formData: CreateItemData | UpdateItemData): Prom
 
     <!-- Grid Layout -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      <Card v-for="item in filteredItems" :key="item.slug" class="overflow-hidden">
-        <CardHeader>
+      <Card v-for="item in filteredItems" :key="item.slug" class="overflow-hidden flex flex-col">
+        <CardHeader class="flex-1">
           <CardTitle>{{ item.title }}</CardTitle>
           <CardDescription>{{ item.description }}</CardDescription>
         </CardHeader>
