@@ -4,6 +4,7 @@ import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
+import { validatePassword } from '../utils/passwordValidation.js';
 
 class UserController extends BaseController {
   constructor() {
@@ -67,6 +68,75 @@ class UserController extends BaseController {
           'User details retrieved successfully'
         )
       );
+  });
+
+  updateUser = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const updateData = req.body;
+
+    const validFields = [
+      'firstName',
+      'lastName',
+      'address',
+      'balance',
+      'contactNumber',
+    ];
+
+    if (Object.keys(updateData).some((field) => !validFields.includes(field))) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'Invalid update fields provided.'
+      );
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'No fields provided for update'
+      );
+    }
+
+    const updatedUser = await this.repository.updateUserById(
+      userId,
+      updateData
+    );
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: 'User updated successfully!',
+      data: updatedUser,
+    });
+  });
+
+  changePassword = asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user._id;
+
+    if (!currentPassword) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'Current password is required'
+      );
+    }
+
+    if (!newPassword) {
+      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'New password is required');
+    }
+
+    if (currentPassword === newPassword) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'Current and New password cannot be same'
+      );
+    }
+
+    validatePassword(newPassword);
+
+    await this.repository.changePassword(userId, currentPassword, newPassword);
+
+    res
+      .status(HTTP_STATUS.OK)
+      .json({ success: true, message: 'Password updated successfully!' });
   });
 }
 
