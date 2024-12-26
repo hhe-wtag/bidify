@@ -133,7 +133,7 @@ const handleFormSubmit = async (formData: CreateItemData | UpdateItemData): Prom
         <CardContent>
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-muted-foreground">Starting Bid</span>
+              <span class="text-muted-foreground">Starts from</span>
               <span class="font-medium">${{ item.startingBid.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between items-center">
@@ -148,7 +148,7 @@ const handleFormSubmit = async (formData: CreateItemData | UpdateItemData): Prom
               </span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-muted-foreground">Minimum Bid</span>
+              <span class="text-muted-foreground">Minimum Raise</span>
               <span class="font-medium">+ ${{ item.minimumBidIncrement.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between items-center">

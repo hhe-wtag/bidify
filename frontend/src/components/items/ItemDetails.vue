@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /// <reference types="node" />
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { useUserStore } from '@/stores/user.ts'
 import Tooltip from '../ui/tooltip/Tooltip.vue'
 import TooltipTrigger from '../ui/tooltip/TooltipTrigger.vue'
 import TooltipContent from '../ui/tooltip/TooltipContent.vue'
+import Input from '../ui/input/Input.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -38,6 +39,24 @@ const updateTimeRemaining = () => {
 
   timeRemaining.value = `${days}d ${hours}h ${minutes}m ${seconds}s`
 }
+
+const minimumBidAmount = computed(() => {
+  const currentItem = itemStore.currentItem
+  if (!currentItem) return 0
+
+  return currentItem.currentBid
+    ? currentItem.currentBid + currentItem.minimumBidIncrement
+    : currentItem.startingBid
+})
+
+const bidAmountToPlace = ref(minimumBidAmount.value)
+
+watch(
+  () => minimumBidAmount.value,
+  (newValue) => {
+    bidAmountToPlace.value = newValue
+  },
+)
 
 onMounted(async () => {
   const slug = route.params.slug as string
@@ -144,7 +163,7 @@ const placeBidDisabledReason = computed(() => {
               </CardHeader>
               <CardContent class="space-y-4">
                 <div class="flex justify-between items-center">
-                  <span class="text-muted-foreground">Starting Bid</span>
+                  <span class="text-muted-foreground">Starts from</span>
                   <span class="font-medium">
                     ${{ itemStore.currentItem.startingBid.toFixed(2) }}
                   </span>
@@ -165,7 +184,7 @@ const placeBidDisabledReason = computed(() => {
                   </span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="text-muted-foreground">Minimum Bid</span>
+                  <span class="text-muted-foreground">Minimum Raise</span>
                   <span class="font-medium">
                     + ${{ itemStore.currentItem.minimumBidIncrement.toFixed(2) }}
                   </span>
@@ -219,6 +238,13 @@ const placeBidDisabledReason = computed(() => {
 
           <!-- Place Bid Button -->
           <div class="flex justify-center">
+            <Input
+              v-model="bidAmountToPlace"
+              type="number"
+              min="itemStore.currentItem.minimumBidIncrement"
+              step="1.0"
+              class="w-48 mr-4"
+            />
             <Tooltip :delay-duration="0">
               <TooltipTrigger>
                 <Button size="lg" :disabled="isPlaceBidDisabled"> Place Bid </Button>
