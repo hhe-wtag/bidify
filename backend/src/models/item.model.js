@@ -19,7 +19,6 @@ const itemSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      // required: [true, 'Item slug is required'],
     },
     sellerId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -58,7 +57,11 @@ const itemSchema = new mongoose.Schema(
       required: [true, 'Minimum bid increment is required'],
       min: [10.0, 'Minimum bid increment must be at least 10'],
     },
-    winnerBidId: {
+    currentBid: {
+      type: Number,
+      default: null,
+    },
+    lastBidId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Bid',
       default: null,
