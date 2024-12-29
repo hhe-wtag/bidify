@@ -1,5 +1,7 @@
 import app from './app.js';
 import { connectDB, closeConnection } from './config/database.js';
+import { initializeSocket } from './config/socket.js';
+import SocketManager from './socketHandlers/SocketManager.js';
 
 const PORT = process.env.PORT;
 
@@ -11,6 +13,8 @@ const startServer = async () => {
       console.info(`\n🚀 Server running on port ${PORT}`);
       console.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
+
+    new SocketManager(initializeSocket(server));
 
     server.on('error', (error) => {
       console.error('Server Error:', error);
