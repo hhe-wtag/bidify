@@ -1,6 +1,6 @@
 import BidHandler from './BidHandler.js';
 
-class SocketManager {
+class SocketConnection {
   constructor(io) {
     if (!io) throw new Error('Socket.io instance required');
     this.io = io;
@@ -12,20 +12,17 @@ class SocketManager {
     this.io.on('connection', (socket) => {
       console.info(`Client connected: ${socket.id}`);
 
-      // Join room for bid updates
+      // When a user enters item route in client will enter items room in socket
       socket.on('join-item', (itemId) => {
-        socket.join(`item-${itemId}`);
-        console.info(`Socket ${socket.id} joined room: item-${itemId}`);
+        this.bidHandler.handleJoinItemRoom(socket, itemId);
       });
 
-      // Handle bid placement
-      socket.on('place-bid', async (data) => {
-        console.info('place-bid', data);
-        try {
-          await this.bidHandler.handleBidPlacement(socket, data);
-        } catch (error) {
-          socket.emit('bid-error', { message: error.message });
-        }
+      socket.on('place-bid', (data) => {
+        this.bidHandler.handleBidPlacement(socket, data);
+      });
+
+      socket.on('leave-item', (itemId) => {
+        this.bidHandler.handleLeaveItemRoom(socket, itemId);
       });
 
       socket.on('disconnect', () => {
@@ -35,4 +32,4 @@ class SocketManager {
   }
 }
 
-export default SocketManager;
+export default SocketConnection;

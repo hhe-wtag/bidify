@@ -1,52 +1,51 @@
 import BaseSocketHandler from './BaseHandler.js';
-import BidController from '../controllers/BidController.js';
+import BidRepository from '../repositories/BidRepository.js';
 
 class BidHandler extends BaseSocketHandler {
   constructor(io) {
     super(io);
-    this.bidController = BidController;
+    this.bidRepository = new BidRepository();
   }
 
   // Bid-specific event handlers
   handleBidPlacement = async (socket, bidData) => {
-    console.log(bidData);
     this.emitToRoom(`item-${bidData.itemId}`, 'new-bid', {
-      //   itemId: bidData.itemId,
-      //   currentBid: bidData.currentBidAmount,
-      //   bidderId: bidData.bidderId,
-      //   timestamp: bidData.createdAt,
-      hello: 'world',
+      message: 'Someone placed a bid',
     });
-    // try {
-    //   const result = await this.bidController.placeBid(bidData);
+    try {
+      const result = await this.bidRepository.placeBid(bidData);
 
-    //   this.emitToUser(socket.id, 'bid-placed', {
-    //     success: true,
-    //     bid: result,
-    //   });
+      this.emitToUser(`item-${bidData.itemId}`, 'new-bid', {
+        bid: result,
+        message: 'New bid placed successfully',
+      });
 
-    //   this.emitToRoom(`auction-${bidData.itemId}`, 'new-bid', {
-    //     itemId: bidData.itemId,
-    //     currentBid: result.currentBidAmount,
-    //     bidderId: result.bidderId,
-    //     timestamp: result.createdAt,
-    //   });
-    // } catch (error) {
-    //   this.emitToUser(socket.id, 'bid-error', {
-    //     message: error.message,
-    //     status: error.statusCode || 500,
-    //   });
-    // }
+      socket.emit('bid-success', {
+        bid: result,
+        message: `new bid placed successfully by ${bidData.bidderId} against itemId: ${bidData.itemId}`,
+      });
+    } catch (error) {
+      console.error('Bid error:', error);
+      socket.emit('bid-error', {
+        message: error.message,
+      });
+    }
   };
 
-  handleJoinAuction = (socket, itemId) => {
-    socket.join(`auction-${itemId}`);
-    console.log(`Client ${socket.id} joined auction room for item ${itemId}`);
+  handleJoinItemRoom = (socket, itemId) => {
+    socket.join(`item-${itemId}`);
+
+    this.broadcastToRoom(socket, `item-${itemId}`, 'user-joined', {
+      message: `User-${socket.id} connected to item room ${itemId}`,
+    });
   };
 
-  handleLeaveAuction = (socket, itemId) => {
-    socket.leave(`auction-${itemId}`);
-    console.log(`Client ${socket.id} left auction room for item ${itemId}`);
+  handleLeaveItemRoom = (socket, itemId) => {
+    this.broadcastToRoom(socket, `item-${itemId}`, 'user-left', {
+      message: `User-${socket.id} left the room ${itemId}`,
+    });
+
+    //socket.leave(`item-${itemId}`);
   };
 }
 
