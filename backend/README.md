@@ -204,7 +204,7 @@ Authorization: Bearer <token>
 
 ### 1. Architecture
 
-Server (server.js) ↓ Socket Initialization (socket.js) ↓ Socket Connection Manager (SocketConnection.js) ↓ Feature Handlers (BidHandler.js, etc.) ↓ Base Handler (BaseHandler.js)
+Server (server.js) ↓ Socket Initialization (socket.js) ↓ Socket Connection Manager (SocketConnection.js) ↓ Feature Handlers (BidSocketHandler.js, etc.) ↓ Base Handler (BaseHandler.js)
 
 ```mermaid
 graph TD
@@ -214,7 +214,7 @@ graph TD
     D --> E[BaseHandler.js]
 
     subgraph Feature Handlers
-        D1[BidHandler.js]
+        D1[BidSocketHandler.js]
         D2[ChatHandler.js]
         D3[NotificationHandler.js]
     end

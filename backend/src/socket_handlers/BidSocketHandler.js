@@ -1,13 +1,12 @@
-import BaseSocketHandler from './BaseHandler.js';
+import BaseSocketHandler from './BaseSocketHandler.js';
 import BidRepository from '../repositories/BidRepository.js';
 
-class BidHandler extends BaseSocketHandler {
+class BidSocketHandler extends BaseSocketHandler {
   constructor(io) {
     super(io);
     this.bidRepository = new BidRepository();
   }
 
-  // Bid-specific event handlers
   handleBidPlacement = async (socket, bidData) => {
     this.emitToRoom(`item-${bidData.itemId}`, 'new-bid', {
       message: 'Someone placed a bid',
@@ -44,9 +43,7 @@ class BidHandler extends BaseSocketHandler {
     this.broadcastToRoom(socket, `item-${itemId}`, 'user-left', {
       message: `User-${socket.id} left the room ${itemId}`,
     });
-
-    //socket.leave(`item-${itemId}`);
   };
 }
 
-export default BidHandler;
+export default BidSocketHandler;

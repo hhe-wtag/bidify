@@ -1,7 +1,7 @@
 import app from './app.js';
 import { connectDB, closeConnection } from './config/database.js';
 import { initializeSocket } from './config/socket.js';
-import SocketConnection from './socketHandlers/SocketConnection.js';
+import SocketConnection from './socket_handlers/SocketConnection.js';
 
 const PORT = process.env.PORT;
 

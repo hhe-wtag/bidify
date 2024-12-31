@@ -11,7 +11,7 @@ const initializeSocket = (server) => {
       methods: ['GET', 'POST'],
       credentials: true,
     },
-    transports: ['websocket', 'polling'],
+    transports: ['websocket'],
   });
 
   return io;
