@@ -81,6 +81,7 @@ Authorization: Bearer <token>
 ```bash
 Authorization: Bearer <token>
 ```
+
 ```bash
 {
   "firstName": "John",
@@ -104,13 +105,13 @@ Authorization: Bearer <token>
 ```bash
 Authorization: Bearer <token>
 ```
+
 ```bash
 {
   "currentPassword": "Abc123sdwq1",
   "newPassword": "Abc123sdwq"
 }
 ```
-
 
 ## Item API Endpoints
 
@@ -198,3 +199,83 @@ Authorization: Bearer <token>
 #### Authorization Check:
 
 - Only the user who created the item (identified by `sellerId`) can delete it.
+
+## WebSocket Integration Flow
+
+### 1. Architecture
+
+Server (server.js) ↓ Socket Initialization (socket.js) ↓ Socket Connection Manager (SocketConnection.js) ↓ Feature Handlers (BidSocketHandler.js, etc.) ↓ Base Handler (BaseHandler.js)
+
+```mermaid
+graph TD
+    A[server.js] --> B[socket.js]
+    B --> C[SocketConnection.js]
+    C --> D[Feature Handlers]
+    D --> E[BaseHandler.js]
+
+    subgraph Feature Handlers
+        D1[BidSocketHandler.js]
+        D2[ChatHandler.js]
+        D3[NotificationHandler.js]
+    end
+```
+
+### 2. Implementation Steps
+
+1. **Create Feature Handler**
+
+```javascript
+// filepath: /socketHandlers/YourFeatureHandler.js
+import BaseSocketHandler from './BaseHandler.js';
+
+class YourFeatureHandler extends BaseSocketHandler {
+  constructor(io) {
+    super(io);
+  }
+
+  handleSomeEvent = (socket, data) => {
+    // Handle event
+    this.emitToRoom(`room-${data.id}`, 'event-name', data);
+  };
+}
+```
+
+### 3. Register in SocketConnection
+
+```js
+// In SocketConnection.js
+import YourFeatureHandler from './YourFeatureHandler.js';
+
+class SocketConnection {
+  constructor(io) {
+    this.featureHandler = new YourFeatureHandler(io);
+  }
+
+  initialize() {
+    this.io.on('connection', (socket) => {
+      socket.on('your-event', (data) => {
+        this.featureHandler.handleSomeEvent(socket, data);
+      });
+    });
+  }
+}
+```
+
+#### 4. Available Methods
+
+- emitToRoom(room, event, data): Emit to all in room
+- broadcastToRoom(socket, room, event, data): Emit to all except sender
+- emitToUser(socketId, event, data): Emit to specific user
+
+#### 5. Event Flow Example
+
+```js
+// Client -> Server
+socket.emit('join-room', roomId);
+
+// Server -> Room
+this.emitToRoom(`room-${roomId}`, 'user-joined', userData);
+
+// Server -> Individual
+this.emitToUser(socketId, 'private-message', message);
+```
