@@ -22,7 +22,7 @@ const bidSchema = new mongoose.Schema(
       required: true,
       min: [0, 'Last bid amount must be positive'],
     },
-    currentBidAmount: {
+    latestBidAmount: {
       type: Number,
       required: true,
       min: [0, 'Total bid amount must be positive'],

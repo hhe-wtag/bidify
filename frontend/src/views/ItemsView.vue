@@ -137,14 +137,14 @@ const handleFormSubmit = async (formData: CreateItemData | UpdateItemData): Prom
               <span class="font-medium">${{ item.startingBid.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-muted-foreground">Current Bid</span>
+              <span class="text-muted-foreground">Latest Bid</span>
               <span
                 :class="{
-                  'font-medium': item.currentBid,
-                  'text-muted-foreground text-sm': !item.currentBid,
+                  'font-medium': item.latestBid,
+                  'text-muted-foreground text-sm': !item.latestBid,
                 }"
               >
-                {{ item.currentBid ? `$${item.currentBid.toFixed(2)}` : 'No bids placed yet' }}
+                {{ item.latestBid ? `$${item.latestBid.toFixed(2)}` : 'No bids placed yet' }}
               </span>
             </div>
             <div class="flex justify-between items-center">

@@ -57,7 +57,7 @@ const itemSchema = new mongoose.Schema(
       required: [true, 'Minimum bid increment is required'],
       min: [10.0, 'Minimum bid increment must be at least 10'],
     },
-    currentBid: {
+    latestBid: {
       type: Number,
       default: null,
     },

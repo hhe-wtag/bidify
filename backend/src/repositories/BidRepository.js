@@ -29,8 +29,8 @@ class BidRepository extends BaseRepository {
 
     const lastBid = await Bid.findOne({ itemId }).sort({ createdAt: -1 });
 
-    const lastBidAmount = lastBid ? lastBid.currentBidAmount : item.startingBid;
-    const currentBidAmount = lastBidAmount + incrementBidAmount;
+    const lastBidAmount = lastBid ? lastBid.latestBidAmount : item.startingBid;
+    const latestBidAmount = lastBidAmount + incrementBidAmount;
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -40,14 +40,14 @@ class BidRepository extends BaseRepository {
         bidderId,
         incrementBidAmount,
         lastBidAmount,
-        currentBidAmount,
+        latestBidAmount,
       });
 
       const savedBid = await bid.save({ session });
 
       const updatedItem = await Item.findByIdAndUpdate(
         itemId,
-        { lastBidId: savedBid._id, currentBid: currentBidAmount },
+        { lastBidId: savedBid._id, latestBid: latestBidAmount },
         { new: true, session }
       );
 

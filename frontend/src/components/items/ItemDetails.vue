@@ -44,8 +44,8 @@ const minimumBidAmount = computed(() => {
   const currentItem = itemStore.currentItem
   if (!currentItem) return 0
 
-  return currentItem.currentBid
-    ? currentItem.currentBid + currentItem.minimumBidIncrement
+  return currentItem.latestBid
+    ? currentItem.latestBid + currentItem.minimumBidIncrement
     : currentItem.startingBid
 })
 
@@ -169,16 +169,16 @@ const placeBidDisabledReason = computed(() => {
                   </span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="text-muted-foreground">Current Bid</span>
+                  <span class="text-muted-foreground">Latest Bid</span>
                   <span
                     :class="{
-                      'font-medium': itemStore.currentItem.currentBid,
-                      'text-muted-foreground text-sm': !itemStore.currentItem.currentBid,
+                      'font-medium': itemStore.currentItem.latestBid,
+                      'text-muted-foreground text-sm': !itemStore.currentItem.latestBid,
                     }"
                   >
                     {{
-                      itemStore.currentItem.currentBid
-                        ? `$${itemStore.currentItem.currentBid.toFixed(2)}`
+                      itemStore.currentItem.latestBid
+                        ? `$${itemStore.currentItem.latestBid.toFixed(2)}`
                         : 'No bids placed yet'
                     }}
                   </span>
