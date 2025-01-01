@@ -1,34 +1,26 @@
 import BaseSocketHandler from './BaseSocketHandler.js';
-import BidRepository from '../repositories/BidRepository.js';
+import BidSocketRepository from '../repositories/BidSocketRepository.js';
+import HTTP_STATUS from '../utils/httpStatus.js';
 
 class BidSocketHandler extends BaseSocketHandler {
   constructor(io) {
     super(io);
-    this.bidRepository = new BidRepository();
+    this.bidSocketRepository = new BidSocketRepository();
   }
 
   handleBidPlacement = async (socket, bidData) => {
-    this.emitToRoom(`item-${bidData.itemId}`, 'new-bid', {
-      message: 'Someone placed a bid',
-    });
-    try {
-      const result = await this.bidRepository.placeBid(bidData);
+    const result = await this.bidSocketRepository.placeBid(bidData);
 
-      this.emitToUser(`item-${bidData.itemId}`, 'new-bid', {
-        bid: result,
-        message: 'New bid placed successfully',
-      });
-
-      socket.emit('bid-success', {
-        bid: result,
-        message: `new bid placed successfully by ${bidData.bidderId} against itemId: ${bidData.itemId}`,
-      });
-    } catch (error) {
-      console.error('Bid error:', error);
-      socket.emit('bid-error', {
-        message: error.message,
+    if (result.statusCode === HTTP_STATUS.CREATED) {
+      this.broadcastToRoom(socket, `item-${bidData.itemId}`, 'new-bid', {
+        message: `New bid of $${bidData.incrementBidAmount} placed by userId: ${bidData.bidderId}`,
       });
     }
+
+    this.emitToUser(socket.id, 'place-bid-result', {
+      'place-bid-result': result,
+      message: `Attempt of 'place-bid' by userId: ${bidData.bidderId} against itemId: ${bidData.itemId}`,
+    });
   };
 
   handleJoinItemRoom = (socket, itemId) => {

@@ -2,12 +2,15 @@ import { io } from 'socket.io-client';
 
 // Test bid placement
 const bidData = {
-  itemId: '6767a64e39106795c9de77e0',
-  bidderId: '65f2d1234a5b6c7d8e9f4567',
+  itemId: '6774d0494189d93277eeb4c7',
+  bidderId: '67639eba3b9a81d69741beab',
   incrementBidAmount: 100,
 };
 
 const socket = io('http://localhost:8080', {
+  auth: {
+    token: 'my-secret-token',
+  },
   transports: ['websocket'],
 });
 
@@ -28,7 +31,7 @@ socket.on('user-left', (data) => {
   console.info(data);
 });
 
-socket.on('bid-success', (data) => {
+socket.on('place-bid-result', (data) => {
   console.info(data);
 });
 
