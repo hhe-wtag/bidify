@@ -20,10 +20,6 @@ socket.on('connect', () => {
   socket.emit('join-item', itemId);
 });
 
-socket.on('new-bid', (data) => {
-  console.info(data);
-});
-
 socket.on('user-joined', (data) => {
   console.info(data);
 });
@@ -32,18 +28,8 @@ socket.on('user-left', (data) => {
   console.info(data);
 });
 
-socket.on('place-bid-result', (data) => {
-  console.info(data);
-});
-
-const placeBid = () => {
-  socket.emit('place-bid', bidData);
-};
-
 process.stdin.on('data', (data) => {
-  if (data.toString().trim() === 'bid') {
-    placeBid();
-  } else if (data.toString().trim() === 'join') {
+  if (data.toString().trim() === 'join') {
     socket.emit('join-item', bidData.itemId);
   } else if (data.toString().trim() === 'leave') {
     socket.emit('leave-item', bidData.itemId);
@@ -51,5 +37,5 @@ process.stdin.on('data', (data) => {
 });
 
 console.info(
-  "Type following commands to test:\n'bid' to place bid, 'join' to join item room, 'leave' to leave item room"
+  "Type following commands to test:\n'join' to join item room, 'leave' to leave item room"
 );

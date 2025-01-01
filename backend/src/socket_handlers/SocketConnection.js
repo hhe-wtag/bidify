@@ -48,10 +48,6 @@ class SocketConnection {
         this.BidSocketHandler.handleJoinItemRoom(socket, itemId);
       });
 
-      socket.on('place-bid', (data) => {
-        this.BidSocketHandler.handleBidPlacement(socket, data);
-      });
-
       socket.on('leave-item', (itemId) => {
         this.BidSocketHandler.handleLeaveItemRoom(socket, itemId);
       });
