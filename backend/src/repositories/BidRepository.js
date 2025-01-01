@@ -20,6 +20,13 @@ class BidRepository extends BaseRepository {
       throw new ApiError(HTTP_STATUS.NOT_FOUND, 'Item not found');
     }
 
+    if (item.sellerId.toString() === bidderId) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'Seller cannot bid on own item'
+      );
+    }
+
     if (item.minimumBidIncrement > incrementBidAmount) {
       throw new ApiError(
         HTTP_STATUS.BAD_REQUEST,
