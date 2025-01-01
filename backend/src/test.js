@@ -9,7 +9,8 @@ const bidData = {
 
 const socket = io('http://localhost:8080', {
   auth: {
-    token: 'my-secret-token',
+    token:
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NWVjZjc4ZDUyOWI2ZTNkNTFjNjAzMyIsImVtYWlsIjoiYWJjZGVAZ21haWwuY29tIiwiaWF0IjoxNzM1NzA4NzA1LCJleHAiOjE3MzU3OTUxMDV9.YI1g1DgsHDj7M8dGXWcZHisYc8Ah5nlFKuAXElNgQJM',
   },
   transports: ['websocket'],
 });
