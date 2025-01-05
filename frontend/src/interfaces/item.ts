@@ -7,7 +7,7 @@ export interface Item {
   endTime: string
   slug: string
   sellerId: string
-  currentBid?: number
+  latestBid?: number
   status?: string
   createdAt?: string
   updatedAt?: string

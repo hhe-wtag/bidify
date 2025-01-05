@@ -84,7 +84,7 @@ const handleSubmit = async () => {
     </div>
 
     <div class="space-y-2">
-      <Label for="startingBid">Starting Bid ($)</Label>
+      <Label for="startingBid">Starts from ($)</Label>
       <Input
         id="startingBid"
         v-model.number="formData.startingBid"
@@ -97,7 +97,7 @@ const handleSubmit = async () => {
     </div>
 
     <div class="space-y-2">
-      <Label for="minimumBidIncrement">Minimum Bid Increment ($)</Label>
+      <Label for="minimumBidIncrement">Minimum Raise ($)</Label>
       <Input
         id="minimumBidIncrement"
         v-model.number="formData.minimumBidIncrement"
