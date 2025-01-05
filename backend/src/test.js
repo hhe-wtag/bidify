@@ -28,8 +28,22 @@ socket.on('user-left', (data) => {
   console.info(data);
 });
 
+socket.on('new-bid', (data) => {
+  console.info(data);
+});
+
+socket.on('place-bid-result', (data) => {
+  console.info(data);
+});
+
+const placeBid = () => {
+  socket.emit('place-bid', bidData);
+};
+
 process.stdin.on('data', (data) => {
-  if (data.toString().trim() === 'join') {
+  if (data.toString().trim() === 'bid') {
+    placeBid();
+  } else if (data.toString().trim() === 'join') {
     socket.emit('join-item', bidData.itemId);
   } else if (data.toString().trim() === 'leave') {
     socket.emit('leave-item', bidData.itemId);

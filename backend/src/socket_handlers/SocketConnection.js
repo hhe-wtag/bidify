@@ -53,6 +53,10 @@ class SocketConnection {
         this.BidSocketHandler.handleLeaveItemRoom(socket, itemId);
       });
 
+      socket.on('place-bid', (data) => {
+        this.BidSocketHandler.handleBidPlacement(socket, data);
+      });
+
       socket.on('disconnect', () => {
         console.info(`❌ User disconnected: ${socket.user.email}`);
       });

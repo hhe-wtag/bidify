@@ -21,6 +21,21 @@ class BidSocketHandler extends BaseSocketHandler {
       message: `User-${socket.id} left the room ${itemId}`,
     });
   };
+
+  handleBidPlacement = async (socket, bidData) => {
+    const result = await this.bidSocketRepository.placeBid(bidData);
+
+    if (result.statusCode === HTTP_STATUS.CREATED) {
+      this.broadcastToRoom(socket, `item-${bidData.itemId}`, 'new-bid', {
+        message: `New bid of $${bidData.incrementBidAmount} placed by userId: ${bidData.bidderId}`,
+      });
+    }
+
+    this.emitToUser(socket.id, 'place-bid-result', {
+      'place-bid-result': result,
+      message: `Attempt of 'place-bid' by userId: ${bidData.bidderId} against itemId: ${bidData.itemId}`,
+    });
+  };
 }
 
 export default BidSocketHandler;
