@@ -42,7 +42,8 @@ class SocketConnection {
 
   setupEventHandlers() {
     this.io.on('connection', (socket) => {
-      console.info(`Authenticated user connected: ${socket.user.email}`);
+      console.info(`✅ Authenticated user connected: ${socket.user.email}`);
+      this.io.emit('user-connected', { email: socket.user.email });
 
       socket.on('join-item', (itemId) => {
         this.BidSocketHandler.handleJoinItemRoom(socket, itemId);
@@ -53,7 +54,7 @@ class SocketConnection {
       });
 
       socket.on('disconnect', () => {
-        console.info(`User disconnected: ${socket.user.email}`);
+        console.info(`❌ User disconnected: ${socket.user.email}`);
       });
     });
   }
