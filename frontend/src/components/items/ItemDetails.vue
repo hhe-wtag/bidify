@@ -12,6 +12,7 @@ import Tooltip from '../ui/tooltip/Tooltip.vue'
 import TooltipTrigger from '../ui/tooltip/TooltipTrigger.vue'
 import TooltipContent from '../ui/tooltip/TooltipContent.vue'
 import Input from '../ui/input/Input.vue'
+import BidUpdate from '@/components/items/BidUpdate.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -256,6 +257,7 @@ const placeBidDisabledReason = computed(() => {
           </div>
         </CardContent>
       </Card>
+      <BidUpdate />
     </div>
 
     <!-- Not Found State -->
