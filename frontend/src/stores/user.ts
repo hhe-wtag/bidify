@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import axiosInstance from '@/plugins/axios'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import type { UserProfile } from '@/interfaces/user'
-import { connectSocket, disconnectSocket } from '@/services/websocket'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -28,7 +27,6 @@ export const useUserStore = defineStore('user', {
 
         if (token) {
           this.setToken(token)
-          connectSocket(token)
         } else {
           throw new Error('Token or user profile missing')
         }
@@ -152,7 +150,6 @@ export const useUserStore = defineStore('user', {
       this.token = null
       this.profile = null
       localStorage.removeItem('token')
-      disconnectSocket()
     },
   },
 })

@@ -41,7 +41,7 @@ const onSubmit = handleSubmit(async (data) => {
       title: 'Login Successful',
       description: result.message,
     })
-    router.push({ name: 'items' })
+    router.push({ name: 'profile' })
   } else {
     toast({
       title: 'Login Failed',
