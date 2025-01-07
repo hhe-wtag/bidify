@@ -1,3 +1,4 @@
+import { instrument } from '@socket.io/admin-ui';
 import jwt from 'jsonwebtoken';
 
 import BidSocketHandler from './BidSocketHandler.js';
@@ -7,10 +8,44 @@ class SocketConnection {
   constructor(io) {
     this.io = io;
     this.BidSocketHandler = new BidSocketHandler(io);
+    this.setupAdminUI();
     this.setupAuthMiddleware();
     this.setupEventHandlers();
   }
 
+  setupAdminUI() {
+    instrument(this.io, {
+      auth: false,
+      mode:
+        process.env.NODE_ENV === 'production' ? 'production' : 'development',
+      serverId: 'bidify-server',
+    });
+    const adminNamespace = this.io.of('/admin');
+
+    adminNamespace.use(async (socket, next) => {
+      const isAdmin = true;
+
+      if (!isAdmin) {
+        return next(new Error('Admin access required'));
+      }
+      next();
+    });
+
+    adminNamespace.on('connection', (socket) => {
+      console.info('Admin connected:', socket.id);
+
+      socket.on('get-active-users', () => {
+        const sockets = this.io.sockets.sockets;
+        console.log('All sockets:', Array.from(this.io.sockets.sockets));
+        const activeUsers = Array.from(sockets).map(([id, socket]) => ({
+          id,
+          email: socket.user?.email,
+          rooms: Array.from(socket.rooms),
+        }));
+        socket.emit('active-users', activeUsers);
+      });
+    });
+  }
   setupAuthMiddleware() {
     this.io.use(async (socket, next) => {
       try {
