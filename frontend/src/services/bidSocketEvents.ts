@@ -12,7 +12,7 @@ export const joinItemRoom = (itemId: string) => {
 }
 
 export const leaveItemRoom = (itemId: string) => {
-  emitEvent('leave-item', itemId)
+  emitEvent('leave-item-room', itemId)
 }
 
 // Bid Actions
