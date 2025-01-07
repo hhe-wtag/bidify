@@ -14,7 +14,7 @@ import TooltipContent from '../ui/tooltip/TooltipContent.vue'
 import Input from '../ui/input/Input.vue'
 import BidUpdate from '@/components/items/BidUpdate.vue'
 import { joinItemRoom, leaveItemRoom } from '@/services/bidSocketEvents.ts'
-import { onEvent } from '@/services/websocket.ts'
+import { offEvent, onEvent } from '@/services/websocket.ts'
 
 const router = useRouter()
 const route = useRoute()
@@ -62,29 +62,40 @@ watch(
   },
 )
 
+// Define handlers outside with named functions
+const handleUserJoined = (data) => {
+  console.log(data)
+}
+
+const handleUserLeft = (data) => {
+  console.log(data)
+}
+
+// Set up event listeners and cleanup
 onBeforeMount(() => {
-  onEvent('user-joined-item-room', (data) => {
-    console.log(data);
-  })
-  onEvent('user-left-item-room', (data) => {
-    console.log(data);
-  })
+  onEvent('user-joined-item-room', handleUserJoined)
+  onEvent('user-left-item-room', handleUserLeft)
 })
 
 onMounted(async () => {
   if (slug) {
     await itemStore.fetchItemBySlug(slug)
-    joinItemRoom(slug);
+    joinItemRoom(slug)
   }
   updateTimeRemaining()
   timer = setInterval(updateTimeRemaining, 1000)
 })
 
 onUnmounted(() => {
-  leaveItemRoom(slug)
+  // Clean up all event listeners
+  offEvent('user-joined-item-room', handleUserJoined)
+  offEvent('user-left-item-room', handleUserLeft)
+  
+  if (slug) {
+    leaveItemRoom(slug)
+  }
   clearInterval(timer)
 })
-
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString(undefined, {
     year: 'numeric',
