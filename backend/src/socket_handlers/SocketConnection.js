@@ -45,11 +45,11 @@ class SocketConnection {
       console.info(`✅ Authenticated user connected: ${socket.user.email}`);
       this.io.emit('user-connected', { email: socket.user.email });
 
-      socket.on('join-item', (itemId) => {
+      socket.on('join-item-room', (itemId) => {
         this.BidSocketHandler.handleJoinItemRoom(socket, itemId);
       });
 
-      socket.on('leave-item', (itemId) => {
+      socket.on('leave-item-room', (itemId) => {
         this.BidSocketHandler.handleLeaveItemRoom(socket, itemId);
       });
 

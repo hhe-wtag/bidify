@@ -17,7 +17,7 @@ const socket = io('http://localhost:8080', {
 
 socket.on('connect', () => {
   const itemId = bidData.itemId;
-  socket.emit('join-item', itemId);
+  socket.emit('join-item-room', itemId);
 });
 
 socket.on('user-joined', (data) => {
@@ -44,9 +44,9 @@ process.stdin.on('data', (data) => {
   if (data.toString().trim() === 'bid') {
     placeBid();
   } else if (data.toString().trim() === 'join') {
-    socket.emit('join-item', bidData.itemId);
+    socket.emit('join-item-room', bidData.itemId);
   } else if (data.toString().trim() === 'leave') {
-    socket.emit('leave-item', bidData.itemId);
+    socket.emit('leave-item-room', bidData.itemId);
   }
 });
 

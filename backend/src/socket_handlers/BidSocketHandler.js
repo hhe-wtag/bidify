@@ -11,7 +11,8 @@ class BidSocketHandler extends BaseSocketHandler {
   handleJoinItemRoom = (socket, itemId) => {
     socket.join(`item-${itemId}`);
 
-    this.broadcastToRoom(socket, `item-${itemId}`, 'user-joined', {
+    this.emitToRoom(`item-${itemId}`, 'user-joined', {
+      user: socket.user,
       message: `User-${socket.id} connected to item room ${itemId}`,
     });
   };
