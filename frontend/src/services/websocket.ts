@@ -42,3 +42,11 @@ export const emitEvent = <T = unknown>(event: string, payload: T) => {
     console.warn('WebSocket is not connected.')
   }
 }
+
+export const onEvent = (event: string, callback: (...args: any[]) => void) => {
+  if (!socket) {
+    console.warn('WebSocket is not connected.')
+    return
+  }
+  socket.on(event, callback)
+}

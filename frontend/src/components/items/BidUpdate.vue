@@ -7,7 +7,26 @@ import {
   StepperSeparator,
   StepperTitle,
 } from '@/components/ui/stepper'
-import { CircleDollarSign, CircleDot } from 'lucide-vue-next'
+import { onEvent } from '@/services/websocket.js'
+import { joinItemRoom } from '@/services/bidSocketEvents.ts'
+import { useItemStore } from '@/stores/item.ts'
+import { CircleDollarSign, CircleDot, Database } from 'lucide-vue-next'
+import { onMounted } from 'vue'
+import { useBidStore } from '@/stores/bid.ts'
+
+const itemStore = useItemStore()
+const bidStore = useBidStore()
+
+onMounted(() => {
+  console.log('Bid on mounted')
+  onEvent('user-joined', (data) => {
+    console.log(data.user.email)
+    bidStore.addConnectedUsers(data.user.email)
+  })
+  if (itemStore.currentItem?.slug) {
+    joinItemRoom(itemStore.currentItem?.slug)
+  }
+})
 
 const steps = [
   {
