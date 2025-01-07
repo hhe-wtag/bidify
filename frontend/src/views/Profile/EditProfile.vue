@@ -4,7 +4,10 @@
     <p class="text-sm text-muted-foreground">Update your account details</p>
   </div>
   <Separator class="mt-8 mb-8" />
+  
   <form class="space-y-8" @submit.prevent="handleSubmit">
+    <ScrollArea class="h-[500px] grid gap-8">
+      <div class="flex flex-col gap-8">
     <FormField name="firstName">
       <FormItem>
         <FormLabel>First Name</FormLabel>
@@ -159,6 +162,8 @@
         <FormMessage />
       </FormItem>
     </FormField>
+  </div>
+    </ScrollArea>
 
     <div class="flex gap-2 justify-start">
       <Button type="submit"> Update profile </Button>
@@ -185,6 +190,7 @@ import { Input } from '@/components/ui/input'
 import { useUserStore } from '@/stores/user'
 import { reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const userStore = useUserStore()
 const router = useRouter()
