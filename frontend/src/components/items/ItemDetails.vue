@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /// <reference types="node" />
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { Button } from '@/components/ui/button'
@@ -13,12 +13,15 @@ import TooltipTrigger from '../ui/tooltip/TooltipTrigger.vue'
 import TooltipContent from '../ui/tooltip/TooltipContent.vue'
 import Input from '../ui/input/Input.vue'
 import BidUpdate from '@/components/items/BidUpdate.vue'
+import { joinItemRoom, leaveItemRoom } from '@/services/bidSocketEvents.ts'
+import { onEvent } from '@/services/websocket.ts'
 
 const router = useRouter()
 const route = useRoute()
 const itemStore = useItemStore()
 const userStore = useUserStore()
 
+const slug = route.params.slug as string
 const timeRemaining = ref('')
 let timer: NodeJS.Timeout
 
@@ -59,16 +62,26 @@ watch(
   },
 )
 
+onBeforeMount(() => {
+  onEvent('user-joined-item-room', (data) => {
+    console.log(data);
+  })
+  onEvent('user-left-item-room', (data) => {
+    console.log(data);
+  })
+})
+
 onMounted(async () => {
-  const slug = route.params.slug as string
   if (slug) {
     await itemStore.fetchItemBySlug(slug)
+    joinItemRoom(slug);
   }
   updateTimeRemaining()
   timer = setInterval(updateTimeRemaining, 1000)
 })
 
 onUnmounted(() => {
+  leaveItemRoom(slug)
   clearInterval(timer)
 })
 

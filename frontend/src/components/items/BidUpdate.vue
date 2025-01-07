@@ -11,28 +11,12 @@ import { onEvent } from '@/services/websocket.js'
 import { joinItemRoom, leaveItemRoom } from '@/services/bidSocketEvents.ts'
 import { useItemStore } from '@/stores/item.ts'
 import { CircleDollarSign, CircleDot, Database } from 'lucide-vue-next'
-import { onBeforeMount, onMounted, onUnmounted } from 'vue'
+import { onBeforeMount, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useBidStore } from '@/stores/bid.ts'
 
 const itemStore = useItemStore()
 const bidStore = useBidStore()
-
-onBeforeMount(() => {
-  onEvent('user-joined-item-room', (data) => {
-    console.log(data);
-  })
-  onEvent('user-left-item-room', (data) => {
-    console.log(data);
-  })
-})
-
-onMounted(() => {
-  joinItemRoom(itemStore.currentItem?.slug)
-})
-
-onUnmounted(() => {
-  leaveItemRoom(itemStore.currentItem?.slug)
-})
+const hasJoined = ref(false)
 
 const steps = [
   {
