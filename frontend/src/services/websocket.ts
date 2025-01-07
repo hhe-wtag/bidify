@@ -4,7 +4,7 @@ import { io, type Socket } from 'socket.io-client'
 let socket: Socket | null = null
 
 export const connectSocket = (token: string) => {
-  if (socket && socket.connected) return 
+  if (socket && socket.connected) return
 
   socket = io('http://localhost:8080', {
     auth: { token: `Bearer ${token}` },
@@ -35,7 +35,7 @@ export const disconnectSocket = () => {
   }
 }
 
-export const emitEvent = (event: string, payload: any) => {
+export const emitEvent = <T = unknown>(event: string, payload: T) => {
   if (socket) {
     socket.emit(event, payload)
   } else {

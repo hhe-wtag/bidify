@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <ScrollArea v-else-if="userStore.profile" class="h-[500px] grid gap-8">
+  <ScrollArea v-else-if="userStore.profile" class="grid gap-8 pr-4 max-h-[500px] overflow-auto">
     <div class="flex flex-col gap-8">
       <ProfileField
         icon="User"
