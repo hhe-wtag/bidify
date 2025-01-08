@@ -11,6 +11,14 @@ class BidRepository extends BaseRepository {
     super(Bid);
   }
 
+  async getLatest10Bids(itemId) {
+    const bids = await Bid.find({ itemId: itemId.toString() })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    return bids;
+  }
+
   async placeBid(bidData) {
     const { itemId, bidderId, incrementBidAmount } = bidData;
 

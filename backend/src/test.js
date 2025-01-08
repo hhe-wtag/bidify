@@ -2,15 +2,15 @@ import { io } from 'socket.io-client';
 
 // Test bid placement
 const bidData = {
-  itemId: '6774d0494189d93277eeb4c7',
-  bidderId: '67639eba3b9a81d69741beab',
+  itemId: '677bc2285f62f8fa4cd2a49c',
+  bidderId: '677df8209aa593f7f000f556',
   incrementBidAmount: 100,
 };
 
 const socket = io('http://localhost:8080', {
   auth: {
     token:
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NWVjZjc4ZDUyOWI2ZTNkNTFjNjAzMyIsImVtYWlsIjoiYWJjZGVAZ21haWwuY29tIiwiaWF0IjoxNzM1NzA4NzA1LCJleHAiOjE3MzU3OTUxMDV9.YI1g1DgsHDj7M8dGXWcZHisYc8Ah5nlFKuAXElNgQJM',
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2RmODIwOWFhNTkzZjdmMDAwZjU1NiIsImVtYWlsIjoibWFyeUBlbWFpbC5jb20iLCJpYXQiOjE3MzYzMTQyOTgsImV4cCI6MTczNjQwMDY5OH0.L2uZA9kLK1DgB2nr0T1cumDpd4hT7DmDvE9MxnGinX4',
   },
   transports: ['websocket'],
 });
