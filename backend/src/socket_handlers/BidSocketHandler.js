@@ -38,7 +38,8 @@ class BidSocketHandler extends BaseSocketHandler {
     }
 
     this.emitToUser(socket.id, 'place-bid-result', {
-      'place-bid-result': result,
+      event: 'place-bid-result',
+      data: { bid: result },
       message: `Attempt of 'place-bid' by userId: ${bidData.bidderId} against itemId: ${bidData.itemId}`,
     });
   };
