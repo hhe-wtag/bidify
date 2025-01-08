@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import BaseRepository from './BaseRepository.js';
 import { Bid } from '../models/bid.model.js';
 import { Item } from '../models/item.model.js';
+import { User } from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
 
@@ -12,11 +13,30 @@ class BidRepository extends BaseRepository {
   }
 
   async getLatest10Bids(itemId) {
+    // Get bids with bidder info
     const bids = await Bid.find({ itemId: itemId.toString() })
       .sort({ createdAt: -1 })
       .limit(10);
 
-    return bids;
+    const bidderIds = [...new Set(bids.map((bid) => bid.bidderId))];
+
+    const users = await User.find({ _id: { $in: bidderIds } })
+      .select('firstName lastName')
+      .lean();
+
+    const userMap = users.reduce((acc, user) => {
+      acc[user._id.toString()] = `${user.firstName} ${user.lastName}`;
+      return acc;
+    }, {});
+
+    const latest10Bids = bids.map((bid) => ({
+      bidderName: userMap[bid.bidderId.toString()],
+      bidAmount: bid.latestBidAmount,
+      timeOfTheBid: bid.createdAt,
+      incrementAmount: bid.incrementBidAmount,
+    }));
+
+    return latest10Bids;
   }
 
   async placeBid(bidData) {
