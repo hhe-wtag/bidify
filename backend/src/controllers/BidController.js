@@ -11,7 +11,7 @@ class BidController extends BaseController {
   }
 
   getLatest10Bids = asyncHandler(async (req, res) => {
-    const { itemId } = req.body;
+    const { itemId } = req.query;
 
     if (!itemId) {
       throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'ItemId is required');
