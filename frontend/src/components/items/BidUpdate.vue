@@ -10,46 +10,63 @@ import {
 import { onEvent } from '@/services/websocket.js'
 import { joinItemRoom, leaveItemRoom } from '@/services/bidSocketEvents.ts'
 import { useItemStore } from '@/stores/item.ts'
-import { CircleDollarSign, CircleDot, Database } from 'lucide-vue-next'
-import { onBeforeMount, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import {
+  ArrowBigUp,
+  ArrowUp,
+  CircleDollarSign,
+  CircleDot,
+  Database,
+  IndentIncrease,
+} from 'lucide-vue-next'
+import { computed, onBeforeMount, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useBidStore } from '@/stores/bid.ts'
 
 const itemStore = useItemStore()
 const bidStore = useBidStore()
 const hasJoined = ref(false)
 
-const steps = [
-  {
-    step: 1,
-    title: '$1,500.00',
-    description: 'Bid placed at 2:30 PM by John Smith',
-  },
-  {
-    step: 2,
-    title: '$1,450.00',
-    description: 'Bid placed at 2:28 PM by Sarah Johnson',
-  },
-  {
-    step: 3,
-    title: '$1,400.00',
-    description: 'Bid placed at 2:25 PM by Michael Brown',
-  },
-  {
-    step: 4,
-    title: '$1,400.00',
-    description: 'Bid placed at 2:25 PM by Michael Brown',
-  },
-  {
-    step: 5,
-    title: '$1,400.00',
-    description: 'Bid placed at 2:25 PM by Michael Brown',
-  },
-  {
-    step: 6,
-    title: '$1,400.00',
-    description: 'Bid placed at 2:25 PM by Michael Brown',
-  },
-]
+const pulsingItem = ref(null)
+
+const placeBidResultHandler = ({ data }) => {
+  if (data.bid.message === 'Bid placed successfully') {
+    bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
+
+    // Apply pulse effect to the latest bid
+    pulsingItem.value = 0
+
+    // Remove the pulse effect after 3 seconds
+    setTimeout(() => {
+      pulsingItem.value = null
+    }, 3000)
+  }
+}
+
+onBeforeMount(() => {
+  onEvent('place-bid-result', placeBidResultHandler)
+})
+
+onMounted(() => {
+  bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
+})
+
+const onBeforeEnter = (el) => {
+  el.style.opacity = 0
+  el.style.transform = 'translateY(-30px)'
+}
+
+const onEnter = (el, done) => {
+  const delay = el.dataset.index * 100
+  setTimeout(() => {
+    el.style.transition = 'all 0.5s ease'
+    el.style.opacity = 1
+    el.style.transform = 'translateY(0)'
+  }, delay)
+}
+
+const latest9Bids = computed(() => {
+  const bids = bidStore.lates10Bids || []
+  return bids.slice(0, bids.length - 1)
+})
 </script>
 
 <template>
@@ -62,51 +79,81 @@ const steps = [
         orientation="vertical"
         class="mx-auto flex w-full scrollbar max-h-[250px] overflow-y-auto max-w-lg p-4 flex-col justify-start gap-6"
       >
-        <StepperItem
-          v-for="(step, index) in steps"
-          :key="step.step"
-          class="relative flex w-full items-start gap-6"
-          :step="step.step"
+        <TransitionGroup
+          name="bid-update"
+          tag="div"
+          class="flex flex-col gap-4"
+          @before-enter="onBeforeEnter"
+          @enter="onEnter"
         >
-          <StepperSeparator
-            v-if="step.step !== steps[steps.length - 1].step"
-            class="absolute left-[18px] top-[38px] block h-[80%] w-0.5 shrink-0 rounded-full bg-muted"
-          />
-
-          <div
-            class="z-10 rounded-full shrink-0 p-1 relative"
-            :class="{ 'latest-bid': index === 0 }"
+          <StepperItem
+            v-for="(step, index) in latest9Bids"
+            :key="step.timeOfTheBid"
+            class="relative flex w-full items-start gap-2"
+            :step="index"
+            :data-index="index"
           >
-            <div
-              v-if="index === 0"
-              class="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_50%,white,#9ca3af)] animate-ping opacity-75"
-            ></div>
-            <div class="relative rounded-full">
-              <CircleDollarSign
-                v-if="index === 0"
-                class="size-8 bg-white rounded-full text-gray-700"
-              />
-              <CircleDot v-else class="size-8 text-gray-500" />
-            </div>
-          </div>
+            <StepperSeparator
+              v-if="index !== latest9Bids.length - 1"
+              class="absolute left-[18px] top-[37px] block h-[78%] w-0.5 shrink-0 rounded-full bg-gray-200 group-data-[state=completed]:bg-gray-200 group-data-[disabled]:bg-gray-200"
+            />
 
-          <div class="flex flex-col gap-1">
-            <StepperTitle class="text-sm font-semibold transition lg:text-base">
-              {{ step.title }}
-            </StepperTitle>
-            <StepperDescription class="text-xs text-muted-foreground transition lg:text-sm">
-              {{ step.description }}
-            </StepperDescription>
-          </div>
-        </StepperItem>
+            <div class="z-10 rounded-full shrink-0 p-1">
+              <div class="relative rounded-full">
+                <CircleDollarSign v-if="index === 0" class="size-8 text-gray-500" />
+                <CircleDot v-else class="size-8 text-gray-500" />
+              </div>
+            </div>
+            <div
+              class="flex flex-col gap-1 p-2 rounded ring-transition"
+              :class="['border border-gray-200', 0 === index && 'ring-pulse']"
+            >
+              <StepperTitle class="text-sm font-semibold transition lg:text-base">
+                $ {{ step.bidAmount }}
+              </StepperTitle>
+              <StepperDescription class="text-xs text-muted-foreground transition lg:text-sm">
+                <span v-if="index < bidStore.lates10Bids.length - 1" class="flex items-center mb-1">
+                  <ArrowUp class="size-3 me-1" />
+                  Price Increased ${{
+                    (step.bidAmount - bidStore.lates10Bids[index + 1]?.bidAmount).toFixed(2)
+                  }}
+                </span>
+                <span class="italic text-sm">
+                  {{ step.bidderName || 'Someone' }}
+                </span>
+                placed this bid at
+                {{ new Date(step.timeOfTheBid).toLocaleTimeString() }}
+              </StepperDescription>
+            </div>
+          </StepperItem>
+        </TransitionGroup>
       </Stepper>
     </CardContent>
   </Card>
 </template>
+
 <style lang="css">
-.scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.bid-update-move {
+  transition: all 0.5s ease;
+}
+
+@keyframes ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(107, 114, 128, 0.2);
+  }
+
+  100% {
+    box-shadow: 0 0 0 18px rgba(107, 114, 128, 0);
+  }
+}
+
+.ring-pulse {
+  animation: ring-pulse 1.5s ease-out 5;
+}
+
+/* Add transition for ring color changes */
+.ring-transition {
+  transition: all 0.3s ease-in-out;
 }
 
 .scrollbar::-webkit-scrollbar-track {

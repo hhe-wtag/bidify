@@ -14,12 +14,14 @@ import TooltipContent from '../ui/tooltip/TooltipContent.vue'
 import Input from '../ui/input/Input.vue'
 import BidUpdate from '@/components/items/BidUpdate.vue'
 import { joinItemRoom, leaveItemRoom } from '@/services/bidSocketEvents.ts'
-import { offEvent, onEvent } from '@/services/websocket.ts'
+import { emitEvent, offEvent, onEvent } from '@/services/websocket.ts'
+import { useBidStore } from '@/stores/bid.ts'
 
 const router = useRouter()
 const route = useRoute()
 const itemStore = useItemStore()
 const userStore = useUserStore()
+const bidStore = useBidStore()
 
 const slug = route.params.slug as string
 const timeRemaining = ref('')
@@ -64,22 +66,21 @@ watch(
 
 // Define handlers outside with named functions
 const handleUserJoined = (data) => {
-  console.log(data)
+  console.log(data.message)
 }
 
 const handleUserLeft = (data) => {
-  console.log(data)
+  console.log(data.message)
 }
 
-// Set up event listeners and cleanup
 onBeforeMount(() => {
   onEvent('user-joined-item-room', handleUserJoined)
   onEvent('user-left-item-room', handleUserLeft)
 })
 
-onMounted(async () => {
+onMounted(() => {
   if (slug) {
-    await itemStore.fetchItemBySlug(slug)
+    itemStore.fetchItemBySlug(slug)
     joinItemRoom(slug)
   }
   updateTimeRemaining()
@@ -87,15 +88,12 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  // Clean up all event listeners
   offEvent('user-joined-item-room', handleUserJoined)
   offEvent('user-left-item-room', handleUserLeft)
-  
-  if (slug) {
-    leaveItemRoom(slug)
-  }
+  leaveItemRoom(slug)
   clearInterval(timer)
 })
+
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString(undefined, {
     year: 'numeric',
@@ -148,6 +146,14 @@ const placeBidDisabledReason = computed(() => {
 
   return ''
 })
+
+const handlePlaceBid = () => {
+  emitEvent('place-bid', {
+    itemId: itemStore.currentItem?._id,
+    bidderId: userStore.profile?._id,
+    incrementBidAmount: 100,
+  })
+}
 </script>
 
 <template>
@@ -272,7 +278,9 @@ const placeBidDisabledReason = computed(() => {
             />
             <Tooltip :delay-duration="0">
               <TooltipTrigger>
-                <Button size="lg" :disabled="isPlaceBidDisabled"> Place Bid </Button>
+                <Button size="lg" :disabled="isPlaceBidDisabled" @click="handlePlaceBid">
+                  Place Bid
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" v-if="isPlaceBidDisabled">
                 {{ placeBidDisabledReason }}
