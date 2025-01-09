@@ -36,7 +36,6 @@ class SocketConnection {
 
       socket.on('get-active-users', () => {
         const sockets = this.io.sockets.sockets;
-        console.log('All sockets:', Array.from(this.io.sockets.sockets));
         const activeUsers = Array.from(sockets).map(([id, socket]) => ({
           id,
           email: socket.user?.email,

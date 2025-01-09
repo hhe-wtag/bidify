@@ -32,7 +32,9 @@ class BidSocketHandler extends BaseSocketHandler {
     const result = await this.bidSocketRepository.placeBid(bidData);
 
     if (result.statusCode === HTTP_STATUS.CREATED) {
-      this.broadcastToRoom(socket, `item-${bidData.itemId}`, 'new-bid', {
+      this.emitToRoom(`item-${bidData.itemId}`, 'new-bid-placed', {
+        event: 'new-bid-placed',
+        data: { bid: result },
         message: `New bid of $${bidData.incrementBidAmount} placed by userId: ${bidData.bidderId}`,
       });
     }
