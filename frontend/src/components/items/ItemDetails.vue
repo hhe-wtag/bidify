@@ -27,6 +27,53 @@ const slug = route.params.slug as string
 const timeRemaining = ref('')
 let timer: NodeJS.Timeout
 
+// Initialize increment amount
+const incrementBidAmount = ref(0)
+
+// Computed values for bidding
+const currentBidAmount = computed(() => {
+  return itemStore.currentItem?.latestBid || itemStore.currentItem?.startingBid || 0
+})
+
+const minimumBidIncrement = computed(() => {
+  return itemStore.currentItem?.minimumBidIncrement || 0
+})
+
+const newLatestBid = computed(() => {
+  if (!itemStore.currentItem) return 0
+  return currentBidAmount.value + incrementBidAmount.value
+})
+
+watch(
+  () => itemStore.currentItem,
+  (newItem) => {
+    if (newItem) {
+      incrementBidAmount.value = newItem.minimumBidIncrement
+    }
+  },
+  { immediate: true },
+)
+
+watch(
+  () => bidStore.lates10Bids,
+  (newBids) => {
+    if (newBids.length > 0) {
+      itemStore.updateBidData(newBids[0])
+      incrementBidAmount.value = minimumBidIncrement.value
+    }
+  },
+)
+
+const handlePlaceBid = () => {
+  if (!itemStore.currentItem || !userStore.profile) return
+
+  emitEvent('place-bid', {
+    itemId: itemStore.currentItem._id,
+    bidderId: userStore.profile._id,
+    incrementBidAmount: incrementBidAmount.value,
+  })
+}
+
 const updateTimeRemaining = () => {
   const endTime = new Date(itemStore.currentItem?.endTime || '').getTime()
   const now = new Date().getTime()
@@ -45,24 +92,6 @@ const updateTimeRemaining = () => {
 
   timeRemaining.value = `${days}d ${hours}h ${minutes}m ${seconds}s`
 }
-
-const minimumBidAmount = computed(() => {
-  const currentItem = itemStore.currentItem
-  if (!currentItem) return 0
-
-  return currentItem.latestBid
-    ? currentItem.latestBid + currentItem.minimumBidIncrement
-    : currentItem.startingBid
-})
-
-const bidAmountToPlace = ref(minimumBidAmount.value)
-
-watch(
-  () => minimumBidAmount.value,
-  (newValue) => {
-    bidAmountToPlace.value = newValue
-  },
-)
 
 onMounted(() => {
   if (slug) {
@@ -128,21 +157,6 @@ const placeBidDisabledReason = computed(() => {
 
   return ''
 })
-
-watch(
-  () => bidStore.lates10Bids,
-  () => {
-    itemStore.updateBidData(bidStore.lates10Bids[0])
-  },
-)
-
-const handlePlaceBid = () => {
-  emitEvent('place-bid', {
-    itemId: itemStore.currentItem?._id,
-    bidderId: userStore.profile?._id,
-    incrementBidAmount: bidAmountToPlace.value - (itemStore.currentItem?.latestBid || 0),
-  })
-}
 </script>
 
 <template>
@@ -261,24 +275,32 @@ const handlePlaceBid = () => {
           </div>
 
           <!-- Place Bid Button -->
-          <div class="flex justify-center">
-            <Input
-              v-model="bidAmountToPlace"
-              type="number"
-              :min="minimumBidAmount"
-              step="1.0"
-              class="w-48 mr-4"
-            />
-            <Tooltip :delay-duration="0">
-              <TooltipTrigger>
-                <Button size="lg" :disabled="isPlaceBidDisabled" @click="handlePlaceBid">
-                  Place Bid
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" v-if="isPlaceBidDisabled">
-                {{ placeBidDisabledReason }}
-              </TooltipContent>
-            </Tooltip>
+          <div class="flex flex-col items-center gap-4 mx-auto pt-4">
+            <h1 class="text-xl">
+              New price for the item will be
+              <span class="font-bold italic">${{ newLatestBid }}</span>
+            </h1>
+
+            <div class="flex justify-center items-center gap-2">
+              <span class="">Raise your bid by $</span>
+              <Input
+                v-model="incrementBidAmount"
+                type="number"
+                :min="itemStore.currentItem.minimumBidIncrement"
+                step="1.0"
+                class="w-20 mr-4"
+              />
+              <Tooltip :delay-duration="0">
+                <TooltipTrigger>
+                  <Button size="lg" :disabled="isPlaceBidDisabled" @click="handlePlaceBid">
+                    Place Bid
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" v-if="isPlaceBidDisabled">
+                  {{ placeBidDisabledReason }}
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         </CardContent>
       </Card>
