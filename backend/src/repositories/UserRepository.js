@@ -1,4 +1,5 @@
 import BaseRepository from './BaseRepository.js';
+import NotificationRepository from './NotificationRepository.js';
 import { User } from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
@@ -22,6 +23,14 @@ class UserRepository extends BaseRepository {
     const token = await user.generateAuthToken();
 
     user.password = undefined;
+
+    const notificationRepo = new NotificationRepository();
+    await notificationRepo.createNotification(
+      user._id,
+      'REGISTRATION',
+      'Welcome to Bidify! Your account has been successfully created.',
+      'New Account'
+    );
     return { user, token };
   }
 
@@ -42,7 +51,12 @@ class UserRepository extends BaseRepository {
     user.password = undefined;
     const token = await user.generateAuthToken();
 
-    return { user, token };
+    const notificationRepo = new NotificationRepository();
+    const unreadNotifications = await notificationRepo.getNotificationsForUser(
+      user._id
+    );
+
+    return { user, token, unreadNotifications };
   }
 
   async updateUserById(id, updateData) {

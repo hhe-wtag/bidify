@@ -4,7 +4,7 @@ import { io, type Socket } from 'socket.io-client'
 let socket: Socket | null = null
 
 export const connectSocket = (token: string) => {
-  if (socket && socket.connected) return 
+  if (socket && socket.connected) return
 
   socket = io('http://localhost:8080', {
     auth: { token: `Bearer ${token}` },
