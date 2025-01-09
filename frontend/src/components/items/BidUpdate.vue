@@ -21,13 +21,9 @@ const pulsingItem = ref(null)
 const handleNewBid = ({ data }) => {
   if (true) {
     bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
-
-    // Apply pulse effect to the latest bid
     pulsingItem.value = 0
-
-    // Remove the pulse effect after 3 seconds
     setTimeout(() => {
-      pulsingItem.value = null
+      pulsingItem.value
     }, 3000)
   }
 }
@@ -57,11 +53,6 @@ const onEnter = (el, done) => {
     el.style.transform = 'translateY(0)'
   }, delay)
 }
-
-const latest9Bids = computed(() => {
-  const bids = bidStore.lates10Bids || []
-  return bids.slice(0, bids.length - 1)
-})
 </script>
 
 <template>
@@ -82,14 +73,14 @@ const latest9Bids = computed(() => {
           @enter="onEnter"
         >
           <StepperItem
-            v-for="(step, index) in latest9Bids"
+            v-for="(step, index) in bidStore.lates10Bids"
             :key="step.timeOfTheBid"
             class="relative flex w-full items-start gap-2"
             :step="index"
             :data-index="index"
           >
             <StepperSeparator
-              v-if="index !== latest9Bids.length - 1"
+              v-if="index !== bidStore.lates10Bids.length - 1"
               class="absolute left-[18px] top-[37px] block h-[78%] w-0.5 shrink-0 rounded-full bg-gray-200 group-data-[state=completed]:bg-gray-200 group-data-[disabled]:bg-gray-200"
             />
 
@@ -107,11 +98,9 @@ const latest9Bids = computed(() => {
                 $ {{ step.bidAmount }}
               </StepperTitle>
               <StepperDescription class="text-xs text-muted-foreground transition lg:text-sm">
-                <span v-if="index < bidStore.lates10Bids.length - 1" class="flex items-center mb-1">
+                <span v-if="index < bidStore.lates10Bids.length" class="flex items-center mb-1">
                   <ArrowUp class="size-3 me-1" />
-                  Price Increased ${{
-                    (step.bidAmount - bidStore.lates10Bids[index + 1]?.bidAmount).toFixed(2)
-                  }}
+                  Price Increased ${{ step.incrementAmount.toFixed(2) }}
                 </span>
                 <span class="italic text-sm">
                   {{ step.bidderName || 'Someone' }}
