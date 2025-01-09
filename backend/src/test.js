@@ -10,7 +10,7 @@ const bidData = {
 const socket = io('http://localhost:8080', {
   auth: {
     token:
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2RmODIwOWFhNTkzZjdmMDAwZjU1NiIsImVtYWlsIjoibWFyeUBlbWFpbC5jb20iLCJpYXQiOjE3MzYzMTQyOTgsImV4cCI6MTczNjQwMDY5OH0.L2uZA9kLK1DgB2nr0T1cumDpd4hT7DmDvE9MxnGinX4',
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2RmODIwOWFhNTkzZjdmMDAwZjU1NiIsImVtYWlsIjoibWFyeUBlbWFpbC5jb20iLCJpYXQiOjE3MzYzOTgwNjAsImV4cCI6MTczNjQ4NDQ2MH0.e7yXEU1YkQZV63nugfLDu8FsIHeCl5nQzV8KPpj5fqo',
   },
   transports: ['websocket'],
 });
@@ -20,11 +20,11 @@ socket.on('connect', () => {
   socket.emit('join-item-room', itemId);
 });
 
-socket.on('user-joined', (data) => {
+socket.on('user-joined-item-room', (data) => {
   console.info(data);
 });
 
-socket.on('user-left', (data) => {
+socket.on('user-left-item-room', (data) => {
   console.info(data);
 });
 
