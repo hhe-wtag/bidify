@@ -4,161 +4,166 @@
     <p class="text-sm text-muted-foreground">Update your account details</p>
   </div>
   <Separator class="mt-8 mb-8" />
+
   <form class="space-y-8" @submit.prevent="handleSubmit">
-    <FormField name="firstName">
-      <FormItem>
-        <FormLabel>First Name</FormLabel>
-        <FormControl>
-          <Input
-            v-model="profile.firstName"
-            type="text"
-            id="firstName"
-            class="input"
-            placeholder="Enter first name"
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+    <ScrollArea class="h-[500px] grid gap-8">
+      <div class="flex flex-col gap-8 pr-4 pl-1 pb-1">
+        <FormField name="firstName">
+          <FormItem>
+            <FormLabel>First Name</FormLabel>
+            <FormControl>
+              <Input
+                v-model="profile.firstName"
+                type="text"
+                id="firstName"
+                class="input"
+                placeholder="Enter first name"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-    <FormField name="lastName">
-      <FormItem>
-        <FormLabel>Last Name</FormLabel>
-        <FormControl>
-          <Input
-            v-model="profile.lastName"
-            type="text"
-            id="lastName"
-            class="input"
-            placeholder="Enter last name"
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+        <FormField name="lastName">
+          <FormItem>
+            <FormLabel>Last Name</FormLabel>
+            <FormControl>
+              <Input
+                v-model="profile.lastName"
+                type="text"
+                id="lastName"
+                class="input"
+                placeholder="Enter last name"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-    <FormField name="contactNumber">
-      <FormItem>
-        <FormLabel>Contact Number</FormLabel>
-        <FormControl>
-          <Input
-            v-model="profile.contactNumber"
-            type="text"
-            id="contactNumber"
-            class="input"
-            placeholder="Enter contact number"
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+        <FormField name="contactNumber">
+          <FormItem>
+            <FormLabel>Contact Number</FormLabel>
+            <FormControl>
+              <Input
+                v-model="profile.contactNumber"
+                type="text"
+                id="contactNumber"
+                class="input"
+                placeholder="Enter contact number"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-    <FormField name="balance">
-      <FormItem>
-        <FormLabel>Balance</FormLabel>
-        <FormControl>
-          <Input
-            v-model="profile.balance"
-            type="number"
-            id="balance"
-            class="input"
-            placeholder="Enter balance"
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+        <FormField name="balance">
+          <FormItem>
+            <FormLabel>Balance</FormLabel>
+            <FormControl>
+              <Input
+                v-model="profile.balance"
+                type="number"
+                id="balance"
+                class="input"
+                placeholder="Enter balance"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-    <FormField name="address">
-      <FormItem>
-        <FormLabel>Address</FormLabel>
-        <FormDescription
-          >Please enter your full address including street, city, state, zip code, and
-          country.</FormDescription
-        ></FormItem
-      >
-    </FormField>
+        <FormField name="address">
+          <FormItem>
+            <FormLabel>Address</FormLabel>
+            <FormDescription
+              >Please enter your full address including street, city, state, zip code, and
+              country.</FormDescription
+            ></FormItem
+          >
+        </FormField>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <FormField name="street">
-        <FormItem>
-          <FormLabel>Street</FormLabel>
-          <FormControl>
-            <Input
-              v-model="profile.address.street"
-              type="text"
-              id="street"
-              class="input"
-              placeholder="Enter street"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField name="street">
+            <FormItem>
+              <FormLabel>Street</FormLabel>
+              <FormControl>
+                <Input
+                  v-model="profile.address.street"
+                  type="text"
+                  id="street"
+                  class="input"
+                  placeholder="Enter street"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-      <FormField name="city">
-        <FormItem>
-          <FormLabel>City</FormLabel>
-          <FormControl>
-            <Input
-              v-model="profile.address.city"
-              type="text"
-              id="city"
-              class="input"
-              placeholder="Enter city"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
+          <FormField name="city">
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <FormControl>
+                <Input
+                  v-model="profile.address.city"
+                  type="text"
+                  id="city"
+                  class="input"
+                  placeholder="Enter city"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-      <FormField name="state">
-        <FormItem>
-          <FormLabel>State</FormLabel>
-          <FormControl>
-            <Input
-              v-model="profile.address.state"
-              type="text"
-              id="state"
-              class="input"
-              placeholder="Enter state"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
+          <FormField name="state">
+            <FormItem>
+              <FormLabel>State</FormLabel>
+              <FormControl>
+                <Input
+                  v-model="profile.address.state"
+                  type="text"
+                  id="state"
+                  class="input"
+                  placeholder="Enter state"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-      <FormField name="zipCode">
-        <FormItem>
-          <FormLabel>Zip Code</FormLabel>
-          <FormControl>
-            <Input
-              v-model="profile.address.zipCode"
-              type="text"
-              id="zipCode"
-              class="input"
-              placeholder="Enter Zip Code"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-    </div>
-    <FormField name="country">
-      <FormItem>
-        <FormLabel>Country</FormLabel>
-        <FormControl>
-          <Input
-            v-model="profile.address.country"
-            type="text"
-            id="country"
-            class="input"
-            placeholder="Enter Country"
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+          <FormField name="zipCode">
+            <FormItem>
+              <FormLabel>Zip Code</FormLabel>
+              <FormControl>
+                <Input
+                  v-model="profile.address.zipCode"
+                  type="text"
+                  id="zipCode"
+                  class="input"
+                  placeholder="Enter Zip Code"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </div>
+        <FormField name="country">
+          <FormItem>
+            <FormLabel>Country</FormLabel>
+            <FormControl>
+              <Input
+                v-model="profile.address.country"
+                type="text"
+                id="country"
+                class="input"
+                placeholder="Enter Country"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+    </ScrollArea>
 
     <div class="flex gap-2 justify-start">
       <Button type="submit"> Update profile </Button>
@@ -185,6 +190,7 @@ import { Input } from '@/components/ui/input'
 import { useUserStore } from '@/stores/user'
 import { reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const userStore = useUserStore()
 const router = useRouter()
