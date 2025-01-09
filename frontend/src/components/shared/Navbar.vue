@@ -14,12 +14,14 @@ import { computed, onMounted, ref } from 'vue'
 import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { connectSocket } from '@/services/websocket.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 onMounted(() => {
   if (userStore.isAuthenticated) {
+    if (userStore.token) connectSocket(userStore.token)
     userStore.fetchUserProfile()
   }
 })
@@ -114,7 +116,7 @@ const formatDate = (dateString: string) => {
       <!-- Brand -->
       <div class="flex cursor-pointer">
         <h2 class="text-2xl font-bold">
-          <router-link to="/">Bidify</router-link>
+          <router-link to="/items">Bidify</router-link>
         </h2>
       </div>
 

@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import type { Item, CreateItemData, UpdateItemData, ItemStoreState } from '@/interfaces/item'
 import axiosInstance from '@/plugins/axios'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useBidStore } from './bid'
+import { late } from 'zod'
+import { joinItemRoom, leaveItemRoom } from '@/services/bidSocketEvents'
 
 // API endpoints
 const API_PATHS = {
@@ -76,6 +79,8 @@ export const useItemStore = defineStore('item', {
           this.items[index] = item
         }
 
+        joinItemRoom(item._id)
+
         return item
       }, 'Failed to fetch item')
     },
@@ -114,13 +119,19 @@ export const useItemStore = defineStore('item', {
         this.items = this.items.filter((item) => item._id !== id)
 
         if (this.currentItem?._id === id) {
-          this.currentItem = null
+          this.clearCurrentItem()
         }
       }, 'Failed to delete item')
     },
 
+    updateBidData(latestBid) {
+      if (this.currentItem)
+        this.currentItem = { ...this.currentItem, latestBid: latestBid?.bidAmount }
+    },
+
     // Utility actions
     clearCurrentItem() {
+      leaveItemRoom(this.currentItem?._id)
       this.currentItem = null
     },
 

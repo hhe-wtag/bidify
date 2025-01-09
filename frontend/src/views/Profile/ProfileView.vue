@@ -8,38 +8,50 @@
 
   <div v-if="loading" class="flex justify-center items-center flex-col">
     <p>Loading profile...</p>
-    <div class="spinner mt-4"></div>
+    <div class="flex flex-col space-y-3">
+      <Skeleton class="h-[125px] w-[250px] rounded-xl" />
+      <div class="space-y-2">
+        <Skeleton class="h-4 w-[250px]" />
+        <Skeleton class="h-4 w-[200px]" />
+      </div>
+    </div>
   </div>
 
-  <div v-else-if="userStore.profile" class="space-y-8">
-    <ProfileField
-      icon="User"
-      label="Full Name"
-      :value="`${userStore.profile.firstName || ''} ${userStore.profile.lastName || ''}`"
-    />
+  <ScrollArea v-else-if="userStore.profile" class="grid gap-8 pr-4 max-h-[500px] overflow-auto">
+    <div class="flex flex-col gap-8">
+      <ProfileField
+        icon="User"
+        label="Full Name"
+        :value="`${userStore.profile.firstName || ''} ${userStore.profile.lastName || ''}`"
+      />
 
-    <ProfileField icon="Mail" label="Email" :value="userStore.profile.email || 'N/A'" />
+      <ProfileField icon="Mail" label="Email" :value="userStore.profile.email || 'N/A'" />
 
-    <ProfileField
-      icon="Phone"
-      label="Contact Number"
-      :value="userStore.profile.contactNumber || ''"
-    />
+      <ProfileField
+        icon="Phone"
+        label="Contact Number"
+        :value="userStore.profile.contactNumber || ''"
+      />
 
-    <ProfileField
-      icon="DollarSign"
-      label="Balance"
-      :value="userStore.profile.balance?.toString() ?? '0'"
-    />
+      <ProfileField
+        icon="DollarSign"
+        label="Balance"
+        :value="userStore.profile.balance?.toString() ?? '0'"
+      />
 
-    <ProfileField
-      icon="Calendar"
-      label="Registration Date"
-      :value="new Date(userStore.profile.registrationDate).toLocaleString()"
-    />
+      <ProfileField
+        icon="Calendar"
+        label="Registration Date"
+        :value="new Date(userStore.profile.registrationDate).toLocaleString()"
+      />
 
-    <ProfileField icon="MapPin" label="Address" :value="formatAddress(userStore.profile.address)" />
-  </div>
+      <ProfileField
+        icon="MapPin"
+        label="Address"
+        :value="formatAddress(userStore.profile.address)"
+      />
+    </div>
+  </ScrollArea>
 </template>
 
 <script setup lang="ts">
@@ -48,6 +60,8 @@ import { ref, onMounted } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { Separator } from '@/components/ui/separator'
 import ProfileField from '@/components/shared/ProfileField.vue'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const { handleError } = useErrorHandler()
 const userStore = useUserStore()
