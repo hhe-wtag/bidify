@@ -126,7 +126,6 @@ export const useUserStore = defineStore('user', {
 
         if (response.status === 200) {
           this.setUserProfile(response.data.data)
-          console.log('Profile updated successfully:', response.data.message)
           return { success: true, message: 'Profile updated successfully' }
         } else {
           console.error('Failed to update profile:', response.data.message)

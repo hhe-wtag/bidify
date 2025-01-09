@@ -13,6 +13,17 @@ export interface Item {
   updatedAt?: string
 }
 
+export interface Bid {
+  _id: string
+  itemId: string
+  bidderId: string
+  incrementBidAmount: number
+  lastBidAmount: number
+  lastestBidAmount: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface CreateItemData {
   title: string
   description: string
@@ -32,6 +43,7 @@ export interface UpdateItemData {
 export interface ItemStoreState {
   items: Item[]
   currentItem: Item | null
+  currentItemLatest10Bids: Bid[]
   loading: boolean
   error: string | null
 }

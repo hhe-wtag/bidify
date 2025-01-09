@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /// <reference types="node" />
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onBeforeMount, onMounted, onUnmounted, ref, Transition, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { Button } from '@/components/ui/button'
@@ -12,12 +12,18 @@ import Tooltip from '../ui/tooltip/Tooltip.vue'
 import TooltipTrigger from '../ui/tooltip/TooltipTrigger.vue'
 import TooltipContent from '../ui/tooltip/TooltipContent.vue'
 import Input from '../ui/input/Input.vue'
+import BidUpdate from '@/components/items/BidUpdate.vue'
+import { leaveItemRoom } from '@/services/bidSocketEvents.ts'
+import { emitEvent, offEvent, onEvent } from '@/services/websocket.ts'
+import { useBidStore } from '@/stores/bid.ts'
 
 const router = useRouter()
 const route = useRoute()
 const itemStore = useItemStore()
 const userStore = useUserStore()
+const bidStore = useBidStore()
 
+const slug = route.params.slug as string
 const timeRemaining = ref('')
 let timer: NodeJS.Timeout
 
@@ -58,10 +64,9 @@ watch(
   },
 )
 
-onMounted(async () => {
-  const slug = route.params.slug as string
+onMounted(() => {
   if (slug) {
-    await itemStore.fetchItemBySlug(slug)
+    itemStore.fetchItemBySlug(slug)
   }
   updateTimeRemaining()
   timer = setInterval(updateTimeRemaining, 1000)
@@ -123,6 +128,21 @@ const placeBidDisabledReason = computed(() => {
 
   return ''
 })
+
+watch(
+  () => bidStore.lates10Bids,
+  () => {
+    itemStore.updateBidData(bidStore.lates10Bids[0])
+  },
+)
+
+const handlePlaceBid = () => {
+  emitEvent('place-bid', {
+    itemId: itemStore.currentItem?._id,
+    bidderId: userStore.profile?._id,
+    incrementBidAmount: bidAmountToPlace.value - (itemStore.currentItem?.latestBid || 0),
+  })
+}
 </script>
 
 <template>
@@ -170,19 +190,23 @@ const placeBidDisabledReason = computed(() => {
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-muted-foreground">Latest Bid</span>
-                  <span
-                    :class="{
-                      'font-medium': itemStore.currentItem.latestBid,
-                      'text-muted-foreground text-sm': !itemStore.currentItem.latestBid,
-                    }"
-                  >
-                    {{
-                      itemStore.currentItem.latestBid
-                        ? `$${itemStore.currentItem.latestBid.toFixed(2)}`
-                        : 'No bids placed yet'
-                    }}
-                  </span>
+                  <Transition name="fade" mode="out-in">
+                    <span
+                      :key="itemStore.currentItem.latestBid"
+                      :class="{
+                        'font-medium': itemStore.currentItem.latestBid,
+                        'text-muted-foreground text-sm': !itemStore.currentItem.latestBid,
+                      }"
+                    >
+                      {{
+                        itemStore.currentItem.latestBid
+                          ? `$${itemStore.currentItem.latestBid.toFixed(2)}`
+                          : 'No bids placed yet'
+                      }}
+                    </span>
+                  </Transition>
                 </div>
+
                 <div class="flex justify-between items-center">
                   <span class="text-muted-foreground">Minimum Raise</span>
                   <span class="font-medium">
@@ -241,13 +265,15 @@ const placeBidDisabledReason = computed(() => {
             <Input
               v-model="bidAmountToPlace"
               type="number"
-              min="itemStore.currentItem.minimumBidIncrement"
+              :min="minimumBidAmount"
               step="1.0"
               class="w-48 mr-4"
             />
             <Tooltip :delay-duration="0">
               <TooltipTrigger>
-                <Button size="lg" :disabled="isPlaceBidDisabled"> Place Bid </Button>
+                <Button size="lg" :disabled="isPlaceBidDisabled" @click="handlePlaceBid">
+                  Place Bid
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" v-if="isPlaceBidDisabled">
                 {{ placeBidDisabledReason }}
@@ -256,6 +282,7 @@ const placeBidDisabledReason = computed(() => {
           </div>
         </CardContent>
       </Card>
+      <BidUpdate />
     </div>
 
     <!-- Not Found State -->
@@ -264,3 +291,13 @@ const placeBidDisabledReason = computed(() => {
     </Alert>
   </div>
 </template>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
