@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import type { Item, CreateItemData, UpdateItemData, ItemStoreState } from '@/interfaces/item'
 import axiosInstance from '@/plugins/axios'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useBidStore } from './bid'
+import { late } from 'zod'
 
 // API endpoints
 const API_PATHS = {
@@ -117,6 +119,11 @@ export const useItemStore = defineStore('item', {
           this.currentItem = null
         }
       }, 'Failed to delete item')
+    },
+
+    updateBidData(latestBid) {
+      if (this.currentItem)
+        this.currentItem = { ...this.currentItem, latestBid: latestBid.bidAmount }
     },
 
     // Utility actions

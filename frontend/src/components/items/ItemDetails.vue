@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /// <reference types="node" />
-import { computed, onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onBeforeMount, onMounted, onUnmounted, ref, Transition, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { Button } from '@/components/ui/button'
@@ -147,11 +147,18 @@ const placeBidDisabledReason = computed(() => {
   return ''
 })
 
+watch(
+  () => bidStore.lates10Bids,
+  () => {
+    itemStore.updateBidData(bidStore.lates10Bids[0])
+  },
+)
+
 const handlePlaceBid = () => {
   emitEvent('place-bid', {
     itemId: itemStore.currentItem?._id,
     bidderId: userStore.profile?._id,
-    incrementBidAmount: 100,
+    incrementBidAmount: bidAmountToPlace.value - (itemStore.currentItem?.latestBid || 0),
   })
 }
 </script>
@@ -201,19 +208,23 @@ const handlePlaceBid = () => {
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-muted-foreground">Latest Bid</span>
-                  <span
-                    :class="{
-                      'font-medium': itemStore.currentItem.latestBid,
-                      'text-muted-foreground text-sm': !itemStore.currentItem.latestBid,
-                    }"
-                  >
-                    {{
-                      itemStore.currentItem.latestBid
-                        ? `$${itemStore.currentItem.latestBid.toFixed(2)}`
-                        : 'No bids placed yet'
-                    }}
-                  </span>
+                  <Transition name="fade" mode="out-in">
+                    <span
+                      :key="itemStore.currentItem.latestBid"
+                      :class="{
+                        'font-medium': itemStore.currentItem.latestBid,
+                        'text-muted-foreground text-sm': !itemStore.currentItem.latestBid,
+                      }"
+                    >
+                      {{
+                        itemStore.currentItem.latestBid
+                          ? `$${itemStore.currentItem.latestBid.toFixed(2)}`
+                          : 'No bids placed yet'
+                      }}
+                    </span>
+                  </Transition>
                 </div>
+
                 <div class="flex justify-between items-center">
                   <span class="text-muted-foreground">Minimum Raise</span>
                   <span class="font-medium">
@@ -272,7 +283,7 @@ const handlePlaceBid = () => {
             <Input
               v-model="bidAmountToPlace"
               type="number"
-              min="itemStore.currentItem.minimumBidIncrement"
+              :min="minimumBidAmount"
               step="1.0"
               class="w-48 mr-4"
             />
@@ -298,3 +309,13 @@ const handlePlaceBid = () => {
     </Alert>
   </div>
 </template>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
