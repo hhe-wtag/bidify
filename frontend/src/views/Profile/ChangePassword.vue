@@ -10,6 +10,7 @@ import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -33,8 +34,8 @@ const { handleSubmit, resetForm } = useForm({
 })
 
 const redirectToProfile = () => {
-  resetForm() 
-  router.push({ name: 'profile' }) 
+  resetForm()
+  router.push({ name: 'profile' })
 }
 
 const onSubmit = handleSubmit(async (data) => {
@@ -57,7 +58,7 @@ const onSubmit = handleSubmit(async (data) => {
       description: result.message,
       variant: 'default',
     })
-    resetForm() 
+    resetForm()
   } else {
     toast({
       title: 'Password Update Failed',
@@ -76,40 +77,52 @@ const onSubmit = handleSubmit(async (data) => {
     </p>
   </div>
   <Separator class="mt-8 mb-8" />
-  <form @submit.prevent="onSubmit" class="space-y-4">
-    <FormField name="currentPassword" v-slot="{ componentField }">
-      <FormItem>
-        <FormLabel>Current Password<span class="text-red-500 ml-1">*</span></FormLabel>
-        <FormControl>
-          <Input
-            type="password"
-            placeholder="Enter your current password"
-            v-bind="componentField"
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+  <form @submit.prevent="onSubmit" class="space-y-8">
+    <ScrollArea class="grid gap-8 max-h-[500px] overflow-auto">
+      <div class="flex flex-col gap-8 pr-4 pl-1 pb-1">
+        <FormField name="currentPassword" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>Current Password<span class="text-red-500 ml-1">*</span></FormLabel>
+            <FormControl>
+              <Input
+                type="password"
+                placeholder="Enter your current password"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-    <FormField name="newPassword" v-slot="{ componentField }">
-      <FormItem>
-        <FormLabel>New Password<span class="text-red-500 ml-1">*</span></FormLabel>
-        <FormControl>
-          <Input type="password" placeholder="Enter your new password" v-bind="componentField" />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+        <FormField name="newPassword" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>New Password<span class="text-red-500 ml-1">*</span></FormLabel>
+            <FormControl>
+              <Input
+                type="password"
+                placeholder="Enter your new password"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-    <FormField name="confirmPassword" v-slot="{ componentField }">
-      <FormItem>
-        <FormLabel>Confirm Password<span class="text-red-500 ml-1">*</span></FormLabel>
-        <FormControl>
-          <Input type="password" placeholder="Confirm your new password" v-bind="componentField" />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
+        <FormField name="confirmPassword" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>Confirm Password<span class="text-red-500 ml-1">*</span></FormLabel>
+            <FormControl>
+              <Input
+                type="password"
+                placeholder="Confirm your new password"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+    </ScrollArea>
     <div class="flex gap-2 justify-start">
       <Button type="onSubmit"> Change Password </Button>
 

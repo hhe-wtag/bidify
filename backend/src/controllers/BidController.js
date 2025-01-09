@@ -10,6 +10,26 @@ class BidController extends BaseController {
     super(new BidRepository());
   }
 
+  getLatest10Bids = asyncHandler(async (req, res) => {
+    const { itemId } = req.query;
+
+    if (!itemId) {
+      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'ItemId is required');
+    }
+
+    const result = await this.repository.getLatest10Bids(itemId);
+
+    res
+      .status(HTTP_STATUS.OK)
+      .json(
+        new ApiResponse(
+          HTTP_STATUS.OK,
+          result,
+          'Latest 10 Bids fetched successfully'
+        )
+      );
+  });
+
   placeBid = asyncHandler(async (req, res) => {
     const bidData = req.body;
 
