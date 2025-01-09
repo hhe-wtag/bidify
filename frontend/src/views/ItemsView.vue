@@ -82,7 +82,7 @@ const handleFormSubmit = async (formData: CreateItemData | UpdateItemData): Prom
   const response = selectedItem.value
     ? await itemStore.updateItem(selectedItem.value._id, formData as UpdateItemData)
     : await itemStore.createItem(formData as CreateItemData)
-  console.log(response)
+
   if (response.success) {
     closeForm()
   } else {

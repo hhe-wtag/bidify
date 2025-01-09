@@ -19,7 +19,6 @@ const bidStore = useBidStore()
 const pulsingItem = ref(null)
 
 const handleNewBid = ({ data }) => {
-  console.log(data)
   if (true) {
     bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
 

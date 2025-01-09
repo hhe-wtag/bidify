@@ -64,14 +64,9 @@ watch(
   },
 )
 
-// Define handlers outside with named functions
-const handleUserJoined = (data) => {
-  console.log(data.message)
-}
+const handleUserJoined = (data) => {}
 
-const handleUserLeft = (data) => {
-  console.log(data.message)
-}
+const handleUserLeft = (data) => {}
 
 onBeforeMount(() => {
   onEvent('user-joined-item-room', handleUserJoined)
