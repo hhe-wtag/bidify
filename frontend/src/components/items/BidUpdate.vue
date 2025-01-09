@@ -7,28 +7,20 @@ import {
   StepperSeparator,
   StepperTitle,
 } from '@/components/ui/stepper'
-import { onEvent } from '@/services/websocket.js'
-import { joinItemRoom, leaveItemRoom } from '@/services/bidSocketEvents.ts'
+import { onNewBid } from '@/services/bidSocketEvents.ts'
 import { useItemStore } from '@/stores/item.ts'
-import {
-  ArrowBigUp,
-  ArrowUp,
-  CircleDollarSign,
-  CircleDot,
-  Database,
-  IndentIncrease,
-} from 'lucide-vue-next'
+import { ArrowUp, CircleDollarSign, CircleDot } from 'lucide-vue-next'
 import { computed, onBeforeMount, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useBidStore } from '@/stores/bid.ts'
 
 const itemStore = useItemStore()
 const bidStore = useBidStore()
-const hasJoined = ref(false)
 
 const pulsingItem = ref(null)
 
-const placeBidResultHandler = ({ data }) => {
-  if (data.bid.message === 'Bid placed successfully') {
+const handleNewBid = ({ data }) => {
+  console.log(data)
+  if (true) {
     bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
 
     // Apply pulse effect to the latest bid
@@ -42,11 +34,15 @@ const placeBidResultHandler = ({ data }) => {
 }
 
 onBeforeMount(() => {
-  onEvent('place-bid-result', placeBidResultHandler)
+  onNewBid(handleNewBid)
 })
 
 onMounted(() => {
   bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
+})
+
+onUnmounted(() => {
+  itemStore.clearCurrentItem()
 })
 
 const onBeforeEnter = (el) => {

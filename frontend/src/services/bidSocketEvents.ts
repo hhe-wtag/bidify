@@ -22,7 +22,7 @@ export const placeBid = (bidData: BidData) => {
 
 // Event Listeners
 export const onNewBid = (callback: (data: any) => void) => {
-  onEvent('new-bid', callback)
+  onEvent('new-bid-placed', callback)
 }
 
 export const onBidSuccess = (callback: (data: any) => void) => {

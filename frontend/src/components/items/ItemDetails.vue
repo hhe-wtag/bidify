@@ -13,7 +13,7 @@ import TooltipTrigger from '../ui/tooltip/TooltipTrigger.vue'
 import TooltipContent from '../ui/tooltip/TooltipContent.vue'
 import Input from '../ui/input/Input.vue'
 import BidUpdate from '@/components/items/BidUpdate.vue'
-import { joinItemRoom, leaveItemRoom } from '@/services/bidSocketEvents.ts'
+import { leaveItemRoom } from '@/services/bidSocketEvents.ts'
 import { emitEvent, offEvent, onEvent } from '@/services/websocket.ts'
 import { useBidStore } from '@/stores/bid.ts'
 
@@ -81,7 +81,6 @@ onBeforeMount(() => {
 onMounted(() => {
   if (slug) {
     itemStore.fetchItemBySlug(slug)
-    joinItemRoom(slug)
   }
   updateTimeRemaining()
   timer = setInterval(updateTimeRemaining, 1000)
@@ -90,7 +89,6 @@ onMounted(() => {
 onUnmounted(() => {
   offEvent('user-joined-item-room', handleUserJoined)
   offEvent('user-left-item-room', handleUserLeft)
-  leaveItemRoom(slug)
   clearInterval(timer)
 })
 
