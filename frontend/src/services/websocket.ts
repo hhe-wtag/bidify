@@ -31,9 +31,9 @@ export const connectSocket = (token: string) => {
 
 const cleanupAllListeners = () => {
   if (!socket) return
-  
+
   activeListeners.forEach((callbacks, event) => {
-    callbacks.forEach(callback => {
+    callbacks.forEach((callback) => {
       socket?.off(event, callback)
     })
   })
@@ -67,9 +67,9 @@ export const onEvent = (event: string, callback: (...args: any[]) => void) => {
     activeListeners.set(event, [])
   }
   const callbacks = activeListeners.get(event)
-  
+
   // Remove existing instance of this callback if it exists
-  const existingIndex = callbacks?.findIndex(cb => cb.toString() === callback.toString())
+  const existingIndex = callbacks?.findIndex((cb) => cb.toString() === callback.toString())
   if (existingIndex !== undefined && existingIndex !== -1) {
     socket.off(event, callbacks[existingIndex])
     callbacks.splice(existingIndex, 1)
@@ -91,7 +91,7 @@ export const offEvent = (event: string, callback?: (...args: any[]) => void) => 
     socket.off(event, callback)
     const callbacks = activeListeners.get(event)
     if (callbacks) {
-      const index = callbacks.findIndex(cb => cb.toString() === callback.toString())
+      const index = callbacks.findIndex((cb) => cb.toString() === callback.toString())
       if (index !== -1) {
         callbacks.splice(index, 1)
       }

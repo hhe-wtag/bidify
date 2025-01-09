@@ -37,7 +37,7 @@ onBeforeMount(() => {
 })
 
 onMounted(() => {
-  bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
+  if (itemStore.currentItem?._id) bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
 })
 
 onUnmounted(() => {

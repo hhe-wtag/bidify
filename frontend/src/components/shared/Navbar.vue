@@ -21,7 +21,6 @@ onMounted(() => {
   if (userStore.isAuthenticated) {
     if (userStore.token) connectSocket(userStore.token)
     userStore.fetchUserProfile()
-    connectSocket()
   }
 })
 
@@ -46,7 +45,6 @@ const handleLogout = async () => {
       <!-- Brand -->
       <div class="flex cursor-pointer">
         <h2 class="text-2xl font-bold">
-          <router-link to="/">Bidify</router-link>
           <router-link to="/items">Bidify</router-link>
         </h2>
       </div>

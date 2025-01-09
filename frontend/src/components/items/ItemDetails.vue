@@ -64,15 +64,6 @@ watch(
   },
 )
 
-const handleUserJoined = (data) => {}
-
-const handleUserLeft = (data) => {}
-
-onBeforeMount(() => {
-  onEvent('user-joined-item-room', handleUserJoined)
-  onEvent('user-left-item-room', handleUserLeft)
-})
-
 onMounted(() => {
   if (slug) {
     itemStore.fetchItemBySlug(slug)
@@ -82,8 +73,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  offEvent('user-joined-item-room', handleUserJoined)
-  offEvent('user-left-item-room', handleUserLeft)
   clearInterval(timer)
 })
 
