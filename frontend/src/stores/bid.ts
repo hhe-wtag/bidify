@@ -1,7 +1,7 @@
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { defineStore } from 'pinia'
 import axiosInstance from '@/plugins/axios'
-import { useItemStore } from './item'
+import type { BidHistory } from '@/interfaces/Bid'
 
 const API_PATHS = {
   LATEST_10: (itemId: string | null) => `/bid/latest-10-bids?itemId=${itemId}`,
@@ -9,7 +9,7 @@ const API_PATHS = {
 
 export const useBidStore = defineStore('bid', {
   state: () => ({
-    lates10Bids: [],
+    lates10Bids: [] as BidHistory[],
     loading: false,
     error: null as string | null,
   }),
