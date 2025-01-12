@@ -6,7 +6,7 @@ import HTTP_STATUS from '../utils/httpStatus.js';
 
 class NotificationRepository extends BaseRepository {
   constructor() {
-    super(User);
+    super(Notification);
   }
 
   async createNotification(userId, type, message, preview) {
@@ -29,7 +29,8 @@ class NotificationRepository extends BaseRepository {
   async getNotificationsForUser(userId) {
     const notifications = await this.model
       .find({ userId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .select('-userId');
     return notifications;
   }
 

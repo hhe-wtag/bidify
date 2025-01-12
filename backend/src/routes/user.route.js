@@ -1,5 +1,6 @@
 import express from 'express';
 
+import NotificationController from '../controllers/NotificationController.js';
 import UserController from '../controllers/UserController.js';
 import { isAuthenticated } from '../middleware/auth.js';
 
@@ -11,6 +12,11 @@ router.put(
   '/profile/password-change',
   isAuthenticated,
   UserController.changePassword
+);
+router.get(
+  '/notification',
+  isAuthenticated,
+  NotificationController.getNotifications
 );
 
 export const UserRoutes = router;

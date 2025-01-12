@@ -1,6 +1,7 @@
 import express from 'express';
 
 import BidController from '../controllers/BidController.js';
+import NotificationController from '../controllers/NotificationController.js';
 import { isAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();

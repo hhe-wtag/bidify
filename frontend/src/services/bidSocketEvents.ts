@@ -6,7 +6,6 @@ interface BidData {
   incrementBidAmount: number
 }
 
-// Join/Leave Room
 export const joinItemRoom = (itemId: string) => {
   emitEvent('join-item-room', itemId)
 }
@@ -15,12 +14,10 @@ export const leaveItemRoom = (itemId: string) => {
   emitEvent('leave-item-room', itemId)
 }
 
-// Bid Actions
 export const placeBid = (bidData: BidData) => {
   emitEvent('place-bid', bidData)
 }
 
-// Event Listeners
 export const onNewBid = (callback: (data: any) => void) => {
   onEvent('new-bid-placed', callback)
 }
@@ -33,6 +30,3 @@ export const onBidError = (callback: (error: any) => void) => {
   onEvent('bid-error', callback)
 }
 
-// export const onUserJoined = (callback: (error: any) => void) => {
-//   onEvent('user-joined', callback)
-// }
