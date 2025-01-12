@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 
 import BidSocketHandler from './BidSocketHandler.js';
 import { User } from '../models/user.model.js';
+import { EVENTS, NAMESPACES } from '../utils/socketConstants.js';
 
 class SocketConnection {
   constructor(io) {
@@ -20,7 +21,7 @@ class SocketConnection {
         process.env.NODE_ENV === 'production' ? 'production' : 'development',
       serverId: 'bidify-server',
     });
-    const adminNamespace = this.io.of('/admin');
+    const adminNamespace = this.io.of(NAMESPACES.ADMIN);
 
     adminNamespace.use(async (socket, next) => {
       const isAdmin = true;
@@ -31,17 +32,17 @@ class SocketConnection {
       next();
     });
 
-    adminNamespace.on('connection', (socket) => {
+    adminNamespace.on(EVENTS.CONNECTION, (socket) => {
       console.info('Admin connected:', socket.id);
 
-      socket.on('get-active-users', () => {
+      socket.on(EVENTS.GET_ACTIVE_USERS, () => {
         const sockets = this.io.sockets.sockets;
         const activeUsers = Array.from(sockets).map(([id, socket]) => ({
           id,
           email: socket.user?.email,
           rooms: Array.from(socket.rooms),
         }));
-        socket.emit('active-users', activeUsers);
+        socket.emit(EVENTS.ACTIVE_USERS_LIST, activeUsers);
       });
     });
   }
@@ -75,23 +76,23 @@ class SocketConnection {
   }
 
   setupEventHandlers() {
-    this.io.on('connection', (socket) => {
+    this.io.on(EVENTS.CONNECTION, (socket) => {
       console.info(`✅ Authenticated user connected: ${socket.user.email}`);
-      this.io.emit('user-connected', { email: socket.user.email });
+      this.io.emit(EVENTS.USER_CONNECTED, { email: socket.user.email });
 
-      socket.on('join-item-room', (itemId) => {
+      socket.on(EVENTS.JOIN_ITEM_ROOM, (itemId) => {
         this.BidSocketHandler.handleJoinItemRoom(socket, itemId);
       });
 
-      socket.on('leave-item-room', (itemId) => {
+      socket.on(EVENTS.LEAVE_ITEM_ROOM, (itemId) => {
         this.BidSocketHandler.handleLeaveItemRoom(socket, itemId);
       });
 
-      socket.on('place-bid', (data) => {
+      socket.on(EVENTS.PLACE_BID, (data) => {
         this.BidSocketHandler.handleBidPlacement(socket, data);
       });
 
-      socket.on('disconnect', () => {
+      socket.on(EVENTS.DISCONNECT, () => {
         console.info(`❌ User disconnected: ${socket.user.email}`);
       });
     });

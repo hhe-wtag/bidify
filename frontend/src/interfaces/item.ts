@@ -1,3 +1,5 @@
+import type { BidHistory } from './Bid'
+
 export interface Item {
   _id: string
   title: string
@@ -43,7 +45,7 @@ export interface UpdateItemData {
 export interface ItemStoreState {
   items: Item[]
   currentItem: Item | null
-  currentItemLatest10Bids: Bid[]
+  currentItemLatest10Bids: BidHistory[]
   loading: boolean
   error: string | null
 }

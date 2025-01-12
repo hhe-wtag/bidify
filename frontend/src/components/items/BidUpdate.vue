@@ -7,29 +7,56 @@ import {
   StepperSeparator,
   StepperTitle,
 } from '@/components/ui/stepper'
-import { onNewBid } from '@/services/bidSocketEvents.ts'
+import { onNewBidPlaced, onPlaceBid, onPlaceBidResult } from '@/services/bidSocketEvents.ts'
 import { useItemStore } from '@/stores/item.ts'
 import { ArrowUp, CircleDollarSign, CircleDot } from 'lucide-vue-next'
-import { computed, onBeforeMount, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { onBeforeMount, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useBidStore } from '@/stores/bid.ts'
+import BidUpdateCard from './BidUpdateCard.vue'
+import { toast } from '../ui/toast/use-toast.ts'
 
 const itemStore = useItemStore()
 const bidStore = useBidStore()
+const pulsingItem = ref<number | null>(null)
 
-const pulsingItem = ref(null)
+interface BidResponse {
+  bid: {
+    statusCode: number
+    message: string
+  }
+}
 
-const handleNewBid = ({ data }) => {
-  if (true) {
-    bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
-    pulsingItem.value = 0
+const handleNewBidPlaced = ({ data }: { data: BidResponse }) => {
+  if (data.bid.statusCode === 201) {
+    if (itemStore.currentItem?._id) {
+      bidStore.fetchLatest10Bids(itemStore.currentItem._id)
+    }
+    pulsingItem.value = 1
     setTimeout(() => {
-      pulsingItem.value
+      pulsingItem.value = null
     }, 3000)
   }
 }
 
+const handlePlacedBidResult = ({ data }: { data: BidResponse }) => {
+  if (data.bid.statusCode === 201) {
+    toast({
+      title: 'Congratulations!',
+      description: data.bid.message,
+      class: 'bg-green-100',
+    })
+  } else {
+    toast({
+      title: 'Something Went Wrong!',
+      description: 'Bid cannot be placed at this moment.',
+      class: 'bg-red-100',
+    })
+  }
+}
+
 onBeforeMount(() => {
-  onNewBid(handleNewBid)
+  onNewBidPlaced(handleNewBidPlaced)
+  onPlaceBidResult(handlePlacedBidResult)
 })
 
 onMounted(() => {
@@ -45,10 +72,10 @@ const onBeforeEnter = (el) => {
   el.style.transform = 'translateY(-30px)'
 }
 
-const onEnter = (el, done) => {
-  const delay = el.dataset.index * 100
+const onEnter = (el) => {
+  const delay = el.dataset.index * 150
   setTimeout(() => {
-    el.style.transition = 'all 0.5s ease'
+    el.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
     el.style.opacity = 1
     el.style.transform = 'translateY(0)'
   }, delay)
@@ -56,57 +83,49 @@ const onEnter = (el, done) => {
 </script>
 
 <template>
-  <Card>
-    <CardHeader>
-      <CardTitle class="text-2xl text-center">Bid Update</CardTitle>
+  <Card class="border rounded-md">
+    <CardHeader class="pb-2">
+      <CardTitle class="text-2xl text-center font-bold text-gray-800"> Bid History </CardTitle>
     </CardHeader>
-    <CardContent class="space-y-6">
+    <CardContent class="p-0">
       <Stepper
         orientation="vertical"
-        class="mx-auto flex w-full scrollbar max-h-[250px] overflow-y-auto max-w-lg p-4 flex-col justify-start gap-6"
+        class="mx-auto flex w-full scrollbar max-h-[600px] overflow-y-auto max-w-lg p-6 flex-col justify-start gap-8"
       >
         <TransitionGroup
           name="bid-update"
           tag="div"
-          class="flex flex-col gap-4"
+          class="flex flex-col gap-6"
           @before-enter="onBeforeEnter"
           @enter="onEnter"
         >
           <StepperItem
             v-for="(step, index) in bidStore.lates10Bids"
             :key="step.timeOfTheBid"
-            class="relative flex w-full items-start gap-2"
+            class="relative flex w-full items-start gap-4 [&_[data-state]]:!bg-gray-200"
             :step="index"
             :data-index="index"
           >
             <StepperSeparator
               v-if="index !== bidStore.lates10Bids.length - 1"
-              class="absolute left-[18px] top-[37px] block h-[78%] w-0.5 shrink-0 rounded-full bg-gray-200 group-data-[state=completed]:bg-gray-200 group-data-[disabled]:bg-gray-200"
+              class="absolute left-[22px] top-[45px] block h-[calc(100%_-_20px)] w-0.5 shrink-0 rounded-full !bg-gray-200"
+              :class="[index === 0 && 'bg-gradient-to-b from-gray-400 to-transparent ']"
             />
 
-            <div class="z-10 rounded-full shrink-0 p-1">
+            <div class="z-10 rounded-full shrink-0 p-1.5 bg-white">
               <div class="relative rounded-full">
-                <CircleDollarSign v-if="index === 0" class="size-8 text-gray-500" />
-                <CircleDot v-else class="size-8 text-gray-500" />
+                <CircleDollarSign v-if="index === 0" class="size-9 text-primary" />
+                <CircleDot v-else class="size-9 text-gray-400 opacity-75" />
               </div>
             </div>
             <div
-              class="flex flex-col gap-1 p-2 rounded ring-transition"
-              :class="['border border-gray-200', 0 === index && 'ring-pulse']"
+              class="flex flex-col rounded-xl transition-all duration-300 ease-in-out w-full"
+              :class="[
+                index === 0 && pulsingItem ? 'ring-pulse scale-[1.02]' : 'hover:scale-[1.02]',
+              ]"
             >
-              <StepperTitle class="text-sm font-semibold transition lg:text-base">
-                $ {{ step.bidAmount }}
-              </StepperTitle>
-              <StepperDescription class="text-xs text-muted-foreground transition lg:text-sm">
-                <span v-if="index < bidStore.lates10Bids.length" class="flex items-center mb-1">
-                  <ArrowUp class="size-3 me-1" />
-                  Price Increased ${{ step.incrementAmount.toFixed(2) }}
-                </span>
-                <span class="italic text-sm">
-                  {{ step.bidderName || 'Someone' }}
-                </span>
-                placed this bid at
-                {{ new Date(step.timeOfTheBid).toLocaleTimeString() }}
+              <StepperDescription>
+                <BidUpdateCard :step="step" :index="index" />
               </StepperDescription>
             </div>
           </StepperItem>
@@ -118,39 +137,46 @@ const onEnter = (el, done) => {
 
 <style lang="css">
 .bid-update-move {
-  transition: all 0.5s ease;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes ring-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(107, 114, 128, 0.2);
+    box-shadow: 0 0 0 0 rgb(14 165 233 / 0.3);
   }
-
+  50% {
+    box-shadow: 0 0 0 15px rgb(14 165 233 / 0);
+  }
   100% {
-    box-shadow: 0 0 0 18px rgba(107, 114, 128, 0);
+    box-shadow: 0 0 0 0 rgb(14 165 233 / 0);
   }
 }
 
 .ring-pulse {
-  animation: ring-pulse 1.5s ease-out 5;
+  animation: ring-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Add transition for ring color changes */
-.ring-transition {
-  transition: all 0.3s ease-in-out;
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
 
 .scrollbar::-webkit-scrollbar-track {
-  border-radius: 100vh;
   background: transparent;
+  border-radius: 100vh;
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
-  background: #c9c9c9;
+  background: #e2e8f0;
   border-radius: 100vh;
+  transition: all 0.3s;
 }
 
 .scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #aeaeae;
+  background: #cbd5e1;
 }
 </style>

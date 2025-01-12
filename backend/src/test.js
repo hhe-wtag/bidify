@@ -20,11 +20,11 @@ socket.on('connect', () => {
   socket.emit('join-item-room', itemId);
 });
 
-socket.on('user-joined-item-room', (data) => {
+socket.on('user-joined-room', (data) => {
   console.info(data);
 });
 
-socket.on('user-left-item-room', (data) => {
+socket.on('user-left-room', (data) => {
   console.info(data);
 });
 
