@@ -5,167 +5,23 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Bell, Clock, Package, Trophy, UserPlus } from 'lucide-vue-next'
+import { useNotificationStore } from '@/stores/notificationStore.ts'
+import { onEvent } from '@/services/websocket.ts'
 
-const notifications = ref([
-  {
-    _id: '1',
-    type: 'REGISTRATION',
-    message: 'Welcome to Bidify! Your account has been successfully created.',
-    read: false,
-    createdAt: '2025-01-06T10:00:00',
-    preview: 'New Account',
-  },
-  {
-    _id: '2',
-    type: 'AUCTION_REMINDER',
-    message: 'Reminder: The auction for "Vintage Watch" ends in 30 minutes!',
-    auctionId: 'auction123',
-    read: false,
-    createdAt: '2025-01-06T09:30:00',
-    preview: 'Auction Ending Soon',
-  },
-  {
-    _id: '3',
-    type: 'BID_PLACED',
-    message: 'Your bid of $500 has been placed for "Antique Vase"',
-    auctionId: 'auction456',
-    read: true,
-    createdAt: '2025-01-06T08:00:00',
-    preview: 'Bid Placed',
-  },
-  {
-    _id: '4',
-    type: 'AUCTION_WON',
-    message: 'Congratulations! You won the auction for "Rare Coins"',
-    auctionId: 'auction789',
-    read: false,
-    createdAt: '2025-01-06T07:00:00',
-    preview: 'Auction Won!',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-  {
-    _id: '5',
-    type: 'OUTBID',
-    message: 'Someone has outbid you on "Vintage Camera"',
-    auctionId: 'auction101',
-    read: true,
-    createdAt: '2025-01-06T06:00:00',
-    preview: 'Outbid Alert',
-  },
-])
+const notificationStore = useNotificationStore()
 
 const tabs = ref('all')
 
-const formatDate = (dateString: string) => new Date(dateString).toLocaleString()
-
-const filteredNotifications = computed(() => notifications.value)
+const formatDate = (dateString: string) => {
+  return new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(new Date(dateString))
+}
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -182,31 +38,30 @@ const getNotificationIcon = (type: string) => {
   }
 }
 
-const markAllAsRead = () => {
-  notifications.value = notifications.value.map((notification) => ({
-    ...notification,
-    read: true,
-  }))
-}
+// onMounted(() => {
+//   notificationStore.fetchNotifications()
+// })
 </script>
 
 <template>
   <div class="container space-y-6 p-10 pb-16">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold tracking-tight">Notifications</h2>
-      <Button variant="outline" @click="markAllAsRead">Mark all as read</Button>
+      <Button variant="outline" @click="notificationStore.markAllAsRead">Mark all as read</Button>
     </div>
 
     <Tabs default-value="all" v-model:value="tabs" class="w-full">
       <TabsList class="grid w-full grid-cols-4">
         <TabsTrigger value="all">
           All
-          <Badge variant="secondary" class="ml-2">{{ notifications.length }}</Badge>
+          <Badge variant="secondary" class="ml-2">{{
+            notificationStore.notifications.length
+          }}</Badge>
         </TabsTrigger>
         <TabsTrigger value="unread">
           Unread
           <Badge variant="secondary" class="ml-2">
-            {{ notifications.filter((n) => !n.read).length }}
+            {{ notificationStore.unreadNotifications.length }}
           </Badge>
         </TabsTrigger>
         <TabsTrigger value="auctions">Auctions</TabsTrigger>
@@ -216,7 +71,7 @@ const markAllAsRead = () => {
       <ScrollArea class="h-[600px] mt-4">
         <TabsContent value="all">
           <div
-            v-for="notification in notifications"
+            v-for="notification in notificationStore.notifications"
             :key="notification._id"
             class="flex items-start space-x-4 p-4 transition-colors cursor-pointer"
             :class="notification.read ? 'bg-white' : 'bg-blue-50 hover:bg-gray-50'"
@@ -238,7 +93,7 @@ const markAllAsRead = () => {
 
         <TabsContent value="unread">
           <div
-            v-for="notification in notifications.filter((n) => !n.read)"
+            v-for="notification in notificationStore.unreadNotifications"
             :key="notification._id"
             class="flex items-start space-x-4 p-4 transition-colors cursor-pointer"
             :class="notification.read ? 'bg-white' : 'bg-blue-50 hover:bg-gray-50'"
@@ -260,9 +115,7 @@ const markAllAsRead = () => {
 
         <TabsContent value="auctions">
           <div
-            v-for="notification in notifications.filter((n) =>
-              ['AUCTION_REMINDER', 'BID_PLACED', 'AUCTION_WON', 'OUTBID'].includes(n.type),
-            )"
+            v-for="notification in notificationStore.auctionNotifications"
             :key="notification._id"
             class="flex items-start space-x-4 p-4 transition-colors cursor-pointer"
             :class="notification.read ? 'bg-white' : 'bg-blue-50 hover:bg-gray-50'"
@@ -284,7 +137,7 @@ const markAllAsRead = () => {
 
         <TabsContent value="system">
           <div
-            v-for="notification in notifications.filter((n) => n.type === 'REGISTRATION')"
+            v-for="notification in notificationStore.systemNotifications"
             :key="notification._id"
             class="flex items-start space-x-4 p-4 transition-colors cursor-pointer"
             :class="notification.read ? 'bg-white' : 'bg-blue-50 hover:bg-gray-50'"

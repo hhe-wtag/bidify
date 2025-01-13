@@ -10,6 +10,10 @@ class NotificationRepository extends BaseRepository {
   }
 
   async createNotification(userId, type, message, preview) {
+    if (!userId) {
+      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'User ID is required');
+    }
+
     const userExists = await User.findById(userId);
     if (!userExists) {
       throw new ApiError(HTTP_STATUS.NOT_FOUND, 'User not found');
@@ -27,6 +31,10 @@ class NotificationRepository extends BaseRepository {
   }
 
   async getNotificationsForUser(userId) {
+    if (!userId) {
+      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'User ID is required');
+    }
+
     const notifications = await this.model
       .find({ userId })
       .sort({ createdAt: -1 })

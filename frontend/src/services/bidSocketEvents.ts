@@ -26,6 +26,11 @@ export const onBidSuccess = (callback: (data: any) => void) => {
   onEvent('bid-success', callback)
 }
 
+
+export const onNotification = (callback: (data: any) => void) => {
+  onEvent('user-notification-room', callback)
+}
+
 export const onBidError = (callback: (error: any) => void) => {
   onEvent('bid-error', callback)
 }

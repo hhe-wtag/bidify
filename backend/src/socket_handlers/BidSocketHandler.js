@@ -18,6 +18,16 @@ class BidSocketHandler extends BaseSocketHandler {
     });
   };
 
+  handleJoinNotificationRoom = (socket) => {
+    socket.join(`notification`);
+
+    this.emitToRoom(`notification`, 'user-notification-room', {
+      event: 'user-notification-room',
+      data: { user: socket.user },
+      message: `User-${socket.id} connected to notification room`,
+    });
+  };
+
   handleLeaveItemRoom = (socket, itemId) => {
     socket.leave(`item-${itemId}`);
 
@@ -36,6 +46,12 @@ class BidSocketHandler extends BaseSocketHandler {
         event: 'new-bid-placed',
         data: { bid: result },
         message: `New bid of $${bidData.incrementBidAmount} placed by userId: ${bidData.bidderId}`,
+      });
+
+      this.emitToUser(socket.id, 'place-bid-notification', {
+        event: 'place-bid-notification',
+        data: { bid: result },
+        message: `Attempt of 'place-bid-notification' by userId: ${bidData.bidderId} against itemId: ${bidData.itemId}`,
       });
     }
 

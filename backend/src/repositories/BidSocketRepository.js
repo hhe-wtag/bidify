@@ -114,6 +114,7 @@ class BidSocketRepository extends BaseRepository {
         }
 
         await session.commitTransaction();
+
         return new ApiResponse(
           HTTP_STATUS.CREATED,
           savedBid,

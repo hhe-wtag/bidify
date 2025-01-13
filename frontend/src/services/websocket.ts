@@ -1,4 +1,6 @@
+import { useNotificationStore } from '@/stores/notificationStore'
 import { io, type Socket } from 'socket.io-client'
+import { onNotification } from './bidSocketEvents'
 
 let socket: Socket | null = null
 const activeListeners = new Map<string, ((...args: any[]) => void)[]>()
@@ -9,16 +11,27 @@ export const connectSocket = (token: string) => {
   socket = io('http://localhost:8080', {
     auth: { token: `Bearer ${token}` },
     transports: ['websocket'],
+    // query: {userId: }
   })
 
   socket.on('connect', () => {
     console.info('✅ WebSocket connection established')
   })
 
+  socket.emit('join-notification-room')
+
+  
+
   socket.on('disconnect', () => {
     console.info('❌ WebSocket connection disconnected')
     cleanupAllListeners()
   })
+
+  // socket.on('new-notification', (data) => {
+  //   console.info('🔔 New notification received:', data)
+  //   const notificationStore = useNotificationStore()
+  //   notificationStore.addNotification(data)
+  // })
 
   socket.on('user-connected', (data) => {
     console.info(`User connected: ${data.email}`)

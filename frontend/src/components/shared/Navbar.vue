@@ -12,17 +12,27 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { LogOut, User, Bell, Clock, Package, Trophy, UserPlus } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { connectSocket } from '@/services/websocket.ts'
+import { useNotificationStore } from '@/stores/notificationStore'
+import { onNotification } from '@/services/bidSocketEvents.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
+const notificationStore = useNotificationStore()
 
-onMounted(() => {
+const loadingNotifications = computed(() => notificationStore.loading)
+const notifications = computed(() => notificationStore.notifications)
+
+onMounted(async () => {
   if (userStore.isAuthenticated) {
     if (userStore.token) connectSocket(userStore.token)
     userStore.fetchUserProfile()
+    await notificationStore.fetchNotifications()
+    onNotification((data) => {
+      console.log(data)
+    })
   }
 })
 
@@ -40,54 +50,11 @@ const handleLogout = async () => {
   router.push('/login')
 }
 
-const notifications = ref([
-  {
-    _id: '1',
-    type: 'REGISTRATION',
-    message: 'Welcome to Bidify! Your account has been successfully created.',
-    read: false,
-    createdAt: '2025-01-06T10:00:00',
-    preview: 'New Account',
-  },
-  {
-    _id: '2',
-    type: 'AUCTION_REMINDER',
-    message: 'Reminder: The auction for "Vintage Watch" ends in 30 minutes!',
-    auctionId: 'auction123',
-    read: false,
-    createdAt: '2025-01-06T09:30:00',
-    preview: 'Auction Ending Soon',
-  },
-  {
-    _id: '2',
-    type: 'AUCTION_REMINDER',
-    message: 'Reminder: The auction for "Vintage Watch" ends in 30 minutes!',
-    auctionId: 'auction123',
-    read: false,
-    createdAt: '2025-01-06T09:30:00',
-    preview: 'Auction Ending Soon',
-  },
-  {
-    _id: '2',
-    type: 'AUCTION_REMINDER',
-    message: 'Reminder: The auction for "Vintage Watch" ends in 30 minutes!',
-    auctionId: 'auction123',
-    read: false,
-    createdAt: '2025-01-06T09:30:00',
-    preview: 'Auction Ending Soon',
-  },
-  {
-    _id: '2',
-    type: 'AUCTION_REMINDER',
-    message: 'Reminder: The auction for "Vintage Watch" ends in 30 minutes!',
-    auctionId: 'auction123',
-    read: false,
-    createdAt: '2025-01-06T09:30:00',
-    preview: 'Auction Ending Soon',
-  },
-])
-
 const unreadCount = computed(() => notifications.value.filter((n) => !n.read).length)
+
+const recentNotifications = computed(() => {
+  return notifications.value.slice(0, 5)
+})
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -105,8 +72,14 @@ const getNotificationIcon = (type: string) => {
 }
 
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  return new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(new Date(dateString))
 }
 </script>
 
@@ -151,12 +124,17 @@ const formatDate = (dateString: string) => {
           <DropdownMenuContent align="end" class="w-80">
             <div class="flex items-center justify-between px-4 py-2">
               <span class="font-semibold">Notifications</span>
-              <router-link to="/notification" class="text-xs text-primary hover:underline">View All</router-link>
+              <router-link to="/notification" class="text-xs text-primary hover:underline"
+                >View All</router-link
+              >
             </div>
             <DropdownMenuSeparator />
             <ScrollArea class="h-[300px]">
+              <div v-if="loadingNotifications" class="flex items-center justify-center py-4">
+                <span>Loading...</span>
+              </div>
               <DropdownMenuItem
-                v-for="notification in notifications"
+                v-for="notification in recentNotifications"
                 :key="notification._id"
                 class="flex flex-col p-4"
               >

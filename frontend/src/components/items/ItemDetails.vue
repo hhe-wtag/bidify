@@ -16,6 +16,8 @@ import BidUpdate from '@/components/items/BidUpdate.vue'
 import { leaveItemRoom } from '@/services/bidSocketEvents.ts'
 import { emitEvent, offEvent, onEvent } from '@/services/websocket.ts'
 import { useBidStore } from '@/stores/bid.ts'
+import { onNotification } from '@/services/bidSocketEvents.ts'
+
 
 const router = useRouter()
 const route = useRoute()
@@ -99,6 +101,7 @@ onMounted(() => {
   }
   updateTimeRemaining()
   timer = setInterval(updateTimeRemaining, 1000)
+  
 })
 
 onUnmounted(() => {
