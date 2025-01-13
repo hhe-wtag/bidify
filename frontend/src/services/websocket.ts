@@ -1,4 +1,6 @@
 import { useNotificationStore } from '@/stores/notificationStore'
+import { toast } from '@/components/ui/toast'
+import { emitToastForWSDisconnet } from '@/utils/commonToasts'
 import { io, type Socket } from 'socket.io-client'
 import { onNotification } from './bidSocketEvents'
 
@@ -23,7 +25,7 @@ export const connectSocket = (token: string) => {
   
 
   socket.on('disconnect', () => {
-    console.info('❌ WebSocket connection disconnected')
+    emitToastForWSDisconnet()
     cleanupAllListeners()
   })
 
@@ -62,16 +64,17 @@ export const disconnectSocket = () => {
 }
 
 export const emitEvent = <T = unknown>(event: string, payload: T) => {
-  if (socket) {
-    socket.emit(event, payload)
-  } else {
-    console.warn('WebSocket is not connected.')
+  if (!socket?.connected) {
+    emitToastForWSDisconnet()
+    return
   }
+
+  socket.emit(event, payload)
 }
 
 export const onEvent = (event: string, callback: (...args: any[]) => void) => {
-  if (!socket) {
-    console.warn('WebSocket is not connected.')
+  if (!socket?.connected) {
+    emitToastForWSDisconnet()
     return
   }
 
@@ -94,8 +97,8 @@ export const onEvent = (event: string, callback: (...args: any[]) => void) => {
 }
 
 export const offEvent = (event: string, callback?: (...args: any[]) => void) => {
-  if (!socket) {
-    console.warn('WebSocket is not connected.')
+  if (!socket?.connected) {
+    emitToastForWSDisconnet()
     return
   }
 

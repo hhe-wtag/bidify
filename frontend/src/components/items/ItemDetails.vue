@@ -1,23 +1,21 @@
 <script setup lang="ts">
-/// <reference types="node" />
-import { computed, onBeforeMount, onMounted, onUnmounted, ref, Transition, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useItemStore } from '@/stores/item'
+import { useUserStore } from '@/stores/user'
+import { useBidStore } from '@/stores/bid'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ArrowLeft, Clock, DollarSign } from 'lucide-vue-next'
-import { useUserStore } from '@/stores/user.ts'
-import Tooltip from '../ui/tooltip/Tooltip.vue'
-import TooltipTrigger from '../ui/tooltip/TooltipTrigger.vue'
-import TooltipContent from '../ui/tooltip/TooltipContent.vue'
-import Input from '../ui/input/Input.vue'
-import BidUpdate from '@/components/items/BidUpdate.vue'
-import { leaveItemRoom } from '@/services/bidSocketEvents.ts'
-import { emitEvent, offEvent, onEvent } from '@/services/websocket.ts'
-import { useBidStore } from '@/stores/bid.ts'
 import { onNotification } from '@/services/bidSocketEvents.ts'
 
+import { ArrowLeft, DollarSign } from 'lucide-vue-next'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Input } from '@/components/ui/input'
+import TimeInformationOfItem from './TimeInformationOfItem.vue'
+import BidUpdate from './BidUpdate.vue'
+import { calculateTimeRemaining } from '@/utils/TimeFunctions.ts'
+import { placeBid } from '@/services/bidSocketEvents.ts'
 
 const router = useRouter()
 const route = useRoute()
@@ -26,25 +24,15 @@ const userStore = useUserStore()
 const bidStore = useBidStore()
 
 const slug = route.params.slug as string
-const timeRemaining = ref('')
-let timer: NodeJS.Timeout
-
-// Initialize increment amount
 const incrementBidAmount = ref(0)
 
-// Computed values for bidding
-const currentBidAmount = computed(() => {
-  return itemStore.currentItem?.latestBid || itemStore.currentItem?.startingBid || 0
-})
+const currentBidAmount = computed(
+  () => itemStore.currentItem?.latestBid || itemStore.currentItem?.startingBid || 0,
+)
 
-const minimumBidIncrement = computed(() => {
-  return itemStore.currentItem?.minimumBidIncrement || 0
-})
+const minimumBidIncrement = computed(() => itemStore.currentItem?.minimumBidIncrement || 0)
 
-const newLatestBid = computed(() => {
-  if (!itemStore.currentItem) return 0
-  return currentBidAmount.value + incrementBidAmount.value
-})
+const newLatestBid = computed(() => currentBidAmount.value + incrementBidAmount.value)
 
 watch(
   () => itemStore.currentItem,
@@ -69,70 +57,18 @@ watch(
 const handlePlaceBid = () => {
   if (!itemStore.currentItem || !userStore.profile) return
 
-  emitEvent('place-bid', {
+  placeBid({
     itemId: itemStore.currentItem._id,
     bidderId: userStore.profile._id,
     incrementBidAmount: incrementBidAmount.value,
   })
 }
 
-const updateTimeRemaining = () => {
-  const endTime = new Date(itemStore.currentItem?.endTime || '').getTime()
-  const now = new Date().getTime()
-  const distance = endTime - now
-
-  if (distance < 0) {
-    timeRemaining.value = 'Auction Ended'
-    clearInterval(timer)
-    return
-  }
-
-  const days = Math.floor(distance / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
-  const seconds = Math.floor((distance % (1000 * 60)) / 1000)
-
-  timeRemaining.value = `${days}d ${hours}h ${minutes}m ${seconds}s`
-}
-
 onMounted(() => {
   if (slug) {
     itemStore.fetchItemBySlug(slug)
   }
-  updateTimeRemaining()
-  timer = setInterval(updateTimeRemaining, 1000)
-  
 })
-
-onUnmounted(() => {
-  clearInterval(timer)
-})
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-const getTimeRemaining = (endTime: string) => {
-  const end = new Date(endTime)
-  const now = new Date()
-  const diff = end.getTime() - now.getTime()
-
-  if (diff <= 0) {
-    return 'Auction ended'
-  }
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-
-  return `${days}d ${hours}h ${minutes}m remaining`
-}
 
 const isPlaceBidDisabled = computed(() => {
   const currentItem = itemStore.currentItem
@@ -142,7 +78,7 @@ const isPlaceBidDisabled = computed(() => {
 
   return (
     currentItem.status === 'closed' ||
-    getTimeRemaining(currentItem.endTime) === 'Auction ended' ||
+    calculateTimeRemaining(currentItem.endTime) === 'Auction Ended' ||
     currentItem.sellerId === userProfile._id
   )
 })
@@ -152,11 +88,10 @@ const placeBidDisabledReason = computed(() => {
   const userProfile = userStore.profile
 
   if (!currentItem || !userProfile) return 'Item or user not found'
-
   if (currentItem.status === 'closed') return 'Auction is closed'
-  if (getTimeRemaining(currentItem.endTime) === 'Auction ended') return 'Auction ended'
+  if (calculateTimeRemaining(currentItem.endTime) === 'Auction Ended') return 'Auction ended'
   if (currentItem.sellerId === userProfile._id)
-    return 'You are the seller of this item, you cannot place bid.'
+    return 'You are the seller of this item, you cannot place bid'
 
   return ''
 })
@@ -169,17 +104,14 @@ const placeBidDisabledReason = computed(() => {
       Back to Items
     </Button>
 
-    <!-- Loading State -->
     <div v-if="itemStore.loading" class="flex justify-center py-8">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
     </div>
 
-    <!-- Error State -->
     <Alert v-else-if="itemStore.error" variant="destructive" class="mb-6">
       <AlertDescription>{{ itemStore.error }}</AlertDescription>
     </Alert>
 
-    <!-- Item Details -->
     <div v-else-if="itemStore.currentItem" class="space-y-6">
       <Card>
         <CardHeader>
@@ -189,7 +121,6 @@ const placeBidDisabledReason = computed(() => {
           </CardDescription>
         </CardHeader>
         <CardContent class="space-y-6">
-          <!-- Bid Information -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
@@ -223,7 +154,6 @@ const placeBidDisabledReason = computed(() => {
                     </span>
                   </Transition>
                 </div>
-
                 <div class="flex justify-between items-center">
                   <span class="text-muted-foreground">Minimum Raise</span>
                   <span class="font-medium">
@@ -233,51 +163,9 @@ const placeBidDisabledReason = computed(() => {
               </CardContent>
             </Card>
 
-            <!-- Time Information -->
-            <Card>
-              <CardHeader>
-                <CardTitle class="text-lg flex items-center">
-                  <Clock class="mr-2 h-5 w-5" />
-                  Time Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent class="space-y-4">
-                <div class="flex justify-between items-center">
-                  <span class="text-muted-foreground">End Time</span>
-                  <span class="font-medium">
-                    {{ formatDate(itemStore.currentItem.endTime) }}
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-muted-foreground">Status</span>
-                  <span
-                    class="font-medium"
-                    :class="{
-                      'text-green-600':
-                        !itemStore.currentItem.status || itemStore.currentItem.status === 'active',
-                      'text-red-600': itemStore.currentItem.status === 'closed',
-                    }"
-                  >
-                    {{ itemStore.currentItem.status || 'Active' }}
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-muted-foreground">Time Remaining</span>
-                  <span
-                    class="font-medium"
-                    :class="{
-                      'text-yellow-600': timeRemaining !== 'Auction Ended',
-                      'text-red-600': timeRemaining === 'Auction Ended',
-                    }"
-                  >
-                    {{ timeRemaining }}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            <TimeInformationOfItem :currentItem="itemStore.currentItem" />
           </div>
 
-          <!-- Place Bid Button -->
           <div class="flex flex-col items-center gap-4 mx-auto pt-4">
             <h1 class="text-xl">
               New price for the item will be
@@ -285,7 +173,7 @@ const placeBidDisabledReason = computed(() => {
             </h1>
 
             <div class="flex justify-center items-center gap-2">
-              <span class="">Raise your bid by $</span>
+              <span>Raise your bid by $</span>
               <Input
                 v-model="incrementBidAmount"
                 type="number"
@@ -310,17 +198,18 @@ const placeBidDisabledReason = computed(() => {
       <BidUpdate />
     </div>
 
-    <!-- Not Found State -->
     <Alert v-else variant="destructive" class="mb-6">
       <AlertDescription>Item not found</AlertDescription>
     </Alert>
   </div>
 </template>
+
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

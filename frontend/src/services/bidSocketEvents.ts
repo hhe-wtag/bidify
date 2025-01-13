@@ -1,3 +1,4 @@
+import { ca } from 'date-fns/locale'
 import { onEvent, emitEvent } from './websocket'
 
 interface BidData {
@@ -18,12 +19,13 @@ export const placeBid = (bidData: BidData) => {
   emitEvent('place-bid', bidData)
 }
 
-export const onNewBid = (callback: (data: any) => void) => {
+// Event Listeners
+export const onNewBidPlaced = (callback: (data: any) => void) => {
   onEvent('new-bid-placed', callback)
 }
 
-export const onBidSuccess = (callback: (data: any) => void) => {
-  onEvent('bid-success', callback)
+export const onPlaceBidResult = (callback: (data: any) => void) => {
+  onEvent('placed-bid-result', callback)
 }
 
 
