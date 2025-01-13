@@ -1,4 +1,3 @@
-import { ca } from 'date-fns/locale'
 import { onEvent, emitEvent } from './websocket'
 
 interface BidData {
