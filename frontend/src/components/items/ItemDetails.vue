@@ -7,7 +7,6 @@ import { useBidStore } from '@/stores/bid'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { onNotification } from '@/services/bidSocketEvents.ts'
 
 import { ArrowLeft, DollarSign } from 'lucide-vue-next'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'

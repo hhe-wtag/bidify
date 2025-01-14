@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 import BaseRepository from './BaseRepository.js';
+import NotificationRepository from './NotificationRepository.js';
 import { Bid } from '../models/bid.model.js';
 import { Item } from '../models/item.model.js';
-import { Notification } from '../models/notification.model.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
@@ -11,6 +11,7 @@ import HTTP_STATUS from '../utils/httpStatus.js';
 class BidSocketRepository extends BaseRepository {
   constructor() {
     super(Bid);
+    this.notificationRepository = new NotificationRepository();
   }
 
   validateBidData(bidData) {
@@ -87,41 +88,35 @@ class BidSocketRepository extends BaseRepository {
           throw new ApiError(HTTP_STATUS.NOT_FOUND, 'Item not found');
         }
 
-        const bidPlacedNotification = new Notification({
-          userId: bidderId,
-          itemId: itemId,
-          type: 'BID_PLACED',
-          message: `You have placed a bid of $${latestBidAmount} on ${item.title}`,
-          preview: 'Bid Placed',
-        });
-        await bidPlacedNotification.save({ session });
+        const bidPlacedNotification =
+          await this.notificationRepository.createNotification(
+            bidderId,
+            itemId,
+            'BID_PLACED',
+            `You have placed a bid of $${latestBidAmount} on ${item.title}`,
+            'Bid Placed'
+          );
 
-        console.log(bidPlacedNotification);
         const previousBidders = await Bid.find({ itemId })
           .distinct('bidderId')
           .where('_id')
           .ne(bidderId);
 
-          const outBidNotify = [];
-        const outbidNotifications = previousBidders
-          .filter((userId) => userId.toString() !== bidderId.toString())
-          .map(async (userId) => {
-            const outbidNotification = new Notification({
-              userId: userId,
-              itemId: itemId,
-              type: 'OUTBID',
-              message: `You have been outbid on ${item.title}. Current bid is $${latestBidAmount}.`,
-              preview: 'Outbid',
-            });
-
-            await outbidNotification.save({ session });
-            outBidNotify.push(outbidNotification);
-            return outbidNotification;
-          });
-
-        await Promise.all(outbidNotifications);
-
-        console.log(outBidNotify);
+        const outbidNotifications = await Promise.all(
+          previousBidders
+            .filter((userId) => userId.toString() !== bidderId.toString())
+            .map(async (userId) => {
+              const outbidNotification =
+                await this.notificationRepository.createNotification(
+                  userId,
+                  itemId,
+                  'OUTBID',
+                  `You have been outbid on ${item.title}. Current bid is $${latestBidAmount}.`,
+                  'Outbid'
+                );
+              return outbidNotification;
+            })
+        );
 
         await session.commitTransaction();
 
@@ -130,7 +125,7 @@ class BidSocketRepository extends BaseRepository {
           {
             savedBid,
             bidPlacedNotification,
-            outBidNotify,
+            outbidNotifications,
           },
           'Bid placed successfully'
         );

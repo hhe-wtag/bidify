@@ -2,6 +2,7 @@ import BaseRepository from './BaseRepository.js';
 import { Notification } from '../models/notification.model.js';
 import { User } from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
 
 class NotificationRepository extends BaseRepository {
@@ -9,7 +10,7 @@ class NotificationRepository extends BaseRepository {
     super(Notification);
   }
 
-  async createNotification(userId, type, message, preview) {
+  async createNotification(userId, itemId, type, message, preview) {
     if (!userId) {
       throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'User ID is required');
     }
@@ -21,6 +22,7 @@ class NotificationRepository extends BaseRepository {
 
     const notification = new Notification({
       userId,
+      itemId,
       type,
       message,
       preview,
@@ -42,18 +44,21 @@ class NotificationRepository extends BaseRepository {
     return notifications;
   }
 
-  async markAsRead(notificationId) {
-    const notification = await this.model.findByIdAndUpdate(
-      notificationId,
-      { read: true },
-      { new: true }
-    );
+  async markAllAsRead(userId) {
+    try {
+      const result = await Notification.updateMany(
+        { userId: userId.userId, read: false },
+        { $set: { read: true } }
+      );
 
-    if (!notification) {
-      throw new ApiError(HTTP_STATUS.NOT_FOUND, 'Notification not found');
+      return new ApiResponse(
+        HTTP_STATUS.OK,
+        result,
+        'All Notifications marked as read successfully'
+      );
+    } catch (error) {
+      return new ApiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, error.message);
     }
-
-    return notification;
   }
 }
 

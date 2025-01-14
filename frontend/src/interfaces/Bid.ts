@@ -15,3 +15,9 @@ export interface BidHistory {
   timeOfTheBid: string
   incrementAmount: number
 }
+
+export interface BidData {
+  itemId: string
+  bidderId: string
+  incrementBidAmount: number
+}

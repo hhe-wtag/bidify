@@ -24,16 +24,9 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-
 import { Search } from 'lucide-vue-next'
-
 import ItemForm from '@/components/items/ItemForm.vue'
 import type { CreateItemData, Item, UpdateItemData } from '@/interfaces/item'
-import {
-  onBidNotification,
-  onNotification,
-  onOutBidNotification,
-} from '@/services/bidSocketEvents.ts'
 import { useNotificationStore } from '@/stores/notificationStore.ts'
 
 const router = useRouter()
@@ -46,9 +39,6 @@ const selectedItem: Ref<Item | null> = ref(null)
 
 onMounted(async () => {
   await itemStore.fetchAllItems()
-  onNotification((data) => {
-    console.log(data)
-  })
 })
 
 const filteredItems = computed(() => {

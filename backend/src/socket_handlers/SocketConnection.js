@@ -2,6 +2,7 @@ import { instrument } from '@socket.io/admin-ui';
 import jwt from 'jsonwebtoken';
 
 import BidSocketHandler from './BidSocketHandler.js';
+import NotificationSocketHandler from './NotificationSocketHandler.js';
 import { User } from '../models/user.model.js';
 import { EVENTS, NAMESPACES } from '../utils/socketConstants.js';
 
@@ -13,6 +14,7 @@ class SocketConnection {
     this.setupAdminUI();
     this.setupAuthMiddleware();
     this.setupEventHandlers();
+    this.NotificationSocketHandler = new NotificationSocketHandler(io);
   }
 
   setupAdminUI() {
@@ -83,9 +85,13 @@ class SocketConnection {
         this.userSocketMap.set(userId, socket.id);
         console.info(`User Id ${userId} Socket ID ${socket.id}`);
       }
-      console.log(this.userSocketMap);
+
       console.info(`✅ Authenticated user connected: ${socket.user.email}`);
       this.io.emit(EVENTS.USER_CONNECTED, { email: socket.user.email });
+
+      socket.on('mark-all-read', async (userId) => {
+        this.NotificationSocketHandler.handleMarkAllAsRead(socket, userId);
+      });
 
       socket.on(EVENTS.JOIN_ITEM_ROOM, (itemId) => {
         this.BidSocketHandler.handleJoinItemRoom(socket, itemId);
@@ -98,20 +104,11 @@ class SocketConnection {
       socket.on(EVENTS.PLACE_BID, (data) => {
         this.BidSocketHandler.handleBidPlacement(socket, data);
       });
-      socket.on('join-notification-room', () => {
-        this.BidSocketHandler.handleJoinNotificationRoom(socket);
-      });
 
       socket.on(EVENTS.DISCONNECT, () => {
         console.info(`❌ User disconnected: ${socket.user.email}`);
-        console.log(userId);
         if (this.userSocketMap.has(userId)) {
           this.userSocketMap.delete(userId);
-          console.log('Updated userSocketMap:', [
-            ...this.userSocketMap.entries(),
-          ]);
-        } else {
-          console.log(`User ${userId} was not found in socket map`);
         }
       });
     });

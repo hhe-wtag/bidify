@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { emitMarkAllRead } from '@/services/notificationSocketEvents'
+import type { Notifications } from '@/interfaces/notification'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 export const useNotificationStore = defineStore('notifications', {
   state: () => ({
-    notifications: [] as Array<any>,
+    notifications: [] as Array<Notifications>,
     loading: false,
     error: null as string | null,
   }),
@@ -22,6 +25,7 @@ export const useNotificationStore = defineStore('notifications', {
   },
   actions: {
     async fetchNotifications() {
+      const { handleError } = useErrorHandler()
       this.loading = true
       this.error = null
       try {
@@ -31,19 +35,20 @@ export const useNotificationStore = defineStore('notifications', {
           },
         })
         this.notifications = response.data.data
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch notifications.'
+      } catch (error) {
+        this.error = handleError(error)
       } finally {
         this.loading = false
       }
     },
-    markAllAsRead() {
+    markAllAsRead(userId: string) {
       this.notifications = this.notifications.map((notification) => ({
         ...notification,
         read: true,
       }))
+      emitMarkAllRead(userId)
     },
-    addNotification(notification: any) {
+    addNotification(notification: Notifications) {
       this.notifications.unshift(notification)
     },
   },

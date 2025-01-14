@@ -16,11 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { connectSocket } from '@/services/websocket.ts'
 import { useNotificationStore } from '@/stores/notificationStore'
-import {
-  onBidNotification,
-  onNotification,
-  onOutBidNotification,
-} from '@/services/bidSocketEvents.ts'
+import { onBidNotification, onOutBidNotification } from '@/services/notificationSocketEvents.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -31,15 +27,10 @@ const notifications = computed(() => notificationStore.notifications)
 
 onMounted(async () => {
   try {
-    await userStore.fetchUserProfile()
     if (userStore.isAuthenticated) {
-      console.log(`User Token: ${userStore.token} UserId: ${userStore.userId}`)
+      await userStore.fetchUserProfile()
       if (userStore.token && userStore.userId) connectSocket(userStore.token, userStore.userId)
-      userStore.fetchUserProfile()
       await notificationStore.fetchNotifications()
-      onNotification((data) => {
-        console.log(data)
-      })
       onBidNotification((data) => {
         console.log('Received place-bid-notification:', data)
         const { notification } = data.data
@@ -164,7 +155,12 @@ const formatDate = (dateString: string) => {
                     class="h-4 w-4 text-gray-500"
                   />
                   <div class="flex-1 space-y-1">
-                    <p :class="['text-sm', notification.read ? 'text-gray-600' : 'font-medium']">
+                    <p
+                      :class="[
+                        'text-sm',
+                        notification.read ? 'text-gray-600' : 'font-medium text-blue-600',
+                      ]"
+                    >
                       {{ notification.message }}
                     </p>
                     <p class="text-xs text-gray-500">

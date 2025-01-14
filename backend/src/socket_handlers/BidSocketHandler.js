@@ -19,16 +19,6 @@ class BidSocketHandler extends BaseSocketHandler {
     });
   };
 
-  handleJoinNotificationRoom = (socket) => {
-    socket.join(`notification`);
-
-    this.emitToRoom(`notification`, 'user-notification-room', {
-      event: 'user-notification-room',
-      data: { user: socket.user },
-      message: `User-${socket.id} connected to notification room`,
-    });
-  };
-
   handleLeaveItemRoom = (socket, itemId) => {
     socket.leave(`item-${itemId}`);
 
@@ -43,7 +33,8 @@ class BidSocketHandler extends BaseSocketHandler {
     const result = await this.bidSocketRepository.placeBid(bidData);
 
     if (result.statusCode === HTTP_STATUS.CREATED) {
-      const { savedBid, bidPlacedNotification, outBidNotify } = result.data;
+      const { savedBid, bidPlacedNotification, outbidNotifications } =
+        result.data;
 
       this.emitToRoom(`item-${bidData.itemId}`, EVENTS.NEW_BID_PLACED, {
         event: EVENTS.NEW_BID_PLACED,
@@ -51,29 +42,24 @@ class BidSocketHandler extends BaseSocketHandler {
         message: `New bid of $${bidData.incrementBidAmount} placed by userId: ${bidData.bidderId}`,
       });
 
-      console.log(`Bid Notify: ${bidPlacedNotification}`);
-      this.emitToUser(socket.id, 'place-bid-notification', {
-        event: 'place-bid-notification',
+      this.emitToUser(socket.id, EVENTS.NOTIFICATION_NEW_BID_PLACE, {
+        event: EVENTS.NOTIFICATION_NEW_BID_PLACE,
         data: { notification: bidPlacedNotification },
         message: `Bid placed successfully by userId: ${bidData.bidderId} on itemId: ${bidData.itemId}`,
       });
 
-      if (outBidNotify.length > 0) {
-        outBidNotify.forEach((notification) => {
+      if (outbidNotifications.length > 0) {
+        outbidNotifications.forEach((notification) => {
           const userIdString = notification.userId.toString();
-          console.log(userIdString);
           if (!this.userSocketMap.has(userIdString)) {
-            console.log(
-              `User ${notification.userId} not connected, skipping emit`
-            );
             return;
           }
+
           const socketId = this.userSocketMap.get(userIdString);
-          console.log(`Outbid Notify: ${notification}`);
-          this.emitToUser(socketId, 'outbid-notification', {
-            event: 'outbid-notification',
+          this.emitToUser(socketId, EVENTS.NOTIFICATION_OUT_BID_PLACE, {
+            event: EVENTS.NOTIFICATION_OUT_BID_PLACE,
             data: { notification },
-            message: `You have been outbid on itemId: ${notification.itemId}.`,
+            message: `You have been outbid by userId: ${notification.userId} on itemId: ${notification.itemId}.`,
           });
         });
       }

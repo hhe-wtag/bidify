@@ -1,8 +1,5 @@
-import { useNotificationStore } from '@/stores/notificationStore'
-import { toast } from '@/components/ui/toast'
 import { emitToastForWSDisconnet } from '@/utils/commonToasts'
 import { io, type Socket } from 'socket.io-client'
-import { onNotification } from './bidSocketEvents'
 
 let socket: Socket | null = null
 const activeListeners = new Map<string, ((...args: any[]) => void)[]>()
@@ -18,10 +15,6 @@ export const connectSocket = (token: string, userId: string) => {
   socket.on('connect', () => {
     console.info('✅ WebSocket connection established')
   })
-
-  socket.emit('join-notification-room')
-
-  
 
   socket.on('disconnect', () => {
     emitToastForWSDisconnet()
