@@ -14,7 +14,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { Input } from '@/components/ui/input'
 import TimeInformationOfItem from './TimeInformationOfItem.vue'
 import BidUpdate from './BidUpdate.vue'
-import { calculateTimeRemaining } from '@/utils/TimeFunctions.ts'
+import { calculateTimeRemaining } from '@/utils/timeFunctions.ts'
 import { placeBid } from '@/services/bidSocketEvents.ts'
 
 const router = useRouter()

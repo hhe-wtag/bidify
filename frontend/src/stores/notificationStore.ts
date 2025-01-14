@@ -43,5 +43,8 @@ export const useNotificationStore = defineStore('notifications', {
         read: true,
       }))
     },
+    addNotification(notification: any) {
+      this.notifications.unshift(notification)
+    },
   },
 })

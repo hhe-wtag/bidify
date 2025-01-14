@@ -1,6 +1,7 @@
 class BaseSocketHandler {
-  constructor(io) {
+  constructor(io, userSocketMap) {
     this.io = io;
+    this.userSocketMap = userSocketMap;
   }
 
   /**
@@ -11,6 +12,18 @@ class BaseSocketHandler {
    */
   emitToUser(socketId, event, data) {
     this.io.to(socketId).emit(event, data);
+  }
+
+  emitToUserId(userId, event, data) {
+    console.log('Current userSocketMap:', this.userSocketMap.entries());
+
+    const socketId = this.userSocketMap.get(userId);
+
+    if (!socketId) {
+      console.log('User not connected');
+      return;
+    }
+    console.log(`Emitting to User ID: ${userId}, Socket ID: ${socketId}`);
   }
 
   /**

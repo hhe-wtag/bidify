@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Clock } from 'lucide-vue-next'
-import { formatDate, calculateTimeRemaining } from '@/utils/TimeFunctions'
+import { formatDate, calculateTimeRemaining } from '@/utils/timeFunctions.ts'
 import type { Item } from '@/interfaces/item.ts'
 
 const props = defineProps<{

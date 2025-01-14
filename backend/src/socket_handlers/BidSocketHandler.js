@@ -4,8 +4,8 @@ import HTTP_STATUS from '../utils/httpStatus.js';
 import { EVENTS } from '../utils/socketConstants.js';
 
 class BidSocketHandler extends BaseSocketHandler {
-  constructor(io) {
-    super(io);
+  constructor(io, userSocketMap) {
+    super(io, userSocketMap);
     this.bidSocketRepository = new BidSocketRepository();
   }
 
@@ -43,17 +43,40 @@ class BidSocketHandler extends BaseSocketHandler {
     const result = await this.bidSocketRepository.placeBid(bidData);
 
     if (result.statusCode === HTTP_STATUS.CREATED) {
+      const { savedBid, bidPlacedNotification, outBidNotify } = result.data;
+
       this.emitToRoom(`item-${bidData.itemId}`, EVENTS.NEW_BID_PLACED, {
         event: EVENTS.NEW_BID_PLACED,
-        data: { bid: result },
+        data: { bid: savedBid },
         message: `New bid of $${bidData.incrementBidAmount} placed by userId: ${bidData.bidderId}`,
       });
 
+      console.log(`Bid Notify: ${bidPlacedNotification}`);
       this.emitToUser(socket.id, 'place-bid-notification', {
         event: 'place-bid-notification',
-        data: { bid: result },
-        message: `Attempt of 'place-bid-notification' by userId: ${bidData.bidderId} against itemId: ${bidData.itemId}`,
+        data: { notification: bidPlacedNotification },
+        message: `Bid placed successfully by userId: ${bidData.bidderId} on itemId: ${bidData.itemId}`,
       });
+
+      if (outBidNotify.length > 0) {
+        outBidNotify.forEach((notification) => {
+          const userIdString = notification.userId.toString();
+          console.log(userIdString);
+          if (!this.userSocketMap.has(userIdString)) {
+            console.log(
+              `User ${notification.userId} not connected, skipping emit`
+            );
+            return;
+          }
+          const socketId = this.userSocketMap.get(userIdString);
+          console.log(`Outbid Notify: ${notification}`);
+          this.emitToUser(socketId, 'outbid-notification', {
+            event: 'outbid-notification',
+            data: { notification },
+            message: `You have been outbid on itemId: ${notification.itemId}.`,
+          });
+        });
+      }
     }
   };
 }

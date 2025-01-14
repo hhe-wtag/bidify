@@ -33,6 +33,15 @@ export const onNotification = (callback: (data: any) => void) => {
   onEvent('user-notification-room', callback)
 }
 
+
+export const onBidNotification = (callback: (data: any) => void) => {
+  onEvent('place-bid-notification', callback)
+}
+
+export const onOutBidNotification = (callback: (data: any) => void) => {
+  onEvent('outbid-notification', callback)
+}
+
 export const onBidError = (callback: (error: any) => void) => {
   onEvent('bid-error', callback)
 }

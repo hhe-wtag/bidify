@@ -89,35 +89,49 @@ class BidSocketRepository extends BaseRepository {
 
         const bidPlacedNotification = new Notification({
           userId: bidderId,
+          itemId: itemId,
           type: 'BID_PLACED',
           message: `You have placed a bid of $${latestBidAmount} on ${item.title}`,
           preview: 'Bid Placed',
         });
         await bidPlacedNotification.save({ session });
 
+        console.log(bidPlacedNotification);
         const previousBidders = await Bid.find({ itemId })
           .distinct('bidderId')
           .where('_id')
           .ne(bidderId);
 
+          const outBidNotify = [];
         const outbidNotifications = previousBidders
           .filter((userId) => userId.toString() !== bidderId.toString())
-          .map((userId) => ({
-            userId,
-            type: 'OUTBID',
-            message: `You have been outbid on ${item.title}. Current bid is $${latestBidAmount}.`,
-            preview: 'Outbid',
-          }));
+          .map(async (userId) => {
+            const outbidNotification = new Notification({
+              userId: userId,
+              itemId: itemId,
+              type: 'OUTBID',
+              message: `You have been outbid on ${item.title}. Current bid is $${latestBidAmount}.`,
+              preview: 'Outbid',
+            });
 
-        if (outbidNotifications.length > 0) {
-          await Notification.insertMany(outbidNotifications, { session });
-        }
+            await outbidNotification.save({ session });
+            outBidNotify.push(outbidNotification);
+            return outbidNotification;
+          });
+
+        await Promise.all(outbidNotifications);
+
+        console.log(outBidNotify);
 
         await session.commitTransaction();
 
         return new ApiResponse(
           HTTP_STATUS.CREATED,
-          savedBid,
+          {
+            savedBid,
+            bidPlacedNotification,
+            outBidNotify,
+          },
           'Bid placed successfully'
         );
       } catch (error) {

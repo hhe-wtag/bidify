@@ -29,10 +29,16 @@ import { Search } from 'lucide-vue-next'
 
 import ItemForm from '@/components/items/ItemForm.vue'
 import type { CreateItemData, Item, UpdateItemData } from '@/interfaces/item'
-import { onNotification } from '@/services/bidSocketEvents.ts'
+import {
+  onBidNotification,
+  onNotification,
+  onOutBidNotification,
+} from '@/services/bidSocketEvents.ts'
+import { useNotificationStore } from '@/stores/notificationStore.ts'
 
 const router = useRouter()
 const itemStore = useItemStore()
+const notificationStore = useNotificationStore()
 const userStore = useUserStore()
 const searchQuery = ref('')
 const showForm = ref(false)
@@ -40,7 +46,7 @@ const selectedItem: Ref<Item | null> = ref(null)
 
 onMounted(async () => {
   await itemStore.fetchAllItems()
-  onNotification((data)=>{
+  onNotification((data) => {
     console.log(data)
   })
 })

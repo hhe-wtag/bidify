@@ -8,7 +8,8 @@ import { EVENTS, NAMESPACES } from '../utils/socketConstants.js';
 class SocketConnection {
   constructor(io) {
     this.io = io;
-    this.BidSocketHandler = new BidSocketHandler(io);
+    this.userSocketMap = new Map();
+    this.BidSocketHandler = new BidSocketHandler(io, this.userSocketMap);
     this.setupAdminUI();
     this.setupAuthMiddleware();
     this.setupEventHandlers();
@@ -77,6 +78,12 @@ class SocketConnection {
 
   setupEventHandlers() {
     this.io.on(EVENTS.CONNECTION, (socket) => {
+      const { userId } = socket.handshake.auth;
+      if (userId) {
+        this.userSocketMap.set(userId, socket.id);
+        console.info(`User Id ${userId} Socket ID ${socket.id}`);
+      }
+      console.log(this.userSocketMap);
       console.info(`✅ Authenticated user connected: ${socket.user.email}`);
       this.io.emit(EVENTS.USER_CONNECTED, { email: socket.user.email });
 
@@ -97,6 +104,15 @@ class SocketConnection {
 
       socket.on(EVENTS.DISCONNECT, () => {
         console.info(`❌ User disconnected: ${socket.user.email}`);
+        console.log(userId);
+        if (this.userSocketMap.has(userId)) {
+          this.userSocketMap.delete(userId);
+          console.log('Updated userSocketMap:', [
+            ...this.userSocketMap.entries(),
+          ]);
+        } else {
+          console.log(`User ${userId} was not found in socket map`);
+        }
       });
     });
   }

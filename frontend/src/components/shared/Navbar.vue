@@ -16,7 +16,11 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { connectSocket } from '@/services/websocket.ts'
 import { useNotificationStore } from '@/stores/notificationStore'
-import { onNotification } from '@/services/bidSocketEvents.ts'
+import {
+  onBidNotification,
+  onNotification,
+  onOutBidNotification,
+} from '@/services/bidSocketEvents.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -26,13 +30,29 @@ const loadingNotifications = computed(() => notificationStore.loading)
 const notifications = computed(() => notificationStore.notifications)
 
 onMounted(async () => {
-  if (userStore.isAuthenticated) {
-    if (userStore.token) connectSocket(userStore.token)
-    userStore.fetchUserProfile()
-    await notificationStore.fetchNotifications()
-    onNotification((data) => {
-      console.log(data)
-    })
+  try {
+    await userStore.fetchUserProfile()
+    if (userStore.isAuthenticated) {
+      console.log(`User Token: ${userStore.token} UserId: ${userStore.userId}`)
+      if (userStore.token && userStore.userId) connectSocket(userStore.token, userStore.userId)
+      userStore.fetchUserProfile()
+      await notificationStore.fetchNotifications()
+      onNotification((data) => {
+        console.log(data)
+      })
+      onBidNotification((data) => {
+        console.log('Received place-bid-notification:', data)
+        const { notification } = data.data
+        notificationStore.addNotification(notification)
+      })
+      onOutBidNotification((data) => {
+        console.log('Received outbid-notification:', data)
+        const { notification } = data.data
+        notificationStore.addNotification(notification)
+      })
+    }
+  } catch (error) {
+    console.error('Error occurred:', error)
   }
 })
 
