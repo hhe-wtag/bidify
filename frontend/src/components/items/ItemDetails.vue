@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+
 import { useItemStore } from '@/stores/item'
 import { useUserStore } from '@/stores/user'
 import { useBidStore } from '@/stores/bid'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ArrowLeft, DollarSign } from 'lucide-vue-next'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
 import TimeInformationOfItem from './TimeInformationOfItem.vue'
 import BidUpdate from './BidUpdate.vue'
+
+import { ArrowLeft, DollarSign, PartyPopper } from 'lucide-vue-next'
+
 import { calculateTimeRemaining } from '@/utils/timeFunctions'
 import { placeBid } from '@/services/bidSocketEvents.ts'
 
@@ -24,20 +28,36 @@ const bidStore = useBidStore()
 const slug = route.params.slug as string
 const incrementBidAmount = ref(0)
 
+const latestBid = computed(() => bidStore.lates10Bids?.[0] || null)
 const currentBidAmount = computed(
   () => itemStore.currentItem?.latestBid || itemStore.currentItem?.startingBid || 0,
 )
-
 const minimumBidIncrement = computed(() => itemStore.currentItem?.minimumBidIncrement || 0)
-
 const newLatestBid = computed(() => currentBidAmount.value + incrementBidAmount.value)
+
+const isPlaceBidDisabled = computed(() => {
+  const currentItem = itemStore.currentItem
+  const userProfile = userStore.profile
+  if (!currentItem || !userProfile) return true
+  return currentItem.status === 'closed' || currentItem.sellerId === userProfile._id
+})
+
+const placeBidDisabledReason = computed(() => {
+  const currentItem = itemStore.currentItem
+  const userProfile = userStore.profile
+
+  if (!currentItem || !userProfile) return 'Item or user not found'
+  if (currentItem.status === 'closed') return 'Auction is closed'
+  if (currentItem.sellerId === userProfile._id)
+    return 'You are the seller of this item, you cannot place bid'
+
+  return ''
+})
 
 watch(
   () => itemStore.currentItem,
   (newItem) => {
-    if (newItem) {
-      incrementBidAmount.value = newItem.minimumBidIncrement
-    }
+    if (newItem) incrementBidAmount.value = newItem.minimumBidIncrement
   },
   { immediate: true },
 )
@@ -52,6 +72,7 @@ watch(
   },
 )
 
+// Methods
 const handlePlaceBid = () => {
   if (!itemStore.currentItem || !userStore.profile) return
 
@@ -62,36 +83,9 @@ const handlePlaceBid = () => {
   })
 }
 
+// Lifecycle Hooks
 onMounted(() => {
-  if (slug) {
-    itemStore.fetchItemBySlug(slug)
-  }
-})
-
-const isPlaceBidDisabled = computed(() => {
-  const currentItem = itemStore.currentItem
-  const userProfile = userStore.profile
-
-  if (!currentItem || !userProfile) return true
-
-  return (
-    currentItem.status === 'closed' ||
-    calculateTimeRemaining(currentItem.endTime) === 'Auction Ended' ||
-    currentItem.sellerId === userProfile._id
-  )
-})
-
-const placeBidDisabledReason = computed(() => {
-  const currentItem = itemStore.currentItem
-  const userProfile = userStore.profile
-
-  if (!currentItem || !userProfile) return 'Item or user not found'
-  if (currentItem.status === 'closed') return 'Auction is closed'
-  if (calculateTimeRemaining(currentItem.endTime) === 'Auction Ended') return 'Auction ended'
-  if (currentItem.sellerId === userProfile._id)
-    return 'You are the seller of this item, you cannot place bid'
-
-  return ''
+  if (slug) itemStore.fetchItemBySlug(slug)
 })
 </script>
 
@@ -164,31 +158,50 @@ const placeBidDisabledReason = computed(() => {
             <TimeInformationOfItem :currentItem="itemStore.currentItem" />
           </div>
 
-          <div class="flex flex-col items-center gap-4 mx-auto pt-4">
-            <h1 class="text-xl">
-              New price for the item will be
-              <span class="font-bold italic">${{ newLatestBid }}</span>
-            </h1>
+          <div v-if="bidStore.loading" class="flex justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
 
-            <div class="flex justify-center items-center gap-2">
-              <span>Raise your bid by $</span>
-              <Input
-                v-model="incrementBidAmount"
-                type="number"
-                :min="itemStore.currentItem.minimumBidIncrement"
-                step="1.0"
-                class="w-20 mr-4"
-              />
-              <Tooltip :delay-duration="0">
-                <TooltipTrigger>
-                  <Button size="lg" :disabled="isPlaceBidDisabled" @click="handlePlaceBid">
-                    Place Bid
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" v-if="isPlaceBidDisabled">
-                  {{ placeBidDisabledReason }}
-                </TooltipContent>
-              </Tooltip>
+          <div v-else>
+            <div v-if="itemStore.currentItem.status === 'sold' && latestBid?.bidderName">
+              <h1 class="text-center text-xl">
+                Winner of this item is
+                <span class="font-bold italic">{{ latestBid.bidderName }}</span>
+                <PartyPopper class="size-8 ms-1 inline-block" />
+              </h1>
+            </div>
+            <div
+              v-if="itemStore.currentItem.status === 'active'"
+              class="flex flex-col items-center gap-4 mx-auto pt-4"
+            >
+              <h1 class="text-xl">
+                New price for the item will be
+                <span class="font-bold italic">${{ newLatestBid }}</span>
+              </h1>
+
+              <div class="flex justify-center items-center gap-2">
+                <span>Raise your bid by $</span>
+                <Input
+                  v-model="incrementBidAmount"
+                  type="number"
+                  :min="itemStore.currentItem.minimumBidIncrement"
+                  step="1.0"
+                  class="w-20 mr-4"
+                />
+                <Tooltip :delay-duration="0">
+                  <TooltipTrigger>
+                    <Button size="lg" :disabled="isPlaceBidDisabled" @click="handlePlaceBid">
+                      Place Bid
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" v-if="isPlaceBidDisabled">
+                    {{ placeBidDisabledReason }}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+            <div v-if="itemStore.currentItem.status === 'canceled'">
+              <h1 class="text-base text-center text-muted-foreground">The auction is canceled!</h1>
             </div>
           </div>
         </CardContent>
@@ -202,10 +215,10 @@ const placeBidDisabledReason = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
 }
 
 .fade-enter-from,
