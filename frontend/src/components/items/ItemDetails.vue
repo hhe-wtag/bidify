@@ -16,8 +16,8 @@ import BidUpdate from './BidUpdate.vue'
 
 import { ArrowLeft, DollarSign, PartyPopper } from 'lucide-vue-next'
 
-import { calculateTimeRemaining } from '@/utils/timeFunctions'
 import { placeBid } from '@/services/bidSocketEvents.ts'
+import { z } from 'zod'
 
 const router = useRouter()
 const route = useRoute()
@@ -53,6 +53,31 @@ const placeBidDisabledReason = computed(() => {
 
   return ''
 })
+const bidError = ref('')
+
+const bidSchema = computed(() => {
+  return z
+    .number({
+      required_error: 'Bid amount is required',
+      invalid_type_error: 'Bid amount must be a number',
+    })
+    .min(
+      itemStore.currentItem.minimumBidIncrement,
+      `You must increase latest bid by $${itemStore.currentItem.minimumBidIncrement}`,
+    )
+})
+
+const validateBidAmount = () => {
+  console.log(incrementBidAmount)
+  try {
+    bidSchema.value.parse(Number(incrementBidAmount.value))
+    bidError.value = ''
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      bidError.value = error.errors[0].message
+    }
+  }
+}
 
 watch(
   () => itemStore.currentItem,
@@ -72,18 +97,25 @@ watch(
   },
 )
 
-// Methods
 const handlePlaceBid = () => {
   if (!itemStore.currentItem || !userStore.profile) return
 
-  placeBid({
-    itemId: itemStore.currentItem._id,
-    bidderId: userStore.profile._id,
-    incrementBidAmount: incrementBidAmount.value,
-  })
+  try {
+    bidSchema.value.parse(Number(incrementBidAmount.value))
+    bidError.value = ''
+
+    placeBid({
+      itemId: itemStore.currentItem._id,
+      bidderId: userStore.profile._id,
+      incrementBidAmount: incrementBidAmount.value,
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      bidError.value = error.errors[0].message
+    }
+  }
 }
 
-// Lifecycle Hooks
 onMounted(() => {
   if (slug) itemStore.fetchItemBySlug(slug)
 })
@@ -181,16 +213,23 @@ onMounted(() => {
 
               <div class="flex justify-center items-center gap-2">
                 <span>Raise your bid by $</span>
+
                 <Input
                   v-model="incrementBidAmount"
                   type="number"
                   :min="itemStore.currentItem.minimumBidIncrement"
                   step="1.0"
                   class="w-20 mr-4"
+                  @update:modelValue="validateBidAmount"
                 />
+
                 <Tooltip :delay-duration="0">
                   <TooltipTrigger>
-                    <Button size="lg" :disabled="isPlaceBidDisabled" @click="handlePlaceBid">
+                    <Button
+                      size="lg"
+                      :disabled="isPlaceBidDisabled || bidError !== ''"
+                      @click="handlePlaceBid"
+                    >
                       Place Bid
                     </Button>
                   </TooltipTrigger>
@@ -199,6 +238,7 @@ onMounted(() => {
                   </TooltipContent>
                 </Tooltip>
               </div>
+              <span v-if="bidError" class="text-sm text-red-500">{{ bidError }}</span>
             </div>
             <div v-if="itemStore.currentItem.status === 'canceled'">
               <h1 class="text-base text-center text-muted-foreground">The auction is canceled!</h1>
