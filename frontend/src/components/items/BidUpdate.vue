@@ -109,7 +109,7 @@ const onEnter = (el) => {
             <StepperSeparator
               v-if="index !== bidStore.lates10Bids.length - 1"
               class="absolute left-[22px] top-[45px] block h-[calc(100%_-_20px)] w-0.5 shrink-0 rounded-full !bg-gray-200"
-              :class="[index === 0 && 'bg-gradient-to-b from-gray-400 to-transparent ']"
+              :class="[index === 0 && 'bg-gradient-to-b from-gray-400 to-transparents']"
             />
 
             <div class="z-10 rounded-full shrink-0 p-1.5 bg-white">
