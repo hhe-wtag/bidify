@@ -58,7 +58,7 @@ const isItemOwner = (item: Item): boolean => {
 }
 
 const formatDate = (date: string): string => {
-  return new Date(date).toLocaleDateString(undefined, {
+  return new Date(date).toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
