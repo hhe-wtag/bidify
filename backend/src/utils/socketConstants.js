@@ -36,6 +36,8 @@ export const EVENTS = {
   NOTIFICATION_MARK_AS_READ: 'mark-as-read',
   NOTIFICATION_NEW_BID_PLACE: 'place-bid-notification',
   NOTIFICATION_OUT_BID_PLACE: 'outbid-notification',
+  NOTIFICATION_WINNER: 'auction-winner',
+  NOTIFICATION_AUCTION_END: 'auction-end',
 
   // Admin Events
   GET_ACTIVE_USERS: 'get-active-users',

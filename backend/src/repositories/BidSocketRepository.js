@@ -4,6 +4,7 @@ import BaseRepository from './BaseRepository.js';
 import NotificationRepository from './NotificationRepository.js';
 import { Bid } from '../models/bid.model.js';
 import { Item } from '../models/item.model.js';
+import { User } from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
@@ -157,6 +158,7 @@ class BidSocketRepository extends BaseRepository {
         endTime: { $lte: new Date() },
       }).session(session);
 
+      const notify = [];
       const updatePromises = endedAuctionItems.map(async (item) => {
         // Get the winning bid
         const winningBid = await Bid.findOne({
@@ -172,16 +174,81 @@ class BidSocketRepository extends BaseRepository {
           },
           { new: true, session }
         );
+
+        if (updatedAuctionItem.status === 'sold') {
+          const winnerNotify =
+            await this.notificationRepository.createNotification(
+              winningBid.bidderId,
+              item._id,
+              'AUCTION_WON',
+              `Congratulations! You won the auction for "${item.title}".`,
+              'Auction Won'
+            );
+
+          notify.push({ winnerNotify: winnerNotify });
+
+          const otherBidders = await Bid.find({
+            itemId: item._id,
+          })
+            .distinct('bidderId')
+            .where('_id');
+
+          const filteredBidders = otherBidders.filter(
+            (userId) => userId.toString() !== winningBid.bidderId.toString()
+          );
+          console.log(
+            `Filtered Bidders: ${filteredBidders} winnerId: ${winningBid.bidderId}`
+          );
+          const auctionEndNotify = await Promise.all(
+            filteredBidders.map(async (userId) => {
+              try {
+                const outbidNotification =
+                  await this.notificationRepository.createNotification(
+                    userId,
+                    item._id,
+                    'AUCTION_END',
+                    `The auction for "${item.title}" has ended.`,
+                    'Auction Ended'
+                  );
+                return outbidNotification;
+              } catch (error) {
+                console.error(
+                  `Failed to create notification for userId ${userId}:`,
+                  error
+                );
+                return null;
+              }
+            })
+          );
+          const winner = await User.findOne(
+            { _id: winningBid.bidderId },
+            'firstName lastName'
+          );
+          const WinnerName = `${winner.firstName} ${winner.lastName}`;
+          const sellerNotification =
+            await this.notificationRepository.createNotification(
+              item.sellerId,
+              item._id,
+              'AUCTION_END',
+              `The auction for "${item.title}" has ended. The winner is ${WinnerName}.`,
+              'Auction Ended'
+            );
+          auctionEndNotify.push(sellerNotification);
+          // console.log(`Winner Notify: ${winnerNotify}`);
+          // console.log(`Auction Notify: ${auctionEndNotify}`);
+          notify.push({ auctionEndNotify: auctionEndNotify });
+        }
         return updatedAuctionItem;
       });
 
       const processedItems = await Promise.all(updatePromises);
+      // console.log(`notify: ${notify}`);
 
       await session.commitTransaction();
 
       return new ApiResponse(
         HTTP_STATUS.OK,
-        { processedItems },
+        { processedItems, notify },
         'Items processed successfully for the auction end time'
       );
     } catch (error) {

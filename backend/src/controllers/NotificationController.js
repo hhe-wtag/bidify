@@ -39,7 +39,7 @@ class NotificationController {
     const { notificationId } = req.params;
 
     const updatedNotification =
-      await this.notificationRepository.markAsRead(notificationId);
+      await this.notificationRepository.markAllAsRead(notificationId);
 
     res.status(HTTP_STATUS.OK).json({
       status: 'success',

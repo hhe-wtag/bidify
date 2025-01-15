@@ -16,7 +16,12 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { connectSocket } from '@/services/websocket.ts'
 import { useNotificationStore } from '@/stores/notificationStore'
-import { onBidNotification, onOutBidNotification } from '@/services/notificationSocketEvents.ts'
+import {
+  onAuctionEndNotification,
+  onAuctionWinNotification,
+  onBidNotification,
+  onOutBidNotification,
+} from '@/services/notificationSocketEvents.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -38,6 +43,16 @@ onMounted(async () => {
       })
       onOutBidNotification((data) => {
         console.log('Received outbid-notification:', data)
+        const { notification } = data.data
+        notificationStore.addNotification(notification)
+      })
+      onAuctionWinNotification((data) => {
+        console.log('Received auction-win-notification:', data)
+        const { notification } = data.data
+        notificationStore.addNotification(notification)
+      })
+      onAuctionEndNotification((data) => {
+        console.log('Received auction-end-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })

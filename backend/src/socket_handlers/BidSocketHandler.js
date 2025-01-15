@@ -80,15 +80,44 @@ class BidSocketHandler extends BaseSocketHandler {
     const result =
       await this.bidSocketRepository.itemAuctionTimeEndStatusUpdate();
 
+    if (result.statusCode === HTTP_STATUS.OK) {
+      const { processedItems, notify } = result.data;
+      const [{ winnerNotify }, { auctionEndNotify }] = notify;
+
+      const userIdString = winnerNotify.userId.toString();
+      if (this.userSocketMap.has(userIdString)) {
+        const socketId = this.userSocketMap.get(userIdString);
+        this.emitToUser(socketId, EVENTS.NOTIFICATION_WINNER, {
+          event: EVENTS.NOTIFICATION_WINNER,
+          data: { notification: winnerNotify },
+          message: `You have won the auction`,
+        });
+      }
+      if (auctionEndNotify.length > 0) {
+        auctionEndNotify.forEach((notification) => {
+          const userIdString = notification.userId.toString();
+          if (!this.userSocketMap.has(userIdString)) {
+            return;
+          }
+
+          const socketId = this.userSocketMap.get(userIdString);
+          this.emitToUser(socketId, EVENTS.NOTIFICATION_AUCTION_END, {
+            event: EVENTS.NOTIFICATION_AUCTION_END,
+            data: { notification },
+            message: `Auction end notification`,
+          });
+        });
+      }
+    }
     // Emit updates for each ended auction
-    result.processedItems.forEach((auction) => {
-      //! TODO
-      // this.emitToRoom(`item-${auction._id}`, EVENTS.AUCTION_ENDED, {
-      //   event: EVENTS.AUCTION_ENDED,
-      //   data: { auction },
-      //   message: `Auction ended for item ${auction.title}`,
-      // });
-    });
+    // result.processedItems.forEach((auction) => {
+    //! TODO
+    // this.emitToRoom(`item-${auction._id}`, EVENTS.AUCTION_ENDED, {
+    //   event: EVENTS.AUCTION_ENDED,
+    //   data: { auction },
+    //   message: `Auction ended for item ${auction.title}`,
+    // });
+    // });
   };
 }
 
