@@ -1,4 +1,5 @@
-import { emitToastForWSDisconnet } from '@/utils/commonToasts'
+import { toast } from '@/components/ui/toast'
+import { emitToastForWSConnect, emitToastForWSDisconnet } from '@/utils/commonToasts'
 import { io, type Socket } from 'socket.io-client'
 
 let socket: Socket | null = null
@@ -13,6 +14,7 @@ export const connectSocket = (token: string, userId: string) => {
   })
 
   socket.on('connect', () => {
+    emitToastForWSConnect()
     console.info('✅ WebSocket connection established')
   })
 

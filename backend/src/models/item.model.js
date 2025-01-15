@@ -45,12 +45,14 @@ const itemSchema = new mongoose.Schema(
     endTime: {
       type: Date,
       required: [true, 'Auction end time is required'],
-      validate: {
-        validator: function (value) {
-          return value > new Date();
-        },
-        message: 'End time must be a future date',
+      validator: function (value) {
+        const now = new Date();
+        const differenceInMilliseconds = value - now;
+        const differenceInHours = differenceInMilliseconds / (1000 * 60 * 60); // Convert milliseconds to hours
+
+        return value > now && differenceInHours >= 12;
       },
+      message: 'End time must be at least 12 hours in the future',
     },
     minimumBidIncrement: {
       type: Number,

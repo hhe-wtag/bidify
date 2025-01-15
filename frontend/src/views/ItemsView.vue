@@ -43,12 +43,14 @@ onMounted(async () => {
 
 const filteredItems = computed(() => {
   const query = searchQuery.value.toLowerCase().trim()
-  if (!query) return itemStore.items
+  if (!query) return [...itemStore.items].reverse()
 
-  return itemStore.items.filter(
-    (item) =>
-      item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query),
-  )
+  return itemStore.items
+    .filter(
+      (item) =>
+        item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query),
+    )
+    .reverse()
 })
 
 const isItemOwner = (item: Item): boolean => {
@@ -56,7 +58,7 @@ const isItemOwner = (item: Item): boolean => {
 }
 
 const formatDate = (date: string): string => {
-  return new Date(date).toLocaleDateString(undefined, {
+  return new Date(date).toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

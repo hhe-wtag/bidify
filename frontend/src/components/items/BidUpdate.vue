@@ -87,8 +87,9 @@ const onEnter = (el) => {
     <CardHeader class="pb-2">
       <CardTitle class="text-2xl text-center font-bold text-gray-800"> Bid History </CardTitle>
     </CardHeader>
-    <CardContent class="p-0">
+    <CardContent class="p-0 pb-6">
       <Stepper
+        v-if="bidStore.lates10Bids.length > 0"
         orientation="vertical"
         class="mx-auto flex w-full scrollbar max-h-[600px] overflow-y-auto max-w-lg p-6 flex-col justify-start gap-8"
       >
@@ -109,7 +110,7 @@ const onEnter = (el) => {
             <StepperSeparator
               v-if="index !== bidStore.lates10Bids.length - 1"
               class="absolute left-[22px] top-[45px] block h-[calc(100%_-_20px)] w-0.5 shrink-0 rounded-full !bg-gray-200"
-              :class="[index === 0 && 'bg-gradient-to-b from-gray-400 to-transparent ']"
+              :class="[index === 0 && 'bg-gradient-to-b from-gray-400 to-transparents']"
             />
 
             <div class="z-10 rounded-full shrink-0 p-1.5 bg-white">
@@ -131,6 +132,9 @@ const onEnter = (el) => {
           </StepperItem>
         </TransitionGroup>
       </Stepper>
+      <div v-else>
+        <h1 class="text-base text-center text-muted-foreground">No Bids placed for item yet!</h1>
+      </div>
     </CardContent>
   </Card>
 </template>

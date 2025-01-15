@@ -1,3 +1,5 @@
+import { schedule } from 'node-cron';
+
 import BaseSocketHandler from './BaseSocketHandler.js';
 import BidSocketRepository from '../repositories/BidSocketRepository.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
@@ -7,6 +9,7 @@ class BidSocketHandler extends BaseSocketHandler {
   constructor(io, userSocketMap) {
     super(io, userSocketMap);
     this.bidSocketRepository = new BidSocketRepository();
+    this.initializeAuctionEndCheck();
   }
 
   handleJoinItemRoom = (socket, itemId) => {
@@ -64,6 +67,28 @@ class BidSocketHandler extends BaseSocketHandler {
         });
       }
     }
+  };
+
+  initializeAuctionEndCheck() {
+    //Run at midnight (00:00) every day
+    schedule('* * * * *', async () => {
+      await this.itemAuctionTimeEndSync();
+    });
+  }
+
+  itemAuctionTimeEndSync = async () => {
+    const result =
+      await this.bidSocketRepository.itemAuctionTimeEndStatusUpdate();
+
+    // Emit updates for each ended auction
+    result.processedItems.forEach((auction) => {
+      //! TODO
+      // this.emitToRoom(`item-${auction._id}`, EVENTS.AUCTION_ENDED, {
+      //   event: EVENTS.AUCTION_ENDED,
+      //   data: { auction },
+      //   message: `Auction ended for item ${auction.title}`,
+      // });
+    });
   };
 }
 

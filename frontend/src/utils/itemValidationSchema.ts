@@ -34,7 +34,13 @@ const itemValidationSchema = z.object({
     .string()
     .nonempty('End time is required')
     .or(z.date())
-    .refine((value) => new Date(value) > new Date(), 'End time must be in the future'),
+    .refine((value) => {
+      const endDate = new Date(value)
+      const currentDate = new Date()
+      const twelveHoursLater = new Date(currentDate.getTime() + 12 * 60 * 60 * 1000) // 12 hours in milliseconds
+
+      return endDate > twelveHoursLater
+    }, 'End time must be at least 12 hours in the future'),
 
   minimumBidIncrement: z
     .number()

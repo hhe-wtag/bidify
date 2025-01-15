@@ -146,6 +146,54 @@ class BidSocketRepository extends BaseRepository {
       );
     }
   }
+
+  async itemAuctionTimeEndStatusUpdate() {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const endedAuctionItems = await Item.find({
+        status: 'active',
+        endTime: { $lte: new Date() },
+      }).session(session);
+
+      const updatePromises = endedAuctionItems.map(async (item) => {
+        // Get the winning bid
+        const winningBid = await Bid.findOne({
+          _id: item.lastBidId,
+        }).session(session);
+
+        const updatedAuctionItem = await Item.findByIdAndUpdate(
+          item._id,
+          {
+            status: winningBid ? 'sold' : 'canceled',
+            latestBid: winningBid?.latestBidAmount || item.startingBid,
+            lastBidId: winningBid?._id || null,
+          },
+          { new: true, session }
+        );
+        return updatedAuctionItem;
+      });
+
+      const processedItems = await Promise.all(updatePromises);
+
+      await session.commitTransaction();
+
+      return new ApiResponse(
+        HTTP_STATUS.OK,
+        { processedItems },
+        'Items processed successfully for the auction end time'
+      );
+    } catch (error) {
+      await session.abortTransaction();
+      return new ApiError(
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        `Failed to process ended items: ${error.message}`
+      );
+    } finally {
+      session.endSession();
+    }
+  }
 }
 
 export default BidSocketRepository;

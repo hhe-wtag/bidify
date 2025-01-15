@@ -21,7 +21,3 @@ export const onNewBidPlaced = (callback: (data: any) => void) => {
 export const onPlaceBidResult = (callback: (data: any) => void) => {
   onEvent('placed-bid-result', callback)
 }
-
-export const onBidError = (callback: (error: any) => void) => {
-  onEvent('bid-error', callback)
-}
