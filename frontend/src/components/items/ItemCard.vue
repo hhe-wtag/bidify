@@ -51,8 +51,15 @@ const getBadges = (item: Item) => {
   const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
   const twentyFourHoursMs = 24 * 60 * 60 * 1000
 
+  // Check if item is canceled
+  if (item?.status === 'canceled') {
+    console.log(item)
+    badges.push({ text: 'Canceled', style: 'bg-gray-100 text-gray-800' })
+    return badges
+  }
+
   // Check if item has ended
-  if (new Date(item?.endTime) < now) {
+  if (new Date(item?.endTime) < now || item.status === 'sold') {
     badges.push({ text: 'Ended', style: 'bg-gray-100 text-gray-800' })
     return badges
   }
