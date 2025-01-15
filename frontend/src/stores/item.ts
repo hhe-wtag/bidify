@@ -124,6 +124,8 @@ export const useItemStore = defineStore('item', {
       }, 'Failed to delete item')
     },
 
+    fetchWinnerOfTheItem() {},
+
     updateBidData(latestBid) {
       if (this.currentItem)
         this.currentItem = { ...this.currentItem, latestBid: latestBid?.bidAmount }

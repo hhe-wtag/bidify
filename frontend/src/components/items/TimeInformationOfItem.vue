@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Clock } from 'lucide-vue-next'
-import { formatDate, calculateTimeRemaining } from '@/utils/TimeFunctions'
+import { formatDate, calculateTimeRemaining } from '@/utils/timeFunctions'
 import type { Item } from '@/interfaces/item.ts'
 
 const props = defineProps<{
@@ -13,30 +13,38 @@ const timeRemaining = ref('')
 let timer: number | undefined
 
 const updateTimeRemaining = () => {
+  if (props.currentItem.status !== 'active') {
+    timeRemaining.value = '0d 0h 0m 0s'
+    return
+  }
+
   timeRemaining.value = calculateTimeRemaining(props.currentItem.endTime)
 
-  if (timeRemaining.value === 'Auction Ended') {
+  if (timeRemaining.value === '0d 0h 0m 0s') {
     clearInterval(timer)
   }
 }
 
 onMounted(() => {
   updateTimeRemaining()
-  timer = setInterval(updateTimeRemaining, 1000)
+  if (props.currentItem.status === 'active') {
+    timer = setInterval(updateTimeRemaining, 1000)
+  }
 })
 
 onUnmounted(() => {
-  clearInterval(timer)
+  if (props.currentItem.status === 'active') clearInterval(timer)
 })
 
 const getStatusClass = (status?: string) => ({
-  'text-green-600': !status || status === 'active',
-  'text-red-600': status === 'closed',
+  'text-green-600': status === 'active',
+  'text-yellow-600': status === 'sold',
+  'text-gray-400': status === 'canceled',
 })
 
 const getTimeRemainingClass = (remaining: string) => ({
-  'text-yellow-600': remaining !== 'Auction Ended',
-  'text-red-600': remaining === 'Auction Ended',
+  'text-yellow-600': remaining !== '0d 0h 0m 0s',
+  'text-red-600': remaining === '0d 0h 0m 0s',
 })
 </script>
 
@@ -57,8 +65,8 @@ const getTimeRemainingClass = (remaining: string) => ({
       </div>
       <div class="flex justify-between items-center">
         <span class="text-muted-foreground">Status</span>
-        <span class="font-medium" :class="getStatusClass(props.currentItem.status)">
-          {{ props.currentItem.status || 'Active' }}
+        <span class="font-medium capitalize" :class="getStatusClass(props.currentItem.status)">
+          {{ props.currentItem.status }}
         </span>
       </div>
       <div class="flex justify-between items-center">
