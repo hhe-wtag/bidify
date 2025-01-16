@@ -5,6 +5,7 @@ import TooltipProvider from './components/ui/tooltip/TooltipProvider.vue'
 </script>
 
 <template>
+  <!-- Todo: enhancements -->
   <TooltipProvider>
     <div class="flex min-h-screen flex-col">
       <Navbar class="flex-none" />
