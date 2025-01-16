@@ -13,6 +13,17 @@ class ItemRepository extends BaseRepository {
     this.notificationRepository = new NotificationRepository();
   }
 
+  async uploadFiles(file) {
+    console.log('hre', file);
+    const filesInfo = {
+      filename: file.filename,
+      filepath: `/uploads/${file.filename}`,
+      mimetype: file.mimetype,
+      size: file.size,
+    };
+    return filesInfo;
+  }
+
   async checkIfTheOperationIsAllowed(itemId, userId) {
     const item = await this.findById(itemId);
 
