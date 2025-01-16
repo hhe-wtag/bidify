@@ -160,7 +160,6 @@ class BidSocketRepository extends BaseRepository {
 
       const notify = [];
       const updatePromises = endedAuctionItems.map(async (item) => {
-        // Get the winning bid
         const winningBid = await Bid.findOne({
           _id: item.lastBidId,
         }).session(session);
@@ -195,9 +194,6 @@ class BidSocketRepository extends BaseRepository {
 
           const filteredBidders = otherBidders.filter(
             (userId) => userId.toString() !== winningBid.bidderId.toString()
-          );
-          console.log(
-            `Filtered Bidders: ${filteredBidders} winnerId: ${winningBid.bidderId}`
           );
           const auctionEndNotify = await Promise.all(
             filteredBidders.map(async (userId) => {
@@ -234,15 +230,12 @@ class BidSocketRepository extends BaseRepository {
               'Auction Ended'
             );
           auctionEndNotify.push(sellerNotification);
-          // console.log(`Winner Notify: ${winnerNotify}`);
-          // console.log(`Auction Notify: ${auctionEndNotify}`);
           notify.push({ auctionEndNotify: auctionEndNotify });
         }
         return updatedAuctionItem;
       });
 
       const processedItems = await Promise.all(updatePromises);
-      // console.log(`notify: ${notify}`);
 
       await session.commitTransaction();
 

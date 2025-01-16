@@ -38,6 +38,7 @@ export const EVENTS = {
   NOTIFICATION_OUT_BID_PLACE: 'outbid-notification',
   NOTIFICATION_WINNER: 'auction-winner',
   NOTIFICATION_AUCTION_END: 'auction-end',
+  NOTIFICATION_AUCTION_CANCELED: 'auction-canceled',
 
   // Admin Events
   GET_ACTIVE_USERS: 'get-active-users',

@@ -11,10 +11,13 @@ class SocketConnection {
     this.io = io;
     this.userSocketMap = new Map();
     this.BidSocketHandler = new BidSocketHandler(io, this.userSocketMap);
+    this.NotificationSocketHandler = new NotificationSocketHandler(
+      io,
+      this.userSocketMap
+    );
     this.setupAdminUI();
     this.setupAuthMiddleware();
     this.setupEventHandlers();
-    this.NotificationSocketHandler = new NotificationSocketHandler(io);
   }
 
   setupAdminUI() {

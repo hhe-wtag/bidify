@@ -72,7 +72,7 @@ class BidSocketHandler extends BaseSocketHandler {
   initializeAuctionEndCheck() {
     // 0 0 * * * Run at midnight (00:00) every day
     // */10 * * * * * * Every 10 seconds (For TEST)
-    schedule('0 0 * * *', async () => {
+    schedule('*/10 * * * * * *', async () => {
       await this.itemAuctionTimeEndSync();
     });
   }
@@ -81,6 +81,7 @@ class BidSocketHandler extends BaseSocketHandler {
     const result =
       await this.bidSocketRepository.itemAuctionTimeEndStatusUpdate();
 
+    // console.log(result);
     if (result.statusCode === HTTP_STATUS.OK) {
       const { processedItems, notify } = result.data;
       const [{ winnerNotify }, { auctionEndNotify }] = notify;
@@ -94,6 +95,7 @@ class BidSocketHandler extends BaseSocketHandler {
           message: `You have won the auction`,
         });
       }
+
       if (auctionEndNotify.length > 0) {
         auctionEndNotify.forEach((notification) => {
           const userIdString = notification.userId.toString();

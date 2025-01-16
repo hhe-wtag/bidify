@@ -16,6 +16,7 @@ const notificationSchema = new mongoose.Schema(
       enum: [
         'REGISTRATION',
         'AUCTION_END',
+        'AUCTION_CANCELED',
         'BID_PLACED',
         'AUCTION_WON',
         'OUTBID',
