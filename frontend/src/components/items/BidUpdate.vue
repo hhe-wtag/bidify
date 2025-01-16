@@ -34,7 +34,7 @@ const handleNewBidPlaced = ({ data }: { data: BidResponse }) => {
     pulsingItem.value = 1
     setTimeout(() => {
       pulsingItem.value = null
-    }, 3000)
+    }, 3500)
   }
 }
 
@@ -122,7 +122,9 @@ const onEnter = (el) => {
             <div
               class="flex flex-col rounded-xl transition-all duration-300 ease-in-out w-full"
               :class="[
-                index === 0 && pulsingItem ? 'ring-pulse scale-[1.02]' : 'hover:scale-[1.02]',
+                index === 0 && pulsingItem
+                  ? 'ring-pulse shadow-xl bg-card'
+                  : 'hover:shadow-xl bg-card',
               ]"
             >
               <StepperDescription>
@@ -158,6 +160,7 @@ const onEnter = (el) => {
 
 .ring-pulse {
   animation: ring-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: 0.5s;
 }
 
 .scrollbar {
