@@ -2,20 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import type { Ref } from 'vue'
 
-import { useRouter } from 'vue-router'
 import { useItemStore } from '@/stores/item'
-import { useUserStore } from '@/stores/user'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -29,10 +19,10 @@ import { Search } from 'lucide-vue-next'
 
 import ItemForm from '@/components/items/ItemForm.vue'
 import type { CreateItemData, Item, UpdateItemData } from '@/interfaces/item'
+import ItemCard from '@/components/items/ItemCard.vue'
 
-const router = useRouter()
 const itemStore = useItemStore()
-const userStore = useUserStore()
+
 const searchQuery = ref('')
 const showForm = ref(false)
 const selectedItem: Ref<Item | null> = ref(null)
@@ -52,18 +42,6 @@ const filteredItems = computed(() => {
     )
     .reverse()
 })
-
-const isItemOwner = (item: Item): boolean => {
-  return item.sellerId === userStore.profile?._id
-}
-
-const formatDate = (date: string): string => {
-  return new Date(date).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
 
 const openCreateForm = (): void => {
   selectedItem.value = null
@@ -126,49 +104,7 @@ const handleFormSubmit = async (formData: CreateItemData | UpdateItemData): Prom
 
     <!-- Grid Layout -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      <Card v-for="item in filteredItems" :key="item.slug" class="overflow-hidden flex flex-col">
-        <CardHeader class="flex-1">
-          <CardTitle>{{ item.title }}</CardTitle>
-          <CardDescription>{{ item.description }}</CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="text-muted-foreground">Starts from</span>
-              <span class="font-medium">${{ item.startingBid.toFixed(2) }}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-muted-foreground">Latest Bid</span>
-              <span
-                :class="{
-                  'font-medium': item.latestBid,
-                  'text-muted-foreground text-sm': !item.latestBid,
-                }"
-              >
-                {{ item.latestBid ? `$${item.latestBid.toFixed(2)}` : 'No bids placed yet' }}
-              </span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-muted-foreground">Minimum Raise</span>
-              <span class="font-medium">+ ${{ item.minimumBidIncrement.toFixed(2) }}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-muted-foreground">End Time</span>
-              <span class="font-medium">{{ formatDate(item.endTime) }}</span>
-            </div>
-          </div>
-        </CardContent>
-
-        <CardFooter class="flex justify-end gap-2">
-          <Button v-if="isItemOwner(item)" variant="outline" size="sm" @click="openEditForm(item)">
-            Edit
-          </Button>
-          <Button variant="outline" size="sm" @click="router.push(`items/${item.slug}`)"
-            >View Details</Button
-          >
-        </CardFooter>
-      </Card>
+      <ItemCard :items="filteredItems" @openEditForm="(item) => openEditForm(item)" />
     </div>
 
     <!-- Create/Edit Dialog -->

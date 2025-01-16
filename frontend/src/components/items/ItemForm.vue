@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import { z } from 'zod'
 import { Calendar } from '@/components/ui/calendar'
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import {
   Select,
   SelectContent,
@@ -51,11 +52,42 @@ const formData = ref<CreateItemData>({
 
 const errors = ref<Record<string, string>>({})
 
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'sold', label: 'Sold' },
+  { value: 'canceled', label: 'Canceled' },
+]
+
+const availableStatus = computed(() => {
+  const currentStatus = props.item?.status
+
+  // If the item is sold, no status update is allowed
+  if (currentStatus === 'sold') return []
+
+  // If the item is active, allow selecting sold or canceled
+  if (currentStatus === 'active') {
+    return statusOptions.filter((status) => ['sold', 'canceled'].includes(status.value))
+  }
+
+  // If the item is canceled, allow selecting active
+  if (currentStatus === 'canceled') {
+    return statusOptions.filter((status) => status.value === 'active')
+  }
+
+  // Default to returning no options if status doesn't match known conditions
+  return []
+})
+
+// Reset function
+const handleReset = () => {
+  formData.value.status = props.item?.status // Reset the status in your form data
+}
+
 const df = new DateFormatter('en-US', {
   dateStyle: 'long',
 })
 
-const items = [
+const datePresets = [
   { value: 0, label: 'Today' },
   { value: 1, label: 'Tomorrow' },
   { value: 3, label: 'In 3 days' },
@@ -80,6 +112,7 @@ onMounted(() => {
     formData.value = {
       title: props.item.title,
       description: props.item.description,
+      status: props.item.status,
       startingBid: props.item.startingBid,
       minimumBidIncrement: props.item.minimumBidIncrement,
       endTime: new Date(props.item.endTime).toISOString(),
@@ -100,6 +133,10 @@ onMounted(() => {
 
     dateTime.value = parseDateTime(formattedDate)
   }
+})
+
+const disabledButton = computed(() => {
+  return loading.value || props.item?.status === 'sold'
 })
 const handleSubmit = async () => {
   loading.value = true
@@ -138,6 +175,34 @@ const handleSubmit = async () => {
         required
       />
       <p v-if="errors.description" class="text-red-500">{{ errors.description }}</p>
+    </div>
+    <div class="space-y-2" v-if="item?.status">
+      <Label for="status">Status</Label>
+      <Select
+        @update:model-value="
+          (v) => {
+            if (!v) return
+            formData.status = v
+          }
+        "
+      >
+        <SelectTrigger>
+          <SelectValue :placeholder="item?.status || 'Select a status'" class="capitalize" />
+        </SelectTrigger>
+        <SelectContent>
+          <!-- Add a reset option -->
+          <SelectItem value="item?.status" @click="handleReset" class="capitalize">
+            {{ item?.status }}
+          </SelectItem>
+
+          <!-- Render other options dynamically -->
+          <SelectItem v-for="status in availableStatus" :key="status.value" :value="status.value">
+            {{ status.label }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      <p v-if="errors.startingBid" class="text-red-500">{{ errors.startingBid }}</p>
     </div>
 
     <div class="space-y-2">
@@ -193,8 +258,12 @@ const handleSubmit = async () => {
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem v-for="item in items" :key="item.value" :value="item.value.toString()">
-                {{ item.label }}
+              <SelectItem
+                v-for="datePreset in datePresets"
+                :key="datePreset.value"
+                :value="datePreset.value.toString()"
+              >
+                {{ datePreset.label }}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -207,9 +276,15 @@ const handleSubmit = async () => {
 
     <DialogFooter>
       <Button type="button" variant="outline" @click="emit('cancel')">Cancel</Button>
-      <Button type="submit" :disabled="loading">
-        {{ props.item ? 'Update' : 'Create' }}
-      </Button>
+
+      <Tooltip :delay-duration="0">
+        <TooltipTrigger>
+          <Button :type="'submit'" :disabled="disabledButton">
+            {{ props.item ? 'Update' : 'Create' }}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent :side="'bottom'">Cannot update a sold listing</TooltipContent>
+      </Tooltip>
     </DialogFooter>
   </form>
 </template>
