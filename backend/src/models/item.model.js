@@ -25,6 +25,14 @@ const itemSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'Seller ID is required'],
     },
+    images: [
+      {
+        filename: String,
+        filepath: String,
+        mimetype: String,
+        size: Number,
+      },
+    ],
     startingBid: {
       type: Number,
       required: [true, 'Starting bid is required'],

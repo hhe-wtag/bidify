@@ -25,13 +25,12 @@ class ItemController extends BaseController {
   create = asyncHandler(async (req, res) => {
     const newItemData = { ...req.body, sellerId: req.user._id };
 
-    if (req.files?.length === 0) {
-      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'No Files Found');
-    }
+    const baseURL = `${req.protocol}://${req.get('host')}`;
 
-    const imageUploadResult = await this.repository.uploadFiles(req.files);
-
-    console.log(imageUploadResult);
+    const imageUploadResult = await this.repository.uploadFiles(
+      req.files,
+      baseURL
+    );
 
     if (newItemData.endTime && new Date(newItemData.endTime) <= new Date()) {
       throw new ApiError(
@@ -40,16 +39,25 @@ class ItemController extends BaseController {
       );
     }
 
-    //const createdItem = await this.repository.create(newItemData);
+    if (imageUploadResult.length === req.files.length) {
+      const createdItem = await this.repository.create({
+        ...newItemData,
+        images: [...imageUploadResult],
+      });
 
-    res
-      .status(HTTP_STATUS.CREATED)
-      .json(
-        new ApiResponse(
-          HTTP_STATUS.CREATED,
-          createdItem,
-          'Item created successfully!'
-        )
+      res
+        .status(HTTP_STATUS.CREATED)
+        .json(
+          new ApiResponse(
+            HTTP_STATUS.CREATED,
+            createdItem,
+            'Item created successfully!'
+          )
+        );
+    } else
+      throw new ApiError(
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        `"Couldn't upload images, failed to create listing!"`
       );
   });
 
