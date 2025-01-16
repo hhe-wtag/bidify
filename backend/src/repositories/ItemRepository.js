@@ -8,14 +8,13 @@ class ItemRepository extends BaseRepository {
     super(Item);
   }
 
-  async uploadFiles(file) {
-    console.log('hre', file);
-    const filesInfo = {
+  async uploadFiles(files) {
+    const filesInfo = files.map((file) => ({
       filename: file.filename,
       filepath: `/uploads/${file.filename}`,
       mimetype: file.mimetype,
       size: file.size,
-    };
+    }));
     return filesInfo;
   }
 

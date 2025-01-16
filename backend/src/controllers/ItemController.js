@@ -24,13 +24,12 @@ class ItemController extends BaseController {
 
   create = asyncHandler(async (req, res) => {
     const newItemData = { ...req.body, sellerId: req.user._id };
-    console.log('item', req.file);
 
-    if (!req.file || req.files?.length === 0) {
+    if (req.files?.length === 0) {
       throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'No Files Found');
     }
 
-    const imageUploadResult = await this.repository.uploadFiles(req.file);
+    const imageUploadResult = await this.repository.uploadFiles(req.files);
 
     console.log(imageUploadResult);
 
