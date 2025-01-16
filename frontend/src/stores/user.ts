@@ -3,6 +3,8 @@ import axiosInstance from '@/plugins/axios'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import type { UserProfile } from '@/interfaces/user'
 import { connectSocket, disconnectSocket } from '@/services/websocket'
+import { useNotificationStore } from './notificationStore'
+import { onAuctionEndNotification, onAuctionWinNotification, onBidNotification, onOutBidNotification } from '@/services/notificationSocketEvents'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -31,6 +33,32 @@ export const useUserStore = defineStore('user', {
         if (token) {
           this.setToken(token)
           connectSocket(token, userId)
+          const notificationStore = useNotificationStore()
+          await notificationStore.fetchNotifications()
+
+          onBidNotification((data) => {
+            console.log('Received place-bid-notification:', data)
+            const { notification } = data.data
+            notificationStore.addNotification(notification)
+          })
+
+          onOutBidNotification((data) => {
+            console.log('Received outbid-notification:', data)
+            const { notification } = data.data
+            notificationStore.addNotification(notification)
+          })
+
+          onAuctionWinNotification((data) => {
+            console.log('Received auction-win-notification:', data)
+            const { notification } = data.data
+            notificationStore.addNotification(notification)
+          })
+
+          onAuctionEndNotification((data) => {
+            console.log('Received auction-end-notification:', data)
+            const { notification } = data.data
+            notificationStore.addNotification(notification)
+          })
         } else {
           throw new Error('Token or user profile missing')
         }
@@ -160,6 +188,9 @@ export const useUserStore = defineStore('user', {
       this.userId = null
       localStorage.removeItem('token')
       disconnectSocket()
+
+      const notificationStore = useNotificationStore()
+      notificationStore.clearNotifications()
     },
   },
 })
