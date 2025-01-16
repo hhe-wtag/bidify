@@ -70,8 +70,9 @@ class BidSocketHandler extends BaseSocketHandler {
   };
 
   initializeAuctionEndCheck() {
-    //Run at midnight (00:00) every day
-    schedule('* * * * *', async () => {
+    // 0 0 * * * Run at midnight (00:00) every day
+    // */10 * * * * * * Every 10 seconds (For TEST)
+    schedule('0 0 * * *', async () => {
       await this.itemAuctionTimeEndSync();
     });
   }
