@@ -11,7 +11,7 @@ router.get('/:slug', ItemController.getBySlug);
 router.post(
   '/create',
   isAuthenticated,
-  upload.single('image'),
+  upload.array('images', 5),
   ItemController.create
 );
 router.patch('/update/:id', isAuthenticated, ItemController.update);
