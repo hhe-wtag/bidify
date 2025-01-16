@@ -143,7 +143,17 @@ const handleSubmit = async () => {
   errors.value = {}
   try {
     itemValidationSchema.parse(formData.value)
-    emit('submit', formData.value)
+    const submitFormData = new FormData()
+
+    Object.entries(formData.value).forEach(([key, value]) => {
+      submitFormData.append(key, value.toString())
+    })
+
+    selectedFiles.value.forEach((file) => {
+      submitFormData.append('images', file)
+    })
+
+    emit('submit', submitFormData)
   } catch (e) {
     if (e instanceof z.ZodError) {
       e.errors.forEach((error) => {
@@ -155,6 +165,36 @@ const handleSubmit = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// Add a separate ref for files since they need special handling
+const selectedFiles = ref<File[]>([])
+
+// Preview URLs for selected images
+const imagePreviewUrls = ref<string[]>([])
+
+const removeImage = (index: number) => {
+  // Revoke the URL for the removed image
+  if (imagePreviewUrls.value[index]) {
+    URL.revokeObjectURL(imagePreviewUrls.value[index])
+  }
+
+  // Remove the file and preview URL from their respective arrays
+  imagePreviewUrls.value.splice(index, 1)
+  selectedFiles.value.splice(index, 1)
+}
+
+const handleFileChange = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  if (!input.files?.length) return
+
+  // Convert FileList to Array and store files
+  const files = Array.from(input.files)
+  selectedFiles.value = files
+
+  // Generate preview URLs
+  imagePreviewUrls.value = files.map((file) => URL.createObjectURL(file))
+  console.log(imagePreviewUrls.value)
 }
 </script>
 
@@ -203,6 +243,35 @@ const handleSubmit = async () => {
       </Select>
 
       <p v-if="errors.startingBid" class="text-red-500">{{ errors.startingBid }}</p>
+    </div>
+    <div class="space-y-2">
+      <Label for="images">Upload Images of the Item</Label>
+      <Input
+        id="images"
+        type="file"
+        @change="handleFileChange"
+        accept="image/*"
+        multiple
+        class="cursor-pointer"
+      />
+
+      <!-- Image previews -->
+      <div v-if="imagePreviewUrls.length" class="grid grid-cols-3 gap-4 mt-4">
+        <div v-for="(url, index) in imagePreviewUrls" :key="index" class="relative group">
+          <img
+            :src="url"
+            class="w-full h-18 object-cover rounded-lg"
+            :alt="`Preview ${index + 1}`"
+          />
+          <button
+            @click.prevent="() => removeImage(index)"
+            class="absolute top-[-4px] right-[-4px] h-6 w-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center text-sm font-medium"
+          >
+            <span class="sr-only">Remove image</span>
+            x
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="space-y-2">
