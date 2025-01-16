@@ -8,10 +8,10 @@ class ItemRepository extends BaseRepository {
     super(Item);
   }
 
-  async uploadFiles(files) {
+  async uploadFiles(files, baseURL) {
     const filesInfo = files.map((file) => ({
       filename: file.filename,
-      filepath: `/uploads/${file.filename}`,
+      filepath: `${baseURL}/uploads/${file.filename}`,
       mimetype: file.mimetype,
       size: file.size,
     }));
