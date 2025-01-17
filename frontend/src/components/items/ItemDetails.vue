@@ -18,6 +18,7 @@ import { ArrowLeft, DollarSign, PartyPopper } from 'lucide-vue-next'
 
 import { placeBid } from '@/services/bidSocketEvents.ts'
 import { z } from 'zod'
+import ItemImageCarousel from './ItemImageCarousel.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -122,7 +123,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container mx-auto p-6 max-w-4xl">
+  <div class="container mx-auto p-6">
     <Button variant="ghost" class="mb-6" @click="router.push('/items')">
       <ArrowLeft class="mr-2 h-4 w-4" />
       Back to Items
@@ -136,16 +137,17 @@ onMounted(() => {
       <AlertDescription>{{ itemStore.error }}</AlertDescription>
     </Alert>
 
-    <div v-else-if="itemStore.currentItem" class="space-y-6">
-      <Card>
-        <CardHeader>
+    <div v-else-if="itemStore.currentItem" class="flex flex-col lg:flex-row gap-4">
+      <Card class="flex flex-col lg:flex-row gap-4 w-[90vw] lg:w-2/3">
+        <CardHeader class="flex-1 lg:pr-0">
+          <ItemImageCarousel :images="itemStore.currentItem.images" />
           <CardTitle class="text-3xl">{{ itemStore.currentItem.title }}</CardTitle>
           <CardDescription class="text-lg">
             {{ itemStore.currentItem.description }}
           </CardDescription>
         </CardHeader>
-        <CardContent class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <CardContent class="p-0 px-4 lg:px-0 lg:pr-4 my-6 w-full lg:w-[45%]">
+          <div class="flex flex-col gap-4">
             <Card>
               <CardHeader>
                 <CardTitle class="text-lg flex items-center">
@@ -204,25 +206,26 @@ onMounted(() => {
             </div>
             <div
               v-if="itemStore.currentItem.status === 'active'"
-              class="flex flex-col items-center gap-4 mx-auto pt-4"
+              class="relative flex flex-col items-center gap-2 mx-auto pt-4"
             >
-              <h1 class="text-xl">
+              <h1 class="text-lg">
                 New price for the item will be
                 <span class="font-bold italic">${{ newLatestBid }}</span>
               </h1>
 
-              <div class="flex justify-center items-center gap-2">
-                <span>Raise your bid by $</span>
-
-                <Input
-                  v-model="incrementBidAmount"
-                  type="number"
-                  :min="itemStore.currentItem.minimumBidIncrement"
-                  step="1.0"
-                  class="w-20 mr-4"
-                  @update:modelValue="validateBidAmount"
-                />
-
+              <div class="flex flex-col justify-center items-center gap-4">
+                <div>
+                  <span>Raise your bid by $</span>
+                  <Input
+                    v-model="incrementBidAmount"
+                    type="number"
+                    :min="itemStore.currentItem.minimumBidIncrement"
+                    step="1.0"
+                    class="inline w-20 ml-2"
+                    :disabled="isPlaceBidDisabled"
+                    @update:modelValue="validateBidAmount"
+                  />
+                </div>
                 <Tooltip :delay-duration="0">
                   <TooltipTrigger>
                     <Button
@@ -237,8 +240,10 @@ onMounted(() => {
                     {{ placeBidDisabledReason }}
                   </TooltipContent>
                 </Tooltip>
+                <span v-if="bidError" class="absolute bottom-[-26px] pt-2 text-sm text-red-500">{{
+                  bidError
+                }}</span>
               </div>
-              <span v-if="bidError" class="text-sm text-red-500">{{ bidError }}</span>
             </div>
             <div v-if="itemStore.currentItem.status === 'canceled'">
               <h1 class="text-base text-center text-muted-foreground">The auction is canceled!</h1>
@@ -246,7 +251,7 @@ onMounted(() => {
           </div>
         </CardContent>
       </Card>
-      <BidUpdate />
+      <BidUpdate class="flex-1 w-[90vw] lg:w-auto" />
     </div>
 
     <Alert v-else variant="destructive" class="mb-6">
