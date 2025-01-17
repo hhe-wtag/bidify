@@ -7,15 +7,17 @@ import {
   StepperSeparator,
   StepperTitle,
 } from '@/components/ui/stepper'
-import { onNewBidPlaced, onPlaceBid, onPlaceBidResult } from '@/services/bidSocketEvents.ts'
+import { joinItemRoom, onNewBidPlaced, onPlaceBidResult } from '@/services/bidSocketEvents.ts'
 import { useItemStore } from '@/stores/item.ts'
-import { ArrowUp, CircleDollarSign, CircleDot } from 'lucide-vue-next'
-import { onBeforeMount, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { CircleDollarSign, CircleDot } from 'lucide-vue-next'
+import { onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useBidStore } from '@/stores/bid.ts'
 import BidUpdateCard from './BidUpdateCard.vue'
 import { toast } from '../ui/toast/use-toast.ts'
+import { useUserStore } from '@/stores/user.ts'
 
 const itemStore = useItemStore()
+const userStore = useUserStore()
 const bidStore = useBidStore()
 const pulsingItem = ref<number | null>(null)
 
@@ -38,17 +40,17 @@ const handleNewBidPlaced = ({ data }: { data: BidResponse }) => {
   }
 }
 
-const handlePlacedBidResult = ({ data }: { data: BidResponse }) => {
-  if (data.bid.statusCode === 201) {
+const handlePlacedBidResult = (data) => {
+  if (data.data.bid?.latestBidAmount > itemStore.currentItem?.latestBid) {
     toast({
       title: 'Congratulations!',
-      description: data.bid.message,
+      description: data.message,
       class: 'bg-green-100',
     })
   } else {
     toast({
       title: 'Something Went Wrong!',
-      description: 'Bid cannot be placed at this moment.',
+      description: data.message,
       class: 'bg-red-100',
     })
   }

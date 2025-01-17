@@ -84,6 +84,13 @@ class BidSocketHandler extends BaseSocketHandler {
         });
       }
     }
+    this.emitToUser(socket.id, EVENTS.PLACE_BID_RESULT, {
+      event: EVENTS.PLACE_BID_RESULT,
+      data: { bid: result.data?.savedBid },
+      message: result.success
+        ? 'Bid Placed Successfully '
+        : 'Something went wrong while placing the bid',
+    });
   };
 
   initializeAuctionEndCheck() {

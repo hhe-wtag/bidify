@@ -19,5 +19,5 @@ export const onNewBidPlaced = (callback: (data: any) => void) => {
 }
 
 export const onPlaceBidResult = (callback: (data: any) => void) => {
-  onEvent('placed-bid-result', callback)
+  onEvent('place-bid-result', callback)
 }

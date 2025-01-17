@@ -169,8 +169,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container mx-auto p-6">
-    <Button variant="ghost" class="mb-6" @click="router.push('/items')">
+  <div class="container mx-auto px-12">
+    <Button variant="ghost" class="my-4" @click="router.push('/items')">
       <ArrowLeft class="mr-2 h-4 w-4" />
       Back to Items
     </Button>
