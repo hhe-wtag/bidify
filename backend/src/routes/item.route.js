@@ -14,7 +14,7 @@ router.post(
   upload.array('images', 5),
   ItemController.create
 );
-router.patch('/update/:id', isAuthenticated, ItemController.update);
+router.patch('/update/:id', isAuthenticated, upload.array('images', 5), ItemController.update);
 router.delete('/delete/:id', isAuthenticated, ItemController.delete);
 
 export const ItemRoutes = router;

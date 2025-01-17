@@ -66,6 +66,15 @@ class ItemController extends BaseController {
     const updates = req.body;
     const userId = req.user.id;
 
+    const existingItem = await this.repository.findById(id);
+    
+    if (!existingItem) {
+      throw new ApiError(
+        HTTP_STATUS.NOT_FOUND,
+        'Item not found'
+      );
+    }
+
     if (updates.endTime && new Date(updates.endTime) <= new Date()) {
       throw new ApiError(
         HTTP_STATUS.BAD_REQUEST,
@@ -73,12 +82,36 @@ class ItemController extends BaseController {
       );
     }
 
-    const updatedItem = await this.repository.updateItem(id, userId, updates);
+    const baseURL = `${req.protocol}://${req.get('host')}`;
+    
+    // Handle image uploads if there are new files
+    if (req.files && req.files.length > 0) {
+      const imageUploadResult = await this.repository.uploadFiles(
+        req.files,
+        baseURL
+      );
+      
+      if (imageUploadResult.length === req.files.length) {
+        // Combine existing images with new ones
+        updates.images = [
+          // ...(existingItem.images || []),
+          ...imageUploadResult
+        ];
+      }
+    }
+
+    // Merge existing data with updates
+    const mergedUpdates = {
+      ...existingItem.toObject(), // Convert mongoose document to plain object
+      ...updates,
+    };
+
+    const updatedItem = await this.repository.updateItem(id, userId, mergedUpdates);
 
     res
       .status(HTTP_STATUS.OK)
       .json(new ApiResponse(HTTP_STATUS.OK, updatedItem, 'Item updated!'));
-  });
+});
 
   delete = asyncHandler(async (req, res) => {
     const { id } = req.params;
