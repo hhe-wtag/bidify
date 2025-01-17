@@ -103,20 +103,20 @@ const onEnter = (el) => {
           <StepperItem
             v-for="(step, index) in bidStore.lates10Bids"
             :key="step.timeOfTheBid"
-            class="relative flex w-full items-start gap-4 [&_[data-state]]:!bg-gray-200"
+            class="relative flex w-full items-start gap-2 [&_[data-state]]:!bg-gray-200"
             :step="index"
             :data-index="index"
           >
             <StepperSeparator
               v-if="index !== bidStore.lates10Bids.length - 1"
-              class="absolute left-[22px] top-[45px] block h-[calc(100%_-_20px)] w-0.5 shrink-0 rounded-full !bg-gray-200"
+              class="absolute left-[19px] top-[35px] block h-[calc(100%_-_6px)] w-0.5 shrink-0 rounded-full !bg-gray-200"
               :class="[index === 0 && 'bg-gradient-to-b from-gray-400 to-transparents']"
             />
 
             <div class="z-10 rounded-full shrink-0 p-1.5 bg-white">
               <div class="relative rounded-full">
-                <CircleDollarSign v-if="index === 0" class="size-9 text-primary" />
-                <CircleDot v-else class="size-9 text-gray-400 opacity-75" />
+                <CircleDollarSign v-if="index === 0" class="size-7 text-primary" />
+                <CircleDot v-else class="size-7 text-gray-400 opacity-75" />
               </div>
             </div>
             <div

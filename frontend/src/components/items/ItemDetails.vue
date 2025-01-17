@@ -198,7 +198,7 @@ onMounted(() => {
 
           <div v-else>
             <div v-if="itemStore.currentItem.status === 'sold' && latestBid?.bidderName">
-              <h1 class="text-center text-xl">
+              <h1 class="text-center text-xl mt-6">
                 Winner of this item is
                 <span class="font-bold italic">{{ latestBid.bidderName }}</span>
                 <PartyPopper class="size-8 ms-1 inline-block" />

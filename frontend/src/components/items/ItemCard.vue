@@ -15,7 +15,8 @@ import { Edit } from 'lucide-vue-next'
 import Tooltip from '../ui/tooltip/Tooltip.vue'
 import TooltipTrigger from '../ui/tooltip/TooltipTrigger.vue'
 import TooltipContent from '../ui/tooltip/TooltipContent.vue'
-import { computed } from 'vue'
+import { formatDate } from '@/utils/timeFunctions'
+
 import placeHolderImage from '@/assets/product-placeholder.jpg'
 const props = defineProps<{
   items: Item[]
@@ -26,15 +27,6 @@ const userStore = useUserStore()
 
 const isItemOwner = (item: Item): boolean => {
   return item.sellerId === userStore.profile?._id
-}
-
-const formatDate = (date: string): string => {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(date))
 }
 
 const emit = defineEmits(['openEditForm'])

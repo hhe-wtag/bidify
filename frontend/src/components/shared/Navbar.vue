@@ -32,6 +32,7 @@ import {
   onBidNotification,
   onOutBidNotification,
 } from '@/services/notificationSocketEvents.ts'
+import { formatDate } from '@/utils/timeFunctions'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -105,17 +106,6 @@ const getNotificationIcon = (type: string) => {
     default:
       return Bell
   }
-}
-
-const formatDate = (dateString: string) => {
-  return new Intl.DateTimeFormat('en-US', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  }).format(new Date(dateString))
 }
 </script>
 
