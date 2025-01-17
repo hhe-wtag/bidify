@@ -36,14 +36,31 @@ class BidSocketHandler extends BaseSocketHandler {
     const result = await this.bidSocketRepository.placeBid(bidData);
 
     if (result.statusCode === HTTP_STATUS.CREATED) {
-      const { savedBid, bidPlacedNotification, outbidNotifications } =
-        result.data;
+      const {
+        savedBid,
+        bidPlacedSellerNotification,
+        bidPlacedNotification,
+        outbidNotifications,
+      } = result.data;
 
       this.emitToRoom(`item-${bidData.itemId}`, EVENTS.NEW_BID_PLACED, {
         event: EVENTS.NEW_BID_PLACED,
         data: { bid: savedBid },
         message: `New bid of $${bidData.incrementBidAmount} placed by userId: ${bidData.bidderId}`,
       });
+
+      if (
+        this.userSocketMap.has(bidPlacedSellerNotification.userId.toString())
+      ) {
+        const socketId = this.userSocketMap.get(
+          bidPlacedSellerNotification.userId.toString()
+        );
+        this.emitToUser(socketId, EVENTS.NOTIFICATION_NEW_BID_PLACE, {
+          event: EVENTS.NOTIFICATION_NEW_BID_PLACE,
+          data: { notification: bidPlacedSellerNotification },
+          message: `Bid placed successfully by userId: ${bidData.bidderId} on itemId: ${bidData.itemId}`,
+        });
+      }
 
       this.emitToUser(socket.id, EVENTS.NOTIFICATION_NEW_BID_PLACE, {
         event: EVENTS.NOTIFICATION_NEW_BID_PLACE,

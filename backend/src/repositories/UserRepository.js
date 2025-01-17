@@ -37,10 +37,7 @@ class UserRepository extends BaseRepository {
   async login(email, password) {
     const user = await this.model.findOne({ email }).select('+password');
     if (!user) {
-      throw new ApiError(
-        HTTP_STATUS.UNAUTHORIZED,
-        'No user found with this email address'
-      );
+      throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid password or email');
     }
 
     const isPasswordValid = await user.comparePassword(password);

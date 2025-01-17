@@ -97,6 +97,14 @@ class BidSocketRepository extends BaseRepository {
             `You have placed a bid of $${latestBidAmount} on ${item.title}`,
             'Bid Placed'
           );
+        const bidPlacedSellerNotification =
+          await this.notificationRepository.createNotification(
+            item.sellerId,
+            itemId,
+            'BID_PLACED',
+            `A new bid of $${latestBidAmount} has been placed on your item "${item.title}`,
+            'Bid Placed'
+          );
 
         const previousBidders = await Bid.find({ itemId })
           .distinct('bidderId')
@@ -125,6 +133,7 @@ class BidSocketRepository extends BaseRepository {
           HTTP_STATUS.CREATED,
           {
             savedBid,
+            bidPlacedSellerNotification,
             bidPlacedNotification,
             outbidNotifications,
           },

@@ -32,18 +32,20 @@ class ItemRepository extends BaseRepository {
 
   async updateItem(id, userId, updates) {
     const item = await this.checkIfTheOperationIsAllowed(id, userId);
-    console.log(updates);
     if (updates.status === 'sold') {
       const winningBid = await Bid.findOne({
         _id: item.lastBidId,
       });
-      const winnerNotify = await this.notificationRepository.createNotification(
-        winningBid.bidderId,
-        item._id,
-        'AUCTION_WON',
-        `Congratulations! You won the auction for "${item.title}".`,
-        'Auction Won'
-      );
+      if (winningBid) {
+        const winnerNotify =
+          await this.notificationRepository.createNotification(
+            winningBid.bidderId,
+            item._id,
+            'AUCTION_WON',
+            `Congratulations! You won the auction for "${item.title}".`,
+            'Auction Won'
+          );
+      }
 
       const otherBidders = await Bid.find({
         itemId: item._id,
@@ -89,14 +91,6 @@ class ItemRepository extends BaseRepository {
           'Auction Ended'
         );
       auctionEndNotify.push(sellerNotification);
-
-      // console.log('Winner Notify: ', winnerNotify);
-      // console.log('Auction End Notify: ', auctionEndNotify);
-      // await NotificationSocketHandler.handleAuctionNotifications(
-      //   winnerNotify,
-      //   auctionEndNotify
-      // );
-      // console.log('done');
     }
     Object.assign(item, updates);
 
