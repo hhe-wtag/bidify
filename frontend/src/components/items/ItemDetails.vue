@@ -19,6 +19,7 @@ import { ArrowLeft, DollarSign, PartyPopper } from 'lucide-vue-next'
 import { placeBid } from '@/services/bidSocketEvents.ts'
 import { z } from 'zod'
 import ItemImageCarousel from './ItemImageCarousel.vue'
+import { onUnmounted } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -36,13 +37,53 @@ const currentBidAmount = computed(
 const minimumBidIncrement = computed(() => itemStore.currentItem?.minimumBidIncrement || 0)
 const newLatestBid = computed(() => currentBidAmount.value + incrementBidAmount.value)
 
+const bidCooldownTimer = ref(null)
+const bidCooldownActive = ref(false)
+const cooldownTimeLeft = ref(0)
+
+// Update the isLatestBidder computed
+const isLatestBidder = computed(() => {
+  return latestBid.value?.bidderId === userStore.profile?._id && !bidCooldownActive.value
+})
+
+// Update the isPlaceBidDisabled computed property
 const isPlaceBidDisabled = computed(() => {
   const currentItem = itemStore.currentItem
   const userProfile = userStore.profile
+
   if (!currentItem || !userProfile) return true
+  if (bidCooldownActive.value) return true
+  if (isLatestBidder.value) return true
   return currentItem.status === 'closed' || currentItem.sellerId === userProfile._id
 })
+const startBidCooldown = () => {
+  bidCooldownActive.value = true
+  cooldownTimeLeft.value = 5
 
+  // Clear existing timer if any
+  if (bidCooldownTimer.value) {
+    clearInterval(bidCooldownTimer.value)
+  }
+
+  // Start countdown timer
+  bidCooldownTimer.value = setInterval(() => {
+    cooldownTimeLeft.value--
+    if (cooldownTimeLeft.value <= 0) {
+      bidCooldownActive.value = false
+      clearInterval(bidCooldownTimer.value)
+      bidCooldownTimer.value = null
+    }
+  }, 1000)
+}
+
+// Clean up timer when component unmounts
+onUnmounted(() => {
+  if (bidCooldownTimer.value) {
+    clearInterval(bidCooldownTimer.value)
+  }
+})
+
+// Update the placeBidDisabledReason
 const placeBidDisabledReason = computed(() => {
   const currentItem = itemStore.currentItem
   const userProfile = userStore.profile
@@ -51,9 +92,13 @@ const placeBidDisabledReason = computed(() => {
   if (currentItem.status === 'closed') return 'Auction is closed'
   if (currentItem.sellerId === userProfile._id)
     return 'You are the seller of this item, you cannot place bid'
+  if (isLatestBidder.value && !bidCooldownActive.value) return 'You already have the highest bid'
+  if (bidCooldownActive.value)
+    return `Please wait ${cooldownTimeLeft.value} seconds before placing another bid`
 
   return ''
 })
+
 const bidError = ref('')
 
 const bidSchema = computed(() => {
@@ -69,7 +114,6 @@ const bidSchema = computed(() => {
 })
 
 const validateBidAmount = () => {
-  console.log(incrementBidAmount)
   try {
     bidSchema.value.parse(Number(incrementBidAmount.value))
     bidError.value = ''
@@ -97,13 +141,14 @@ watch(
     }
   },
 )
-
 const handlePlaceBid = () => {
   if (!itemStore.currentItem || !userStore.profile) return
+  if (isLatestBidder.value || bidCooldownActive.value) return
 
   try {
     bidSchema.value.parse(Number(incrementBidAmount.value))
     bidError.value = ''
+    startBidCooldown()
 
     placeBid({
       itemId: itemStore.currentItem._id,
@@ -114,6 +159,7 @@ const handlePlaceBid = () => {
     if (error instanceof z.ZodError) {
       bidError.value = error.errors[0].message
     }
+    bidCooldownActive.value = false
   }
 }
 
@@ -192,11 +238,7 @@ onMounted(() => {
             <TimeInformationOfItem :currentItem="itemStore.currentItem" />
           </div>
 
-          <div v-if="bidStore.loading" class="flex justify-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
-
-          <div v-else>
+          <div>
             <div v-if="itemStore.currentItem.status === 'sold' && latestBid?.bidderName">
               <h1 class="text-center text-xl mt-6">
                 Winner of this item is
@@ -233,7 +275,7 @@ onMounted(() => {
                       :disabled="isPlaceBidDisabled || bidError !== ''"
                       @click="handlePlaceBid"
                     >
-                      Place Bid
+                      {{ bidCooldownActive ? `Wait ${cooldownTimeLeft}s` : 'Place Bid' }}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" v-if="isPlaceBidDisabled">
