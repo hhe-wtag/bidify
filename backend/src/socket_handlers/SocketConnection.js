@@ -5,6 +5,7 @@ import BidSocketHandler from './BidSocketHandler.js';
 import NotificationSocketHandler from './NotificationSocketHandler.js';
 import { User } from '../models/user.model.js';
 import { EVENTS, NAMESPACES } from '../utils/socketConstants.js';
+import PushNotificationService from '../services/PushNotificationService.js';
 
 class SocketConnection {
   constructor(io) {
@@ -91,6 +92,23 @@ class SocketConnection {
 
       console.info(`✅ Authenticated user connected: ${socket.user.email}`);
       this.io.emit(EVENTS.USER_CONNECTED, { email: socket.user.email });
+
+      // socket.on('send-push-notification', async (data) => {
+      //   const { recipientUserId, message } = data;
+      //   try {
+      //     await PushNotificationService.sendNotification(
+      //       recipientUserId,
+      //       message
+      //     );
+      //     socket.emit('notification-sent', { success: true });
+      //   } catch (error) {
+      //     console.error('Error sending push notification:', error.message);
+      //     socket.emit('notification-sent', {
+      //       success: false,
+      //       error: error.message,
+      //     });
+      //   }
+      // });
 
       socket.on('mark-all-read', async (userId) => {
         this.NotificationSocketHandler.handleMarkAllAsRead(socket, userId);

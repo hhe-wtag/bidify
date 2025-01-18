@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, User, Bell, Clock, Package, Trophy, UserPlus } from 'lucide-vue-next'
+import { LogOut, User, Bell, Clock, Package, Trophy, UserPlus, BellIcon } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +22,16 @@ import {
   onBidNotification,
   onOutBidNotification,
 } from '@/services/notificationSocketEvents.ts'
+import { setupPushNotifications } from '@/composables/usePushNotifications.ts'
+
+async function testNotification() {
+  if ('serviceWorker' in navigator) {
+    const registration = await navigator.serviceWorker.ready
+    registration.showNotification('Test Notification', {
+      body: 'This is a test notification',
+    })
+  }
+}
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -29,6 +39,8 @@ const notificationStore = useNotificationStore()
 
 const loadingNotifications = computed(() => notificationStore.loading)
 const notifications = computed(() => notificationStore.notifications)
+
+const loadingPushSetup = ref(false)
 
 onMounted(async () => {
   try {
@@ -135,6 +147,10 @@ const formatDate = (dateString: string) => {
 
       <!-- Auth Section -->
       <div v-if="userStore.isAuthenticated" class="flex items-center gap-4">
+        <button @click="setupPushNotifications" class="p-2 hover:bg-gray-100 rounded-full">
+          <BellIcon class="h-5 w-5" />
+        </button>
+
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button variant="ghost" size="icon" class="relative">

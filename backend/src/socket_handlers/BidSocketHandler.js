@@ -4,6 +4,7 @@ import BaseSocketHandler from './BaseSocketHandler.js';
 import BidSocketRepository from '../repositories/BidSocketRepository.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
 import { EVENTS } from '../utils/socketConstants.js';
+import PushNotificationService from '../services/PushNotificationService.js';
 
 class BidSocketHandler extends BaseSocketHandler {
   constructor(io, userSocketMap) {
@@ -69,7 +70,7 @@ class BidSocketHandler extends BaseSocketHandler {
       });
 
       if (outbidNotifications.length > 0) {
-        outbidNotifications.forEach((notification) => {
+        outbidNotifications.forEach(async (notification) => {
           const userIdString = notification.userId.toString();
           if (!this.userSocketMap.has(userIdString)) {
             return;
@@ -81,6 +82,12 @@ class BidSocketHandler extends BaseSocketHandler {
             data: { notification },
             message: `You have been outbid by userId: ${notification.userId} on itemId: ${notification.itemId}.`,
           });
+
+          // await PushNotificationService.sendNotification(notification.userId, {
+          //   title: 'New Bid Alert!',
+          //   body: `Someone has outbid you on ${notification.itemId}`,
+          //   url: `/items/${notification.itemId}`,
+          // });
         });
       }
     }

@@ -88,6 +88,13 @@ const userSchema = new mongoose.Schema(
       min: [0, 'Balance cannot be negative'],
       default: 0,
     },
+    pushSubscription: {
+      endpoint: { type: String },
+      keys: {
+        p256dh: { type: String },
+        auth: { type: String },
+      },
+    },
   },
   {
     timestamps: { createdAt: 'registrationDate' },
