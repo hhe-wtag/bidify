@@ -2,13 +2,19 @@ import { instrument } from '@socket.io/admin-ui';
 import jwt from 'jsonwebtoken';
 
 import BidSocketHandler from './BidSocketHandler.js';
+import NotificationSocketHandler from './NotificationSocketHandler.js';
 import { User } from '../models/user.model.js';
 import { EVENTS, NAMESPACES } from '../utils/socketConstants.js';
 
 class SocketConnection {
   constructor(io) {
     this.io = io;
-    this.BidSocketHandler = new BidSocketHandler(io);
+    this.userSocketMap = new Map();
+    this.BidSocketHandler = new BidSocketHandler(io, this.userSocketMap);
+    this.NotificationSocketHandler = new NotificationSocketHandler(
+      io,
+      this.userSocketMap
+    );
     this.setupAdminUI();
     this.setupAuthMiddleware();
     this.setupEventHandlers();
@@ -77,8 +83,18 @@ class SocketConnection {
 
   setupEventHandlers() {
     this.io.on(EVENTS.CONNECTION, (socket) => {
+      const { userId } = socket.handshake.auth;
+      if (userId) {
+        this.userSocketMap.set(userId, socket.id);
+        console.info(`User Id ${userId} Socket ID ${socket.id}`);
+      }
+
       console.info(`✅ Authenticated user connected: ${socket.user.email}`);
       this.io.emit(EVENTS.USER_CONNECTED, { email: socket.user.email });
+
+      socket.on('mark-all-read', async (userId) => {
+        this.NotificationSocketHandler.handleMarkAllAsRead(socket, userId);
+      });
 
       socket.on(EVENTS.JOIN_ITEM_ROOM, (itemId) => {
         this.BidSocketHandler.handleJoinItemRoom(socket, itemId);
@@ -94,6 +110,9 @@ class SocketConnection {
 
       socket.on(EVENTS.DISCONNECT, () => {
         console.info(`❌ User disconnected: ${socket.user.email}`);
+        if (this.userSocketMap.has(userId)) {
+          this.userSocketMap.delete(userId);
+        }
       });
     });
   }

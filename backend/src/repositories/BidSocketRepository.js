@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
 
 import BaseRepository from './BaseRepository.js';
+import NotificationRepository from './NotificationRepository.js';
 import { Bid } from '../models/bid.model.js';
 import { Item } from '../models/item.model.js';
+import { User } from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
@@ -10,6 +12,7 @@ import HTTP_STATUS from '../utils/httpStatus.js';
 class BidSocketRepository extends BaseRepository {
   constructor() {
     super(Bid);
+    this.notificationRepository = new NotificationRepository();
   }
 
   validateBidData(bidData) {
@@ -76,16 +79,61 @@ class BidSocketRepository extends BaseRepository {
 
         const savedBid = await bid.save({ session });
 
-        await Item.findByIdAndUpdate(
+        const updatedItem = await Item.findByIdAndUpdate(
           itemId,
           { lastBidId: savedBid._id, latestBid: latestBidAmount },
           { new: true, session }
         );
 
+        if (!updatedItem) {
+          throw new ApiError(HTTP_STATUS.NOT_FOUND, 'Item not found');
+        }
+
+        const bidPlacedNotification =
+          await this.notificationRepository.createNotification(
+            bidderId,
+            'BID_PLACED',
+            `You have placed a bid of $${latestBidAmount} on ${item.title}`,
+            'Bid Placed'
+          );
+        const bidPlacedSellerNotification =
+          await this.notificationRepository.createNotification(
+            item.sellerId,
+            'BID_PLACED',
+            `A new bid of $${latestBidAmount} has been placed on your item "${item.title}`,
+            'Bid Placed'
+          );
+
+        const previousBidders = await Bid.find({ itemId })
+          .distinct('bidderId')
+          .where('_id')
+          .ne(bidderId);
+
+        const outbidNotifications = await Promise.all(
+          previousBidders
+            .filter((userId) => userId.toString() !== bidderId.toString())
+            .map(async (userId) => {
+              const outbidNotification =
+                await this.notificationRepository.createNotification(
+                  userId,
+                  'OUTBID',
+                  `You have been outbid on ${item.title}. Current bid is $${latestBidAmount}.`,
+                  'Outbid'
+                );
+              return outbidNotification;
+            })
+        );
+
         await session.commitTransaction();
+
         return new ApiResponse(
           HTTP_STATUS.CREATED,
-          savedBid,
+          {
+            savedBid,
+            bidPlacedSellerNotification,
+            bidPlacedNotification,
+            outbidNotifications,
+          },
           'Bid placed successfully'
         );
       } catch (error) {
@@ -116,8 +164,8 @@ class BidSocketRepository extends BaseRepository {
         endTime: { $lte: new Date() },
       }).session(session);
 
+      const notify = [];
       const updatePromises = endedAuctionItems.map(async (item) => {
-        // Get the winning bid
         const winningBid = await Bid.findOne({
           _id: item.lastBidId,
         }).session(session);
@@ -131,6 +179,62 @@ class BidSocketRepository extends BaseRepository {
           },
           { new: true, session }
         );
+
+        if (updatedAuctionItem.status === 'sold') {
+          const winnerNotify =
+            await this.notificationRepository.createNotification(
+              winningBid.bidderId,
+              'AUCTION_WON',
+              `Congratulations! You won the auction for "${item.title}".`,
+              'Auction Won'
+            );
+
+          notify.push({ winnerNotify: winnerNotify });
+
+          const otherBidders = await Bid.find({
+            itemId: item._id,
+          })
+            .distinct('bidderId')
+            .where('_id');
+
+          const filteredBidders = otherBidders.filter(
+            (userId) => userId.toString() !== winningBid.bidderId.toString()
+          );
+          const auctionEndNotify = await Promise.all(
+            filteredBidders.map(async (userId) => {
+              try {
+                const outbidNotification =
+                  await this.notificationRepository.createNotification(
+                    userId,
+                    'AUCTION_END',
+                    `The auction for "${item.title}" has ended.`,
+                    'Auction Ended'
+                  );
+                return outbidNotification;
+              } catch (error) {
+                console.error(
+                  `Failed to create notification for userId ${userId}:`,
+                  error
+                );
+                return null;
+              }
+            })
+          );
+          const winner = await User.findOne(
+            { _id: winningBid.bidderId },
+            'firstName lastName'
+          );
+          const WinnerName = `${winner.firstName} ${winner.lastName}`;
+          const sellerNotification =
+            await this.notificationRepository.createNotification(
+              item.sellerId,
+              'AUCTION_END',
+              `The auction for "${item.title}" has ended. The winner is ${WinnerName}.`,
+              'Auction Ended'
+            );
+          auctionEndNotify.push(sellerNotification);
+          notify.push({ auctionEndNotify: auctionEndNotify });
+        }
         return updatedAuctionItem;
       });
 
@@ -140,7 +244,7 @@ class BidSocketRepository extends BaseRepository {
 
       return new ApiResponse(
         HTTP_STATUS.OK,
-        { processedItems },
+        { processedItems, notify },
         'Items processed successfully for the auction end time'
       );
     } catch (error) {

@@ -5,11 +5,11 @@ import { io, type Socket } from 'socket.io-client'
 let socket: Socket | null = null
 const activeListeners = new Map<string, ((...args: any[]) => void)[]>()
 
-export const connectSocket = (token: string) => {
+export const connectSocket = (token: string, userId: string) => {
   if (socket && socket.connected) return
 
   socket = io('http://localhost:8080', {
-    auth: { token: `Bearer ${token}` },
+    auth: { token: `Bearer ${token}`,userId: `${userId}` },
     transports: ['websocket'],
   })
 

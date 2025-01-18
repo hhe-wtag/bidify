@@ -1,6 +1,7 @@
 class BaseSocketHandler {
-  constructor(io) {
+  constructor(io, userSocketMap) {
     this.io = io;
+    this.userSocketMap = userSocketMap;
   }
 
   /**

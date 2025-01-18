@@ -31,6 +31,15 @@ export const EVENTS = {
   USER_CONNECTED: 'user-connected',
   USER_DISCONNECTED: 'user-disconnected',
 
+  // Notification Events
+  NOTIFICATION_MARK_ALL_READ: 'mark-all-read',
+  NOTIFICATION_MARK_AS_READ: 'mark-as-read',
+  NOTIFICATION_NEW_BID_PLACE: 'place-bid-notification',
+  NOTIFICATION_OUT_BID_PLACE: 'outbid-notification',
+  NOTIFICATION_WINNER: 'auction-winner',
+  NOTIFICATION_AUCTION_END: 'auction-end',
+  NOTIFICATION_AUCTION_CANCELED: 'auction-canceled',
+
   // Admin Events
   GET_ACTIVE_USERS: 'get-active-users',
   ACTIVE_USERS_LIST: 'active-users-list',

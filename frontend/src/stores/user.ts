@@ -3,11 +3,14 @@ import axiosInstance from '@/plugins/axios'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import type { UserProfile } from '@/interfaces/user'
 import { connectSocket, disconnectSocket } from '@/services/websocket'
+import { useNotificationStore } from './notificationStore'
+import { onAuctionEndNotification, onAuctionWinNotification, onBidNotification, onOutBidNotification } from '@/services/notificationSocketEvents'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
     token: localStorage.getItem('token') || null,
     profile: null as UserProfile | null,
+    userId: null as string | null,
     error: null as string | null,
   }),
   getters: {
@@ -24,11 +27,38 @@ export const useUserStore = defineStore('user', {
         })
 
         const token = response.data.data.token
+        const userId = response.data.data.user._id
         this.setUserProfile(response.data.data.user)
 
         if (token) {
           this.setToken(token)
-          connectSocket(token)
+          connectSocket(token, userId)
+          const notificationStore = useNotificationStore()
+          await notificationStore.fetchNotifications()
+
+          onBidNotification((data) => {
+            console.log('Received place-bid-notification:', data)
+            const { notification } = data.data
+            notificationStore.addNotification(notification)
+          })
+
+          onOutBidNotification((data) => {
+            console.log('Received outbid-notification:', data)
+            const { notification } = data.data
+            notificationStore.addNotification(notification)
+          })
+
+          onAuctionWinNotification((data) => {
+            console.log('Received auction-win-notification:', data)
+            const { notification } = data.data
+            notificationStore.addNotification(notification)
+          })
+
+          onAuctionEndNotification((data) => {
+            console.log('Received auction-end-notification:', data)
+            const { notification } = data.data
+            notificationStore.addNotification(notification)
+          })
         } else {
           throw new Error('Token or user profile missing')
         }
@@ -67,6 +97,7 @@ export const useUserStore = defineStore('user', {
       try {
         const response = await axiosInstance.get('/user/profile')
         this.setUserProfile(response.data.data.user)
+        this.setUserId(response.data.data.user._id)
         this.error = null
         return { success: true, message: 'Profile fetched successfully' }
       } catch (error) {
@@ -147,11 +178,19 @@ export const useUserStore = defineStore('user', {
       this.profile = profile
     },
 
+    setUserId(userId: string) {
+      this.userId = userId
+    },
+
     logout() {
       this.token = null
       this.profile = null
+      this.userId = null
       localStorage.removeItem('token')
       disconnectSocket()
+
+      const notificationStore = useNotificationStore()
+      notificationStore.clearNotifications()
     },
   },
 })

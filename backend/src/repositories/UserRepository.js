@@ -1,4 +1,5 @@
 import BaseRepository from './BaseRepository.js';
+import NotificationRepository from './NotificationRepository.js';
 import { User } from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
@@ -22,16 +23,21 @@ class UserRepository extends BaseRepository {
     const token = await user.generateAuthToken();
 
     user.password = undefined;
+
+    const notificationRepo = new NotificationRepository();
+    await notificationRepo.createNotification(
+      user._id,
+      'REGISTRATION',
+      'Welcome to Bidify! Your account has been successfully created.',
+      'New Account'
+    );
     return { user, token };
   }
 
   async login(email, password) {
     const user = await this.model.findOne({ email }).select('+password');
     if (!user) {
-      throw new ApiError(
-        HTTP_STATUS.UNAUTHORIZED,
-        'No user found with this email address'
-      );
+      throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid password or email');
     }
 
     const isPasswordValid = await user.comparePassword(password);
@@ -42,7 +48,12 @@ class UserRepository extends BaseRepository {
     user.password = undefined;
     const token = await user.generateAuthToken();
 
-    return { user, token };
+    const notificationRepo = new NotificationRepository();
+    const unreadNotifications = await notificationRepo.getNotificationsForUser(
+      user._id
+    );
+
+    return { user, token, unreadNotifications };
   }
 
   async updateUserById(id, updateData) {

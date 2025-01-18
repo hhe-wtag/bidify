@@ -9,18 +9,56 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, User } from 'lucide-vue-next'
-import { computed, onMounted } from 'vue'
+import { LogOut, User, Bell, Clock, Package, Trophy, UserPlus } from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
 import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { connectSocket } from '@/services/websocket.ts'
+import { useNotificationStore } from '@/stores/notificationStore'
+import {
+  onAuctionEndNotification,
+  onAuctionWinNotification,
+  onBidNotification,
+  onOutBidNotification,
+} from '@/services/notificationSocketEvents.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
+const notificationStore = useNotificationStore()
 
-onMounted(() => {
-  if (userStore.isAuthenticated) {
-    if (userStore.token) connectSocket(userStore.token)
-    userStore.fetchUserProfile()
+const loadingNotifications = computed(() => notificationStore.loading)
+const notifications = computed(() => notificationStore.notifications)
+
+onMounted(async () => {
+  try {
+    if (userStore.isAuthenticated) {
+      await userStore.fetchUserProfile()
+      if (userStore.token && userStore.userId) connectSocket(userStore.token, userStore.userId)
+      await notificationStore.fetchNotifications()
+      onBidNotification((data) => {
+        console.log('Received place-bid-notification:', data)
+        const { notification } = data.data
+        notificationStore.addNotification(notification)
+      })
+      onOutBidNotification((data) => {
+        console.log('Received outbid-notification:', data)
+        const { notification } = data.data
+        notificationStore.addNotification(notification)
+      })
+      onAuctionWinNotification((data) => {
+        console.log('Received auction-win-notification:', data)
+        const { notification } = data.data
+        notificationStore.addNotification(notification)
+      })
+      onAuctionEndNotification((data) => {
+        console.log('Received auction-end-notification:', data)
+        const { notification } = data.data
+        notificationStore.addNotification(notification)
+      })
+    }
+  } catch (error) {
+    console.error('Error occurred:', error)
   }
 })
 
@@ -36,6 +74,38 @@ const firstName = computed(() => {
 const handleLogout = async () => {
   await userStore.logout()
   router.push('/login')
+}
+
+const unreadCount = computed(() => notifications.value.filter((n) => !n.read).length)
+
+const recentNotifications = computed(() => {
+  return notifications.value.slice(0, 5)
+})
+
+const getNotificationIcon = (type: string) => {
+  switch (type) {
+    case 'REGISTRATION':
+      return UserPlus
+    case 'AUCTION_REMINDER':
+      return Clock
+    case 'BID_PLACED':
+      return Package
+    case 'AUCTION_WON':
+      return Trophy
+    default:
+      return Bell
+  }
+}
+
+const formatDate = (dateString: string) => {
+  return new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(new Date(dateString))
 }
 </script>
 
@@ -67,9 +137,62 @@ const handleLogout = async () => {
       <div v-if="userStore.isAuthenticated" class="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger>
+            <Button variant="ghost" size="icon" class="relative">
+              <Bell style="width: 25px; height: 25px" />
+              <Badge
+                v-if="unreadCount > 0"
+                class="absolute -top-0.5 -right-0.5 px-1 py-0.5 text-xs bg-red-500 text-white rounded"
+              >
+                {{ unreadCount }}
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="w-80">
+            <div class="flex items-center justify-between px-4 py-2">
+              <span class="font-semibold">Notifications</span>
+              <router-link to="/notification" class="text-xs text-primary hover:underline"
+                >View All</router-link
+              >
+            </div>
+            <DropdownMenuSeparator />
+            <ScrollArea class="h-[300px]">
+              <div v-if="loadingNotifications" class="flex items-center justify-center py-4">
+                <span>Loading...</span>
+              </div>
+              <DropdownMenuItem
+                v-for="notification in recentNotifications"
+                :key="notification._id"
+                class="flex flex-col p-4"
+              >
+                <div class="flex w-full gap-2">
+                  <component
+                    :is="getNotificationIcon(notification.type)"
+                    class="h-4 w-4 text-gray-500"
+                  />
+                  <div class="flex-1 space-y-1">
+                    <p
+                      :class="[
+                        'text-sm',
+                        notification.read ? 'text-gray-600' : 'font-medium text-blue-600',
+                      ]"
+                    >
+                      {{ notification.message }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      {{ formatDate(notification.createdAt) }}
+                    </p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            </ScrollArea>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger>
             <Avatar>
               <AvatarFallback>
-                {{ firstLetter }}
+                <div class="text-lg font-semibold">{{ firstLetter }}</div>
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>

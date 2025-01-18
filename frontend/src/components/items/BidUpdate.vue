@@ -27,7 +27,7 @@ interface BidResponse {
 }
 
 const handleNewBidPlaced = ({ data }: { data: BidResponse }) => {
-  if (data.bid.statusCode === 201) {
+  if (data.bid?.latestBidAmount > itemStore.currentItem?.latestBid) {
     if (itemStore.currentItem?._id) {
       bidStore.fetchLatest10Bids(itemStore.currentItem._id)
     }

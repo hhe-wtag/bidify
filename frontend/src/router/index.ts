@@ -8,6 +8,7 @@ import BaseProfile from '@/views/Profile/BaseProfile.vue'
 import EditProfile from '@/views/Profile/EditProfile.vue'
 import ProfileView from '@/views/Profile/ProfileView.vue'
 import ChangePassword from '@/views/Profile/ChangePassword.vue'
+import NotificationView from '@/views/NotificationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,6 +60,12 @@ const router = createRouter({
       name: 'items',
       component: ItemsView,
       meta: { requiresAuth: false },
+    },
+    {
+      path: '/notification',
+      name: 'notification',
+      component: NotificationView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/items/:slug',

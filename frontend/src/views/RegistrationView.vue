@@ -56,11 +56,7 @@ const onSubmit = handleSubmit(async (data) => {
   if (result.success) {
     toast({
       title: 'Registration Successful',
-      description: h(
-        'pre',
-        { class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4' },
-        h('code', { class: 'text-white' }, JSON.stringify(data, null, 2)),
-      ),
+      description: result.message || 'Your registration was successful!',
     })
     router.push({ name: 'login' })
   } else {

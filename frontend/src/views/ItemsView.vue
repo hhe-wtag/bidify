@@ -14,15 +14,12 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-
 import { Search } from 'lucide-vue-next'
-
 import ItemForm from '@/components/items/ItemForm.vue'
 import type { CreateItemData, Item, UpdateItemData } from '@/interfaces/item'
 import ItemCard from '@/components/items/ItemCard.vue'
 
 const itemStore = useItemStore()
-
 const searchQuery = ref('')
 const showForm = ref(false)
 const selectedItem: Ref<Item | null> = ref(null)

@@ -1,12 +1,6 @@
+import type { BidData } from '@/interfaces/Bid'
 import { onEvent, emitEvent } from './websocket'
 
-interface BidData {
-  itemId: string
-  bidderId: string
-  incrementBidAmount: number
-}
-
-// Join/Leave Room
 export const joinItemRoom = (itemId: string) => {
   emitEvent('join-item-room', itemId)
 }
@@ -15,7 +9,6 @@ export const leaveItemRoom = (itemId: string) => {
   emitEvent('leave-item-room', itemId)
 }
 
-// Bid Actions
 export const placeBid = (bidData: BidData) => {
   emitEvent('place-bid', bidData)
 }

@@ -45,16 +45,12 @@ class UserController extends BaseController {
       }
     }
 
-    const createdUser = await this.repository.register(newUserData);
+    await this.repository.register(newUserData);
 
     res
       .status(HTTP_STATUS.CREATED)
       .json(
-        new ApiResponse(
-          HTTP_STATUS.CREATED,
-          createdUser,
-          'User registered successfully!'
-        )
+        new ApiResponse(HTTP_STATUS.CREATED, 'User registered successfully!')
       );
   });
 
