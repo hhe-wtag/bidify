@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 import BaseRepository from './BaseRepository.js';
 import NotificationRepository from './NotificationRepository.js';
 import { Bid } from '../models/bid.model.js';
@@ -114,6 +116,107 @@ class ItemRepository extends BaseRepository {
 
     return this.deleteById(id);
   }
+
+  async getUserEnlistedItems(userId) {
+    console.log(userId);
+    const items = await Item.find({ sellerId: userId });
+
+    console.log(items);
+    return items;
+  }
+
+  getUserWinningItems = async (userId) => {
+    try {
+      const winningItems = await Item.aggregate([
+        {
+          $match: {
+            status: 'sold',
+            lastBidId: { $ne: null },
+          },
+        },
+        {
+          $lookup: {
+            from: 'bids',
+            localField: 'lastBidId',
+            foreignField: '_id',
+            as: 'lastBid',
+          },
+        },
+        // Unwind the lastBid array
+        {
+          $unwind: '$lastBid',
+        },
+        // Only keep items where the last bidder is our user
+        {
+          $match: {
+            'lastBid.bidderId': new mongoose.Types.ObjectId(userId),
+          },
+        },
+        // Join with categories
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'categoryId',
+            foreignField: '_id',
+            as: 'category',
+          },
+        },
+        // Join with users (sellers)
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'sellerId',
+            foreignField: '_id',
+            as: 'seller',
+          },
+        },
+        // Unwind arrays (if they exist)
+        {
+          $unwind: {
+            path: '$category',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: '$seller',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        // Reshape the output
+        {
+          $project: {
+            _id: 1,
+            id: '$_id',
+            title: 1,
+            description: 1,
+            status: 1,
+            endTime: 1,
+            startingBid: 1,
+            minimumBidIncrement: 1,
+            latestBid: '$lastBid.latestBidAmount',
+            lastBidId: 1,
+            sellerId: 1,
+            slug: 1,
+            images: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            __v: 1,
+          },
+        },
+      ]);
+
+      console.log('Won these', winningItems);
+
+      return winningItems.map((item) => ({
+        ...item,
+        timeLeft: item.endTime > new Date() ? item.endTime - new Date() : 0,
+        isOngoing: item.endTime > new Date(),
+      }));
+    } catch (error) {
+      throw new Error(`Error fetching winning items: ${error.message}`);
+    }
+  };
 }
 
 export default ItemRepository;

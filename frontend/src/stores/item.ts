@@ -13,6 +13,8 @@ const API_PATHS = {
   CREATE: '/item/create',
   UPDATE: (id: string) => `/item/update/${id}`,
   DELETE: (id: string) => `/item/delete/${id}`,
+  USER_ENLISTED_ITEMS: '/item/user-enlisted-items',
+  USER_WINNING_ITEMS: '/item/user-winning-items',
 } as const
 
 export const useItemStore = defineStore('item', {
@@ -66,6 +68,22 @@ export const useItemStore = defineStore('item', {
         this.items = data.data
         return data.data
       }, 'Failed to fetch items')
+    },
+
+    async fetchUserEnlistedItems() {
+      return this.handleApiCall(async () => {
+        const { data } = await axiosInstance.get('/item/user-enlisted-items')
+        this.items = data.data
+        return data.data
+      }, 'Failed to fetch enlisted items')
+    },
+
+    async fetchUserWinningItems() {
+      return this.handleApiCall(async () => {
+        const { data } = await axiosInstance.get('/item/user-winning-items')
+        this.items = data.data
+        return data.data
+      }, 'Failed to fetch winning items')
     },
 
     async fetchItemBySlug(slug: string) {
