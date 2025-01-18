@@ -71,6 +71,14 @@ const router = createRouter({
       path: '/items/:slug',
       component: () => import('@/components/items/ItemDetails.vue'),
     },
+    {
+      path: '/user-enlisted-items',
+      component: () => import('@/views/UserEnlistedItems.vue'),
+    },
+    {
+      path: '/user-winning-items',
+      component: () => import('@/views/UserWinningItems.vue'),
+    }
   ],
 })
 
