@@ -23,6 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(passport.initialize());
 
+app.use('/uploads', express.static('uploads'));
+
 app.use('/api/auth', AuthRoutes);
 app.use('/api/user', UserRoutes);
 app.use('/api/item', ItemRoutes);
