@@ -5,7 +5,7 @@ import { io, type Socket } from 'socket.io-client'
 let socket: Socket | null = null
 const activeListeners = new Map<string, ((...args: any[]) => void)[]>()
 
-export const connectSocket = (token: string, userId: string) => {
+export const connectSocket = (token: string, userId: string, setWSStatus: any) => {
   if (socket && socket.connected) return
 
   socket = io('http://localhost:8080', {
@@ -21,9 +21,11 @@ export const connectSocket = (token: string, userId: string) => {
   socket.on('disconnect', () => {
     emitToastForWSDisconnet()
     cleanupAllListeners()
+    setWSStatus(false)
   })
 
   socket.on('user-connected', (data) => {
+    setWSStatus(true)
     console.info(`User connected: ${data.email}`)
   })
 

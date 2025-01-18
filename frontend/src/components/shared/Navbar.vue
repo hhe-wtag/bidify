@@ -20,7 +20,7 @@ import {
   PackageCheck,
   ClipboardList,
 } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -41,12 +41,10 @@ const notificationStore = useNotificationStore()
 const loadingNotifications = computed(() => notificationStore.loading)
 const notifications = computed(() => notificationStore.notifications)
 
-onMounted(async () => {
-  try {
-    if (userStore.isAuthenticated) {
-      await userStore.fetchUserProfile()
-      if (userStore.token && userStore.userId) connectSocket(userStore.token, userStore.userId)
-      await notificationStore.fetchNotifications()
+watch(
+  () => userStore.isWSConnected,
+  (isConnected) => {
+    if (isConnected) {
       onBidNotification((data) => {
         console.log('Received place-bid-notification:', data)
         const { notification } = data.data
@@ -67,6 +65,19 @@ onMounted(async () => {
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })
+    }
+  },
+)
+
+onMounted(async () => {
+  try {
+    if (userStore.isAuthenticated) {
+      await userStore.fetchUserProfile()
+      if (userStore.token && userStore.userId)
+        connectSocket(userStore.token, userStore.userId, (WSConnectionStatus) => {
+          userStore.setWSConnection(WSConnectionStatus)
+        })
+      await notificationStore.fetchNotifications()
     }
   } catch (error) {
     console.error('Error occurred:', error)

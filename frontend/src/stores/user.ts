@@ -12,9 +12,11 @@ export const useUserStore = defineStore('user', {
     profile: null as UserProfile | null,
     userId: null as string | null,
     error: null as string | null,
+    wsConnection: false as boolean
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
+    isWSConnected: (state) => state.wsConnection
   },
   actions: {
     async login(email: string, password: string) {
@@ -172,6 +174,10 @@ export const useUserStore = defineStore('user', {
     setToken(token: string) {
       this.token = token
       localStorage.setItem('token', token)
+    },
+
+    setWSConnection(status: boolean) {
+      this.wsConnection = status
     },
 
     setUserProfile(profile: UserProfile) {
