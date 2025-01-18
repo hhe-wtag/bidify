@@ -16,7 +16,7 @@ import Tooltip from '../ui/tooltip/Tooltip.vue'
 import TooltipTrigger from '../ui/tooltip/TooltipTrigger.vue'
 import TooltipContent from '../ui/tooltip/TooltipContent.vue'
 import { computed } from 'vue'
-
+import placeHolderImage from '@/assets/product-placeholder.jpg'
 const props = defineProps<{
   items: Item[]
 }>()
@@ -93,8 +93,17 @@ const getBadges = (item: Item) => {
     class="relative overflow-hidden flex flex-col transition-all duration-200 hover:shadow-xl bg-card cursor-pointer"
     @click="router.push(`items/${item.slug}`)"
   >
+    <div class="p-4 w-full h-[250px]">
+      <div class="relative w-full h-full">
+        <img
+          :src="item.images[0]?.filepath || placeHolderImage"
+          class="w-full h-full object-cover object-center rounded-lg border"
+          alt=""
+        />
+      </div>
+    </div>
     <!-- Card Header -->
-    <CardHeader class="flex-1">
+    <CardHeader class="flex-1 pt-0">
       <CardTitle class="text-xl font-bold tracking-tight">
         {{ item.title }}
       </CardTitle>
@@ -155,7 +164,7 @@ const getBadges = (item: Item) => {
 
       <Tooltip v-if="isItemOwner(item)" :delay-duration="0">
         <TooltipTrigger>
-          <Button variant="ghost" size="sm" @click="handleEdit($event, item)">
+          <Button variant="outline" size="sm" @click="handleEdit($event, item)">
             <Edit />
             Edit Item
           </Button>
@@ -164,7 +173,7 @@ const getBadges = (item: Item) => {
       </Tooltip>
 
       <Button
-        variant="outline"
+        variant="secondary"
         size="sm"
         class="hover:bg-primary hover:text-primary-foreground transition-colors"
         @click.stop="router.push(`items/${item.slug}`)"
