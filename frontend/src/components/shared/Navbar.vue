@@ -9,7 +9,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, User, Bell, Clock, Package, Trophy, UserPlus } from 'lucide-vue-next'
+import {
+  LogOut,
+  User,
+  Bell,
+  Clock,
+  Package,
+  Trophy,
+  UserPlus,
+  PackageCheck,
+  ClipboardList,
+} from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { Badge } from '@/components/ui/badge'
@@ -203,8 +213,18 @@ const formatDate = (dateString: string) => {
             <DropdownMenuSeparator />
             <DropdownMenuItem @click="router.push('/profile')">
               <User class="mr-2 h-4 w-4" />
-              Profile
+              Profile Settings
             </DropdownMenuItem>
+            <hr />
+            <DropdownMenuItem @click="router.push('/user-enlisted-items')">
+              <ClipboardList class="mr-2 h-4 w-4" />
+              Enlisted Items
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/user-winning-items')">
+              <PackageCheck class="mr-2 h-4 w-4" />
+              Won Items
+            </DropdownMenuItem>
+            <hr />
             <DropdownMenuItem @click="handleLogout">
               <LogOut class="mr-2 h-4 w-4" />
               Logout
