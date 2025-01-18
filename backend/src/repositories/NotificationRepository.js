@@ -10,7 +10,7 @@ class NotificationRepository extends BaseRepository {
     super(Notification);
   }
 
-  async createNotification(userId, itemId, type, message, preview) {
+  async createNotification(userId, type, message, preview) {
     if (!userId) {
       throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'User ID is required');
     }
@@ -20,13 +20,14 @@ class NotificationRepository extends BaseRepository {
       throw new ApiError(HTTP_STATUS.NOT_FOUND, 'User not found');
     }
 
-    const notification = new Notification({
+    const notificationData = {
       userId,
-      itemId,
       type,
       message,
       preview,
-    });
+    };
+
+    const notification = new Notification(notificationData);
 
     await notification.save();
     return notification;

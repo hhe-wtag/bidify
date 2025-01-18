@@ -92,7 +92,6 @@ class BidSocketRepository extends BaseRepository {
         const bidPlacedNotification =
           await this.notificationRepository.createNotification(
             bidderId,
-            itemId,
             'BID_PLACED',
             `You have placed a bid of $${latestBidAmount} on ${item.title}`,
             'Bid Placed'
@@ -100,7 +99,6 @@ class BidSocketRepository extends BaseRepository {
         const bidPlacedSellerNotification =
           await this.notificationRepository.createNotification(
             item.sellerId,
-            itemId,
             'BID_PLACED',
             `A new bid of $${latestBidAmount} has been placed on your item "${item.title}`,
             'Bid Placed'
@@ -118,7 +116,6 @@ class BidSocketRepository extends BaseRepository {
               const outbidNotification =
                 await this.notificationRepository.createNotification(
                   userId,
-                  itemId,
                   'OUTBID',
                   `You have been outbid on ${item.title}. Current bid is $${latestBidAmount}.`,
                   'Outbid'
@@ -187,7 +184,6 @@ class BidSocketRepository extends BaseRepository {
           const winnerNotify =
             await this.notificationRepository.createNotification(
               winningBid.bidderId,
-              item._id,
               'AUCTION_WON',
               `Congratulations! You won the auction for "${item.title}".`,
               'Auction Won'
@@ -210,7 +206,6 @@ class BidSocketRepository extends BaseRepository {
                 const outbidNotification =
                   await this.notificationRepository.createNotification(
                     userId,
-                    item._id,
                     'AUCTION_END',
                     `The auction for "${item.title}" has ended.`,
                     'Auction Ended'
@@ -233,7 +228,6 @@ class BidSocketRepository extends BaseRepository {
           const sellerNotification =
             await this.notificationRepository.createNotification(
               item.sellerId,
-              item._id,
               'AUCTION_END',
               `The auction for "${item.title}" has ended. The winner is ${WinnerName}.`,
               'Auction Ended'
