@@ -44,7 +44,10 @@ class ItemRepository extends BaseRepository {
 
   async updateItem(id, userId, updates) {
     const item = await this.checkIfTheOperationIsAllowed(id, userId);
-    if (updates.status === 'sold') {
+    Object.assign(item, updates);
+    const updatedItem = await item.save();
+
+    if (updatedItem.status === 'sold') {
       const winningBid = await Bid.findOne({
         _id: item.lastBidId,
       });
@@ -52,7 +55,6 @@ class ItemRepository extends BaseRepository {
         const winnerNotify =
           await this.notificationRepository.createNotification(
             winningBid.bidderId,
-            item._id,
             'AUCTION_WON',
             `Congratulations! You won the auction for "${item.title}".`,
             'Auction Won'
@@ -74,7 +76,6 @@ class ItemRepository extends BaseRepository {
             const outbidNotification =
               await this.notificationRepository.createNotification(
                 userId,
-                item._id,
                 'AUCTION_END',
                 `The auction for "${item.title}" has ended.`,
                 'Auction Ended'
@@ -97,16 +98,12 @@ class ItemRepository extends BaseRepository {
       const sellerNotification =
         await this.notificationRepository.createNotification(
           item.sellerId,
-          item._id,
           'AUCTION_END',
           `The auction for "${item.title}" has ended. The winner is ${WinnerName}.`,
           'Auction Ended'
         );
       auctionEndNotify.push(sellerNotification);
     }
-    Object.assign(item, updates);
-
-    const updatedItem = await item.save();
 
     return updatedItem;
   }
