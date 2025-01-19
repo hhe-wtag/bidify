@@ -1,11 +1,13 @@
-export const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
+export const formatDate = (dateString: string) => {
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    month: 'short',
     day: 'numeric',
+    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  })
+    hour12: true,
+  }).format(new Date(dateString))
 }
 
 export const calculateTimeRemaining = (endTime: string): string => {
