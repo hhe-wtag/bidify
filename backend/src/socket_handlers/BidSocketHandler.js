@@ -3,6 +3,7 @@ import { schedule } from 'node-cron';
 import BaseSocketHandler from './BaseSocketHandler.js';
 import BidSocketRepository from '../repositories/BidSocketRepository.js';
 import HTTP_STATUS from '../utils/httpStatus.js';
+import { sendPushNotification } from '../utils/pushNotification.js';
 import { EVENTS } from '../utils/socketConstants.js';
 
 class BidSocketHandler extends BaseSocketHandler {
@@ -60,6 +61,14 @@ class BidSocketHandler extends BaseSocketHandler {
           data: { notification: bidPlacedSellerNotification },
           message: `Bid placed successfully by userId: ${bidData.bidderId} on itemId: ${bidData.itemId}`,
         });
+        const payload = {
+          title: 'Bid Placed',
+          message: bidPlacedSellerNotification.message,
+        };
+        sendPushNotification(
+          bidPlacedSellerNotification.userId.toString(),
+          payload
+        );
       }
 
       this.emitToUser(socket.id, EVENTS.NOTIFICATION_NEW_BID_PLACE, {
@@ -67,6 +76,12 @@ class BidSocketHandler extends BaseSocketHandler {
         data: { notification: bidPlacedNotification },
         message: `Bid placed successfully by userId: ${bidData.bidderId} on itemId: ${bidData.itemId}`,
       });
+
+      const payload = {
+        title: 'Bid Placed',
+        message: bidPlacedNotification.message,
+      };
+      sendPushNotification(bidPlacedNotification.userId.toString(), payload);
 
       if (outbidNotifications.length > 0) {
         outbidNotifications.forEach((notification) => {
@@ -81,6 +96,12 @@ class BidSocketHandler extends BaseSocketHandler {
             data: { notification },
             message: `You have been outbid by userId: ${notification.userId} on itemId: ${notification.itemId}.`,
           });
+
+          const payload = {
+            title: 'Bid Placed',
+            message: notification.message,
+          };
+          sendPushNotification(notification.userId.toString(), payload);
         });
       }
     }
