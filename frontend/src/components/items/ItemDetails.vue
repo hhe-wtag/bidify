@@ -187,8 +187,8 @@ onMounted(() => {
       <Card class="flex flex-col lg:flex-row gap-4 w-[90vw] lg:w-2/3">
         <CardHeader class="flex-1 lg:pr-0">
           <ItemImageCarousel :images="itemStore.currentItem.images" />
-          <CardTitle class="text-3xl">{{ itemStore.currentItem.title }}</CardTitle>
-          <CardDescription class="text-lg">
+          <CardTitle class="text-2xl pt-2">{{ itemStore.currentItem.title }}</CardTitle>
+          <CardDescription class="text-base max-h-20 overflow-y-auto">
             {{ itemStore.currentItem.description }}
           </CardDescription>
         </CardHeader>
