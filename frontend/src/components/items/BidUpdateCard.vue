@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowUp, Clock, History, User } from 'lucide-vue-next'
 import { formatDistanceToNow } from 'date-fns'
+import { formatDate } from '@/utils/timeFunctions'
 
 interface BidStep {
   bidAmount: number
@@ -22,16 +23,6 @@ const formatCurrency = (amount: number) => {
   }).format(amount)
 }
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 const getTimeAgo = (date: string) => {
   return formatDistanceToNow(new Date(date), { addSuffix: true })
 }
@@ -47,19 +38,21 @@ const getTimeAgo = (date: string) => {
         <span class="text-3xl font-bold text-primary tracking-tight">
           {{ formatCurrency(step.bidAmount) }}
         </span>
-        <div
-          class="w-fit flex items-center bg-green-50 text-green-700 px-2.5 py-1 rounded-full text-sm font-medium"
-        >
-          <ArrowUp class="size-4 me-1.5 stroke-[2.5]" />
-          {{ formatCurrency(step.incrementAmount) }}
+        <div class="flex items-center gap-2">
+          <div
+            class="w-fit flex items-center bg-green-50 text-green-700 px-2.5 py-1 rounded-full text-sm font-medium"
+          >
+            <ArrowUp class="size-4 me-1.5 stroke-[2.5]" />
+            {{ formatCurrency(step.incrementAmount) }}
+          </div>
+          <div
+            v-if="index === 0"
+            class="w-fit flex items-center bg-yellow-50 text-yellow-700 px-2.5 py-1 rounded-full text-sm font-medium"
+          >
+            <History class="size-4 me-1.5" />
+            Latest Bid
+          </div>
         </div>
-      </div>
-      <div
-        v-if="index === 0"
-        class="flex items-center text-green-600 text-sm font-medium bg-green-50 px-3 py-1.5 rounded-full mt-4"
-      >
-        <History class="size-4 me-1.5" />
-        Latest Bid
       </div>
     </div>
 

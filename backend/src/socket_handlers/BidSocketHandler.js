@@ -84,6 +84,13 @@ class BidSocketHandler extends BaseSocketHandler {
         });
       }
     }
+    this.emitToUser(socket.id, EVENTS.PLACE_BID_RESULT, {
+      event: EVENTS.PLACE_BID_RESULT,
+      data: { bid: result.data?.savedBid },
+      message: result.success
+        ? 'Bid Placed Successfully '
+        : 'Something went wrong while placing the bid',
+    });
   };
 
   initializeAuctionEndCheck() {
@@ -98,7 +105,6 @@ class BidSocketHandler extends BaseSocketHandler {
     const result =
       await this.bidSocketRepository.itemAuctionTimeEndStatusUpdate();
 
-    // console.log(result);
     if (result.statusCode === HTTP_STATUS.OK) {
       const { processedItems, notify } = result.data;
       const [{ winnerNotify }, { auctionEndNotify }] = notify;
@@ -128,16 +134,15 @@ class BidSocketHandler extends BaseSocketHandler {
           });
         });
       }
+      // Emit updates for each ended auction
+      processedItems.forEach((auction) => {
+        this.emitToRoom(`item-${auction._id}`, EVENTS.AUCTION_ENDED, {
+          event: EVENTS.AUCTION_ENDED,
+          data: { auction },
+          message: `Auction ended for item ${auction.title}`,
+        });
+      });
     }
-    // Emit updates for each ended auction
-    // result.processedItems.forEach((auction) => {
-    //! TODO
-    // this.emitToRoom(`item-${auction._id}`, EVENTS.AUCTION_ENDED, {
-    //   event: EVENTS.AUCTION_ENDED,
-    //   data: { auction },
-    //   message: `Auction ended for item ${auction.title}`,
-    // });
-    // });
   };
 }
 
