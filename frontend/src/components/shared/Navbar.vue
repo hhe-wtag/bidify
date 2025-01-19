@@ -9,8 +9,18 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, User, Bell, Clock, Package, Trophy, UserPlus } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+import {
+  LogOut,
+  User,
+  Bell,
+  Clock,
+  Package,
+  Trophy,
+  UserPlus,
+  PackageCheck,
+  ClipboardList,
+} from 'lucide-vue-next'
+import { computed, onMounted, ref, watch } from 'vue'
 import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -22,6 +32,7 @@ import {
   onBidNotification,
   onOutBidNotification,
 } from '@/services/notificationSocketEvents.ts'
+import { formatDate } from '@/utils/timeFunctions'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -30,32 +41,39 @@ const notificationStore = useNotificationStore()
 const loadingNotifications = computed(() => notificationStore.loading)
 const notifications = computed(() => notificationStore.notifications)
 
-onMounted(async () => {
-  try {
-    if (userStore.isAuthenticated) {
-      await userStore.fetchUserProfile()
-      if (userStore.token && userStore.userId) connectSocket(userStore.token, userStore.userId)
-      await notificationStore.fetchNotifications()
+watch(
+  () => userStore.isWSConnected,
+  (isConnected) => {
+    if (isConnected) {
       onBidNotification((data) => {
-        console.log('Received place-bid-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })
       onOutBidNotification((data) => {
-        console.log('Received outbid-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })
       onAuctionWinNotification((data) => {
-        console.log('Received auction-win-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })
       onAuctionEndNotification((data) => {
-        console.log('Received auction-end-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })
+    }
+  },
+)
+
+onMounted(async () => {
+  try {
+    if (userStore.isAuthenticated) {
+      await userStore.fetchUserProfile()
+      if (userStore.token && userStore.userId)
+        connectSocket(userStore.token, userStore.userId, (WSConnectionStatus) => {
+          userStore.setWSConnection(WSConnectionStatus)
+        })
+      await notificationStore.fetchNotifications()
     }
   } catch (error) {
     console.error('Error occurred:', error)
@@ -95,17 +113,6 @@ const getNotificationIcon = (type: string) => {
     default:
       return Bell
   }
-}
-
-const formatDate = (dateString: string) => {
-  return new Intl.DateTimeFormat('en-US', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  }).format(new Date(dateString))
 }
 </script>
 
@@ -203,8 +210,18 @@ const formatDate = (dateString: string) => {
             <DropdownMenuSeparator />
             <DropdownMenuItem @click="router.push('/profile')">
               <User class="mr-2 h-4 w-4" />
-              Profile
+              Profile Settings
             </DropdownMenuItem>
+            <hr />
+            <DropdownMenuItem @click="router.push('/user-enlisted-items')">
+              <ClipboardList class="mr-2 h-4 w-4" />
+              Enlisted Items
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/user-winning-items')">
+              <PackageCheck class="mr-2 h-4 w-4" />
+              Won Items
+            </DropdownMenuItem>
+            <hr />
             <DropdownMenuItem @click="handleLogout">
               <LogOut class="mr-2 h-4 w-4" />
               Logout

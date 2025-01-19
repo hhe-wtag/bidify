@@ -18,6 +18,8 @@ import { ArrowLeft, DollarSign, PartyPopper } from 'lucide-vue-next'
 
 import { placeBid } from '@/services/bidSocketEvents.ts'
 import { z } from 'zod'
+import ItemImageCarousel from './ItemImageCarousel.vue'
+import { onUnmounted } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -35,13 +37,53 @@ const currentBidAmount = computed(
 const minimumBidIncrement = computed(() => itemStore.currentItem?.minimumBidIncrement || 0)
 const newLatestBid = computed(() => currentBidAmount.value + incrementBidAmount.value)
 
+const bidCooldownTimer = ref(null)
+const bidCooldownActive = ref(false)
+const cooldownTimeLeft = ref(0)
+
+// Update the isLatestBidder computed
+const isLatestBidder = computed(() => {
+  return latestBid.value?.bidderId === userStore.profile?._id && !bidCooldownActive.value
+})
+
+// Update the isPlaceBidDisabled computed property
 const isPlaceBidDisabled = computed(() => {
   const currentItem = itemStore.currentItem
   const userProfile = userStore.profile
+
   if (!currentItem || !userProfile) return true
+  if (bidCooldownActive.value) return true
+  if (isLatestBidder.value) return true
   return currentItem.status === 'closed' || currentItem.sellerId === userProfile._id
 })
+const startBidCooldown = () => {
+  bidCooldownActive.value = true
+  cooldownTimeLeft.value = 5
 
+  // Clear existing timer if any
+  if (bidCooldownTimer.value) {
+    clearInterval(bidCooldownTimer.value)
+  }
+
+  // Start countdown timer
+  bidCooldownTimer.value = setInterval(() => {
+    cooldownTimeLeft.value--
+    if (cooldownTimeLeft.value <= 0) {
+      bidCooldownActive.value = false
+      clearInterval(bidCooldownTimer.value)
+      bidCooldownTimer.value = null
+    }
+  }, 1000)
+}
+
+// Clean up timer when component unmounts
+onUnmounted(() => {
+  if (bidCooldownTimer.value) {
+    clearInterval(bidCooldownTimer.value)
+  }
+})
+
+// Update the placeBidDisabledReason
 const placeBidDisabledReason = computed(() => {
   const currentItem = itemStore.currentItem
   const userProfile = userStore.profile
@@ -50,9 +92,13 @@ const placeBidDisabledReason = computed(() => {
   if (currentItem.status === 'closed') return 'Auction is closed'
   if (currentItem.sellerId === userProfile._id)
     return 'You are the seller of this item, you cannot place bid'
+  if (isLatestBidder.value && !bidCooldownActive.value) return 'You already have the highest bid'
+  if (bidCooldownActive.value)
+    return `Please wait ${cooldownTimeLeft.value} seconds before placing another bid`
 
   return ''
 })
+
 const bidError = ref('')
 
 const bidSchema = computed(() => {
@@ -68,7 +114,6 @@ const bidSchema = computed(() => {
 })
 
 const validateBidAmount = () => {
-  console.log(incrementBidAmount)
   try {
     bidSchema.value.parse(Number(incrementBidAmount.value))
     bidError.value = ''
@@ -96,13 +141,14 @@ watch(
     }
   },
 )
-
 const handlePlaceBid = () => {
   if (!itemStore.currentItem || !userStore.profile) return
+  if (isLatestBidder.value || bidCooldownActive.value) return
 
   try {
     bidSchema.value.parse(Number(incrementBidAmount.value))
     bidError.value = ''
+    startBidCooldown()
 
     placeBid({
       itemId: itemStore.currentItem._id,
@@ -113,6 +159,7 @@ const handlePlaceBid = () => {
     if (error instanceof z.ZodError) {
       bidError.value = error.errors[0].message
     }
+    bidCooldownActive.value = false
   }
 }
 
@@ -122,8 +169,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container mx-auto p-6 max-w-4xl">
-    <Button variant="ghost" class="mb-6" @click="router.push('/items')">
+  <div class="container mx-auto px-12">
+    <Button variant="ghost" class="my-4" @click="router.push('/items')">
       <ArrowLeft class="mr-2 h-4 w-4" />
       Back to Items
     </Button>
@@ -136,16 +183,17 @@ onMounted(() => {
       <AlertDescription>{{ itemStore.error }}</AlertDescription>
     </Alert>
 
-    <div v-else-if="itemStore.currentItem" class="space-y-6">
-      <Card>
-        <CardHeader>
+    <div v-else-if="itemStore.currentItem" class="flex flex-col lg:flex-row gap-4">
+      <Card class="flex flex-col lg:flex-row gap-4 w-[90vw] lg:w-2/3">
+        <CardHeader class="flex-1 lg:pr-0">
+          <ItemImageCarousel :images="itemStore.currentItem.images" />
           <CardTitle class="text-3xl">{{ itemStore.currentItem.title }}</CardTitle>
           <CardDescription class="text-lg">
             {{ itemStore.currentItem.description }}
           </CardDescription>
         </CardHeader>
-        <CardContent class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <CardContent class="p-0 px-4 lg:px-0 lg:pr-4 my-6 w-full lg:w-[45%]">
+          <div class="flex flex-col gap-4">
             <Card>
               <CardHeader>
                 <CardTitle class="text-lg flex items-center">
@@ -190,13 +238,9 @@ onMounted(() => {
             <TimeInformationOfItem :currentItem="itemStore.currentItem" />
           </div>
 
-          <div v-if="bidStore.loading" class="flex justify-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
-
-          <div v-else>
+          <div>
             <div v-if="itemStore.currentItem.status === 'sold' && latestBid?.bidderName">
-              <h1 class="text-center text-xl">
+              <h1 class="text-center text-xl mt-6">
                 Winner of this item is
                 <span class="font-bold italic">{{ latestBid.bidderName }}</span>
                 <PartyPopper class="size-8 ms-1 inline-block" />
@@ -204,25 +248,26 @@ onMounted(() => {
             </div>
             <div
               v-if="itemStore.currentItem.status === 'active'"
-              class="flex flex-col items-center gap-4 mx-auto pt-4"
+              class="relative flex flex-col items-center gap-2 mx-auto pt-4"
             >
-              <h1 class="text-xl">
+              <h1 class="text-lg">
                 New price for the item will be
                 <span class="font-bold italic">${{ newLatestBid }}</span>
               </h1>
 
-              <div class="flex justify-center items-center gap-2">
-                <span>Raise your bid by $</span>
-
-                <Input
-                  v-model="incrementBidAmount"
-                  type="number"
-                  :min="itemStore.currentItem.minimumBidIncrement"
-                  step="1.0"
-                  class="w-20 mr-4"
-                  @update:modelValue="validateBidAmount"
-                />
-
+              <div class="flex flex-col justify-center items-center gap-4">
+                <div>
+                  <span>Raise your bid by $</span>
+                  <Input
+                    v-model="incrementBidAmount"
+                    type="number"
+                    :min="itemStore.currentItem.minimumBidIncrement"
+                    step="1.0"
+                    class="inline w-20 ml-2"
+                    :disabled="isPlaceBidDisabled"
+                    @update:modelValue="validateBidAmount"
+                  />
+                </div>
                 <Tooltip :delay-duration="0">
                   <TooltipTrigger>
                     <Button
@@ -230,15 +275,17 @@ onMounted(() => {
                       :disabled="isPlaceBidDisabled || bidError !== ''"
                       @click="handlePlaceBid"
                     >
-                      Place Bid
+                      {{ bidCooldownActive ? `Wait ${cooldownTimeLeft}s` : 'Place Bid' }}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" v-if="isPlaceBidDisabled">
                     {{ placeBidDisabledReason }}
                   </TooltipContent>
                 </Tooltip>
+                <span v-if="bidError" class="absolute bottom-[-26px] pt-2 text-sm text-red-500">{{
+                  bidError
+                }}</span>
               </div>
-              <span v-if="bidError" class="text-sm text-red-500">{{ bidError }}</span>
             </div>
             <div v-if="itemStore.currentItem.status === 'canceled'">
               <h1 class="text-base text-center text-muted-foreground">The auction is canceled!</h1>
@@ -246,7 +293,7 @@ onMounted(() => {
           </div>
         </CardContent>
       </Card>
-      <BidUpdate />
+      <BidUpdate class="flex-1 w-[90vw] lg:w-auto" />
     </div>
 
     <Alert v-else variant="destructive" class="mb-6">

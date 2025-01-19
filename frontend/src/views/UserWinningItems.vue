@@ -18,7 +18,6 @@ import { Search } from 'lucide-vue-next'
 import ItemForm from '@/components/items/ItemForm.vue'
 import type { CreateItemData, Item, UpdateItemData } from '@/interfaces/item'
 import ItemCard from '@/components/items/ItemCard.vue'
-import { emitEvent } from '@/services/websocket.ts'
 
 const itemStore = useItemStore()
 const searchQuery = ref('')
@@ -26,7 +25,7 @@ const showForm = ref(false)
 const selectedItem: Ref<Item | null> = ref(null)
 
 onMounted(async () => {
-  await itemStore.fetchAllItems()
+  await itemStore.fetchUserWinningItems()
 })
 
 const filteredItems = computed(() => {
@@ -62,9 +61,6 @@ const handleFormSubmit = async (formData: CreateItemData | UpdateItemData): Prom
     : await itemStore.createItem(formData as CreateItemData)
 
   if (response.success) {
-    if (response.data.status === 'sold') {
-      emitEvent('item-sold', response.data)
-    }
     closeForm()
   } else {
     // Optionally, you can show a toast notification or alert

@@ -4,7 +4,12 @@ import { useErrorHandler } from '@/composables/useErrorHandler'
 import type { UserProfile } from '@/interfaces/user'
 import { connectSocket, disconnectSocket } from '@/services/websocket'
 import { useNotificationStore } from './notificationStore'
-import { onAuctionEndNotification, onAuctionWinNotification, onBidNotification, onOutBidNotification } from '@/services/notificationSocketEvents'
+import {
+  onAuctionEndNotification,
+  onAuctionWinNotification,
+  onBidNotification,
+  onOutBidNotification,
+} from '@/services/notificationSocketEvents'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -12,9 +17,11 @@ export const useUserStore = defineStore('user', {
     profile: null as UserProfile | null,
     userId: null as string | null,
     error: null as string | null,
+    wsConnection: false as boolean,
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
+    isWSConnected: (state) => state.wsConnection,
   },
   actions: {
     async login(email: string, password: string) {
@@ -37,25 +44,21 @@ export const useUserStore = defineStore('user', {
           await notificationStore.fetchNotifications()
 
           onBidNotification((data) => {
-            console.log('Received place-bid-notification:', data)
             const { notification } = data.data
             notificationStore.addNotification(notification)
           })
 
           onOutBidNotification((data) => {
-            console.log('Received outbid-notification:', data)
             const { notification } = data.data
             notificationStore.addNotification(notification)
           })
 
           onAuctionWinNotification((data) => {
-            console.log('Received auction-win-notification:', data)
             const { notification } = data.data
             notificationStore.addNotification(notification)
           })
 
           onAuctionEndNotification((data) => {
-            console.log('Received auction-end-notification:', data)
             const { notification } = data.data
             notificationStore.addNotification(notification)
           })
@@ -172,6 +175,10 @@ export const useUserStore = defineStore('user', {
     setToken(token: string) {
       this.token = token
       localStorage.setItem('token', token)
+    },
+
+    setWSConnection(status: boolean) {
+      this.wsConnection = status
     },
 
     setUserProfile(profile: UserProfile) {

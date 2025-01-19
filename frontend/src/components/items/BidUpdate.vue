@@ -7,15 +7,22 @@ import {
   StepperSeparator,
   StepperTitle,
 } from '@/components/ui/stepper'
-import { onNewBidPlaced, onPlaceBid, onPlaceBidResult } from '@/services/bidSocketEvents.ts'
+import {
+  joinItemRoom,
+  onAuctionEnded,
+  onNewBidPlaced,
+  onPlaceBidResult,
+} from '@/services/bidSocketEvents.ts'
 import { useItemStore } from '@/stores/item.ts'
-import { ArrowUp, CircleDollarSign, CircleDot } from 'lucide-vue-next'
-import { onBeforeMount, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { CircleDollarSign, CircleDot } from 'lucide-vue-next'
+import { onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useBidStore } from '@/stores/bid.ts'
 import BidUpdateCard from './BidUpdateCard.vue'
 import { toast } from '../ui/toast/use-toast.ts'
+import { useUserStore } from '@/stores/user.ts'
 
 const itemStore = useItemStore()
+const userStore = useUserStore()
 const bidStore = useBidStore()
 const pulsingItem = ref<number | null>(null)
 
@@ -38,26 +45,41 @@ const handleNewBidPlaced = ({ data }: { data: BidResponse }) => {
   }
 }
 
-const handlePlacedBidResult = ({ data }: { data: BidResponse }) => {
-  if (data.bid.statusCode === 201) {
+const handlePlacedBidResult = (data) => {
+  if (data.data.bid?.latestBidAmount > itemStore.currentItem?.latestBid) {
     toast({
       title: 'Congratulations!',
-      description: data.bid.message,
+      description: data.message,
       class: 'bg-green-100',
     })
   } else {
     toast({
       title: 'Something Went Wrong!',
-      description: 'Bid cannot be placed at this moment.',
+      description: data.message,
       class: 'bg-red-100',
     })
   }
 }
 
-onBeforeMount(() => {
-  onNewBidPlaced(handleNewBidPlaced)
-  onPlaceBidResult(handlePlacedBidResult)
-})
+watch(
+  () => userStore.isWSConnected,
+  (isConnected) => {
+    if (isConnected && itemStore.currentItem?._id) {
+      joinItemRoom(itemStore.currentItem?._id)
+      onNewBidPlaced(handleNewBidPlaced)
+      onPlaceBidResult(handlePlacedBidResult)
+      onAuctionEnded(() => {
+        itemStore.fetchItemBySlug(itemStore.currentItem?.slug)
+        toast({
+          title: 'Auction Ended!',
+          description: 'The auction has ended for this item.',
+          class: 'bg-yellow-100',
+        })
+      })
+    }
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   if (itemStore.currentItem?._id) bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
@@ -103,20 +125,20 @@ const onEnter = (el) => {
           <StepperItem
             v-for="(step, index) in bidStore.lates10Bids"
             :key="step.timeOfTheBid"
-            class="relative flex w-full items-start gap-4 [&_[data-state]]:!bg-gray-200"
+            class="relative flex w-full items-start gap-2 [&_[data-state]]:!bg-gray-200"
             :step="index"
             :data-index="index"
           >
             <StepperSeparator
               v-if="index !== bidStore.lates10Bids.length - 1"
-              class="absolute left-[22px] top-[45px] block h-[calc(100%_-_20px)] w-0.5 shrink-0 rounded-full !bg-gray-200"
+              class="absolute left-[19px] top-[35px] block h-[calc(100%_-_6px)] w-0.5 shrink-0 rounded-full !bg-gray-200"
               :class="[index === 0 && 'bg-gradient-to-b from-gray-400 to-transparents']"
             />
 
             <div class="z-10 rounded-full shrink-0 p-1.5 bg-white">
               <div class="relative rounded-full">
-                <CircleDollarSign v-if="index === 0" class="size-9 text-primary" />
-                <CircleDot v-else class="size-9 text-gray-400 opacity-75" />
+                <CircleDollarSign v-if="index === 0" class="size-7 text-primary" />
+                <CircleDot v-else class="size-7 text-gray-400 opacity-75" />
               </div>
             </div>
             <div
