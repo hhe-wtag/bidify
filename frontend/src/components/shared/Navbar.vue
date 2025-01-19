@@ -100,6 +100,22 @@ const recentNotifications = computed(() => {
   return notifications.value.slice(0, 5)
 })
 
+const shakeBell = ref(false)
+const notificationSound = ref(new Audio('/sounds/notification.mp3'))
+
+watch(unreadCount, (newCount, oldCount) => {
+  if (newCount > oldCount) {
+    shakeBell.value = true
+    notificationSound.value.currentTime = 0
+    notificationSound.value.play().catch((err) => {
+      console.error('Error playing notification sound:', err)
+    })
+    setTimeout(() => {
+      shakeBell.value = false
+    }, 500)
+  }
+})
+
 const getNotificationIcon = (type: string) => {
   switch (type) {
     case 'REGISTRATION':
@@ -144,7 +160,7 @@ const getNotificationIcon = (type: string) => {
       <div v-if="userStore.isAuthenticated" class="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <Button variant="ghost" size="icon" class="relative">
+            <Button variant="ghost" size="icon" class="relative" :class="{ shake: shakeBell }">
               <Bell style="width: 25px; height: 25px" />
               <Badge
                 v-if="unreadCount > 0"
@@ -236,3 +252,24 @@ const getNotificationIcon = (type: string) => {
     </div>
   </nav>
 </template>
+
+<style scoped>
+@keyframes shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20%,
+  60% {
+    transform: rotate(-10deg);
+  }
+  40%,
+  80% {
+    transform: rotate(10deg);
+  }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+</style>
