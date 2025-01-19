@@ -46,22 +46,18 @@ watch(
   (isConnected) => {
     if (isConnected) {
       onBidNotification((data) => {
-        console.log('Received place-bid-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })
       onOutBidNotification((data) => {
-        console.log('Received outbid-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })
       onAuctionWinNotification((data) => {
-        console.log('Received auction-win-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })
       onAuctionEndNotification((data) => {
-        console.log('Received auction-end-notification:', data)
         const { notification } = data.data
         notificationStore.addNotification(notification)
       })

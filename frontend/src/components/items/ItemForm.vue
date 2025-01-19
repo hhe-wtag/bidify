@@ -194,7 +194,6 @@ const handleFileChange = (event: Event) => {
 
   // Generate preview URLs
   imagePreviewUrls.value = files.map((file) => URL.createObjectURL(file))
-  console.log(imagePreviewUrls.value)
 }
 </script>
 

@@ -45,7 +45,6 @@ const getBadges = (item: Item) => {
 
   // Check if item is canceled
   if (item?.status === 'canceled') {
-    console.log(item)
     badges.push({ text: 'Canceled', style: 'bg-gray-100 text-gray-800' })
     return badges
   }

@@ -101,7 +101,6 @@ class SocketConnection {
       });
 
       socket.on(EVENTS.ITEM_SOLD, (item) => {
-        console.log(item.status);
         if (item.status === 'sold') {
           this.io.to(`item-${item._id}`).emit(EVENTS.AUCTION_ENDED, {
             event: EVENTS.AUCTION_ENDED,

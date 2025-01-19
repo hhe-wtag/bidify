@@ -115,10 +115,7 @@ class ItemRepository extends BaseRepository {
   }
 
   async getUserEnlistedItems(userId) {
-    console.log(userId);
     const items = await Item.find({ sellerId: userId });
-
-    console.log(items);
     return items;
   }
 
@@ -202,8 +199,6 @@ class ItemRepository extends BaseRepository {
           },
         },
       ]);
-
-      console.log('Won these', winningItems);
 
       return winningItems.map((item) => ({
         ...item,

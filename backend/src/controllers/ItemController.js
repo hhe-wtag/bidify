@@ -138,8 +138,6 @@ class ItemController extends BaseController {
     const userId = req.user.id;
     const items = await this.repository.getUserWinningItems(userId);
 
-    console.log(items);
-
     res
       .status(HTTP_STATUS.OK)
       .json(new ApiResponse(HTTP_STATUS.OK, items, 'User winnings found!'));
