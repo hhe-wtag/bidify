@@ -100,6 +100,17 @@ class SocketConnection {
         this.BidSocketHandler.handleJoinItemRoom(socket, itemId);
       });
 
+      socket.on(EVENTS.ITEM_SOLD, (item) => {
+        console.log(item.status);
+        if (item.status === 'sold') {
+          this.io.to(`item-${item._id}`).emit(EVENTS.AUCTION_ENDED, {
+            event: EVENTS.AUCTION_ENDED,
+            data: { item },
+            message: `Auction ended for item ${item.title}`,
+          });
+        }
+      });
+
       socket.on(EVENTS.LEAVE_ITEM_ROOM, (itemId) => {
         this.BidSocketHandler.handleLeaveItemRoom(socket, itemId);
       });
