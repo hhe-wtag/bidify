@@ -7,7 +7,12 @@ import {
   StepperSeparator,
   StepperTitle,
 } from '@/components/ui/stepper'
-import { joinItemRoom, onNewBidPlaced, onPlaceBidResult } from '@/services/bidSocketEvents.ts'
+import {
+  joinItemRoom,
+  onAuctionEnded,
+  onNewBidPlaced,
+  onPlaceBidResult,
+} from '@/services/bidSocketEvents.ts'
 import { useItemStore } from '@/stores/item.ts'
 import { CircleDollarSign, CircleDot } from 'lucide-vue-next'
 import { onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue'
@@ -63,6 +68,13 @@ watch(
       joinItemRoom(itemStore.currentItem?._id)
       onNewBidPlaced(handleNewBidPlaced)
       onPlaceBidResult(handlePlacedBidResult)
+      onAuctionEnded(() => {
+        toast({
+          title: 'Auction Ended!',
+          description: 'The auction has ended for this item.',
+          class: 'bg-yellow-100',
+        })
+      })
     }
   },
   { immediate: true },

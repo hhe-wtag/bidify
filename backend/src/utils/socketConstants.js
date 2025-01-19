@@ -22,6 +22,7 @@ export const EVENTS = {
   PLACE_BID: 'place-bid',
   PLACE_BID_RESULT: 'place-bid-result',
   NEW_BID_PLACED: 'new-bid-placed',
+  AUCTION_ENDED: 'auction-ended',
 
   // Room Events
   USER_JOINED_ROOM: 'user-joined-room',
