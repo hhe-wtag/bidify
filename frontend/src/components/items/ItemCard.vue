@@ -75,6 +75,9 @@ const getBadges = (item: Item) => {
 
   return badges
 }
+const handleImageError = (event) => {
+  event.target.src = placeHolderImage
+}
 </script>
 
 <template>
@@ -90,6 +93,7 @@ const getBadges = (item: Item) => {
           :src="item.images[0]?.filepath || placeHolderImage"
           class="w-full h-full object-cover object-center rounded-lg border"
           alt=""
+          @error="handleImageError"
         />
       </div>
     </div>
