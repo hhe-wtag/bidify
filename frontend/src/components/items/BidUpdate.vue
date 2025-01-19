@@ -56,10 +56,17 @@ const handlePlacedBidResult = (data) => {
   }
 }
 
-onBeforeMount(() => {
-  onNewBidPlaced(handleNewBidPlaced)
-  onPlaceBidResult(handlePlacedBidResult)
-})
+watch(
+  () => userStore.isWSConnected,
+  (isConnected) => {
+    if (isConnected && itemStore.currentItem?._id) {
+      joinItemRoom(itemStore.currentItem?._id)
+      onNewBidPlaced(handleNewBidPlaced)
+      onPlaceBidResult(handlePlacedBidResult)
+    }
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   if (itemStore.currentItem?._id) bidStore.fetchLatest10Bids(itemStore.currentItem?._id)
