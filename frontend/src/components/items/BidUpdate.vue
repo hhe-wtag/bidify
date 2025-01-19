@@ -69,6 +69,7 @@ watch(
       onNewBidPlaced(handleNewBidPlaced)
       onPlaceBidResult(handlePlacedBidResult)
       onAuctionEnded(() => {
+        itemStore.fetchItemBySlug(itemStore.currentItem?.slug)
         toast({
           title: 'Auction Ended!',
           description: 'The auction has ended for this item.',
