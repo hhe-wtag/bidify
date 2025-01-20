@@ -51,13 +51,38 @@ Bidify is a real-time auction platform that allows users to create, manage, and 
 
 4. **Datebase Connection & Seeding**
 
-   Datebase will connect using the environment variables, make sure you update your env.
-
-   If you want to populate documents on empty DB change the `const MONGODB_URI = 'your_secret_uri';` from the file `seedDatabase.js` in the root folder and run the follow
+   To seed the database with initial data, use the `seedDatabase.js` script. You have several options to run it:
 
    ```bash
+   # Using default configuration
    node seedDatabase.js
+
+   # Specify custom MongoDB URI and database name
+   node seedDatabase.js --uri mongodb+srv://username:password@cluster.mongodb.net --db db_name
+
+   # Force overwrite existing dummy images
+   node seedDatabase.js --force
+
+   # View all available options
+   node seedDatabase.js --help
    ```
+
+   The script supports the following options:
+
+   - --uri, -u: MongoDB URI (default: mongodb://localhost:27017)
+   - --db, -d: Database name (default: bidify_test)
+   - --force, -f: Force overwrite existing dummy images
+   - --help, -h: Show help message
+
+   The seeder will:
+
+   - Copy dummy images to the uploads directory
+   - Create 5 sample users with password "1234Asdf"
+   - Create 8 auction items with images
+   - Generate sample bids
+   - Create corresponding notifications
+
+````
 
 ## API Documentation
 
@@ -70,13 +95,13 @@ POST /api/auth/register
 Content-Type: application/json
 
 {
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "contactNumber": "1234567890",
-  "password": "StrongPass123"
+"firstName": "John",
+"lastName": "Doe",
+"email": "john@example.com",
+"contactNumber": "1234567890",
+"password": "StrongPass123"
 }
-```
+````
 
 #### Login
 
@@ -305,7 +330,7 @@ this.emitToRoom(`room-${roomId}`, 'user-joined', userData);
 // Server -> Individual
 this.emitToUser(socketId, 'private-message', message);
 ```
- 
+
 ```javascript
 // Client-side connection
 const socket = io('http://localhost:8080', {
@@ -455,25 +480,13 @@ notificationSocket.emit('mark-as-read', {
 
 #### Admin Monitoring
 
-```javascript
-// Connect to admin namespace
-const adminSocket = io('/admin', {
-  auth: { token: 'admin_token_here' },
-});
+We have created a basic setup for monitoring all the events in our server using the `https://admin.socket.io/` site.
 
-// Get active users
-adminSocket.emit('get-active-users');
-adminSocket.on('active-users-list', (users) => {
-  console.log('Active users:', users);
-});
+Steps to follow:
 
-// Monitor room users
-adminSocket.emit('get-room-users', { roomId: 'room_id_here' });
-adminSocket.on('room-users-list', (users) => {
-  console.log('Users in room:', users);
-});
-```
-
+1. Visit the site `https://admin.socket.io/`.
+2. Use this credentials to login
+   ![https://admin.socket.io](/backend/docs/admin_socket_io.png)
 
 ## Push Notification Service
 
@@ -507,7 +520,6 @@ To enable Web Push Notifications, you need to generate VAPID keys and configure 
   ```bash
   VITE_VAPID_PUBLIC_KEY=<your_generated_public_key>
   ```
-
 
 ## Security Considerations
 
