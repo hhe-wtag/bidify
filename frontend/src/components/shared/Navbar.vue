@@ -19,6 +19,7 @@ import {
   UserPlus,
   PackageCheck,
   ClipboardList,
+  BellRing,
 } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import DropdownMenuSeparator from '../ui/dropdown-menu/DropdownMenuSeparator.vue'
@@ -33,6 +34,7 @@ import {
   onOutBidNotification,
 } from '@/services/notificationSocketEvents.ts'
 import { formatDate } from '@/utils/timeFunctions'
+import { setupPushNotifications } from '@/services/pushNotification.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -69,6 +71,7 @@ onMounted(async () => {
   try {
     if (userStore.isAuthenticated) {
       await userStore.fetchUserProfile()
+      console.log(userStore.userId)
       if (userStore.token && userStore.userId)
         connectSocket(userStore.token, userStore.userId, (WSConnectionStatus) => {
           userStore.setWSConnection(WSConnectionStatus)
@@ -102,7 +105,6 @@ const recentNotifications = computed(() => {
 
 const shakeBell = ref(false)
 const notificationSound = ref(new Audio('/sounds/notification.mp3'))
-
 watch(unreadCount, (newCount, oldCount) => {
   if (newCount > oldCount) {
     shakeBell.value = true
@@ -130,6 +132,7 @@ const getNotificationIcon = (type: string) => {
       return Bell
   }
 }
+
 </script>
 
 <template>
@@ -158,6 +161,17 @@ const getNotificationIcon = (type: string) => {
 
       <!-- Auth Section -->
       <div v-if="userStore.isAuthenticated" class="flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="icon"
+          @click="setupPushNotifications(userStore.userId, userStore.token)"
+          class="w-full flex items-center justify-center gap-2 px-4 py-2"
+          title="Enable Push Notifications"
+        >
+          Subscribe
+          <!-- <BellRing style="width: 25px; height: 25px" /> -->
+        </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button variant="ghost" size="icon" class="relative" :class="{ shake: shakeBell }">

@@ -7,6 +7,7 @@ import { AuthRoutes } from './routes/auth.route.js';
 import { BidRoutes } from './routes/bid.route.js';
 import { ItemRoutes } from './routes/item.route.js';
 import { NotificationRoutes } from './routes/notification.route.js';
+import { PushNotificationRoutes } from './routes/push.route.js';
 import { UserRoutes } from './routes/user.route.js';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/user', UserRoutes);
 app.use('/api/item', ItemRoutes);
 app.use('/api/bid', BidRoutes);
 app.use('/api/notification', NotificationRoutes);
+app.use('/api/push', PushNotificationRoutes);
 
 app.use(globalErrorHandler);
 
