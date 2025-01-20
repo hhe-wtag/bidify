@@ -46,13 +46,12 @@ export const setupPushNotifications = async (userId, token) => {
       try {
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey:
-            'BDdTbQklov4-VHiMt6DUds3U6SuWSRi8dhzgYBFOrlkJbR3oFE48-3XDR2xkviruCUvsYEqgAa2VMp1AxYxyMlE',
+          applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
         })
 
         console.log('Push subscription successful:', subscription)
 
-        await registerPushNotification(subscription,userId,token)
+        await registerPushNotification(subscription, userId, token)
 
         new Notification('Push Notifications Enabled', {
           body: 'You will now receive notifications for bids and auction updates',

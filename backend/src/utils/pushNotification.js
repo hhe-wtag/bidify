@@ -5,8 +5,8 @@ const subscriptions = new Map();
 // Set VAPID keys
 webpush.setVapidDetails(
   'mailto: afnan.mumu@welldev.io',
-  'BDdTbQklov4-VHiMt6DUds3U6SuWSRi8dhzgYBFOrlkJbR3oFE48-3XDR2xkviruCUvsYEqgAa2VMp1AxYxyMlE',
-  'Q6NbQq-17Npkl2bm4nYx5I_HjSWJc_3fJYKsLThFCFA'
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
 );
 
 /**
