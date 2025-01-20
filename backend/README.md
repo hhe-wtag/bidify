@@ -305,7 +305,7 @@ this.emitToRoom(`room-${roomId}`, 'user-joined', userData);
 // Server -> Individual
 this.emitToUser(socketId, 'private-message', message);
 ```
-
+ 
 ```javascript
 // Client-side connection
 const socket = io('http://localhost:8080', {
@@ -473,6 +473,41 @@ adminSocket.on('room-users-list', (users) => {
   console.log('Users in room:', users);
 });
 ```
+
+
+## Push Notification Service
+
+#### 1. Generate Vapid Keys
+
+To enable Web Push Notifications, you need to generate VAPID keys and configure them in both the backend and frontend.
+
+## Steps to Generate VAPID Keys:
+
+1. **Navigate to the backend directory**:
+
+   ```bash
+   cd backend
+   ```
+
+2. **Generate VAPID keys using the web-push library:**:
+
+   ```bash
+   .\node_modules\.bin\web-push generate-vapid-keys
+   ```
+
+3. **Save the keys in the respective .env files:**:
+
+- Copy the generated Public Key and Private Key.
+- In the backend's .env file, add the following:
+  ```bash
+  VAPID_PUBLIC_KEY=<your_generated_public_key>
+  VAPID_PRIVATE_KEY=<your_generated_private_key>
+  ```
+- In the frontend's .env file, add the public key:
+  ```bash
+  VITE_VAPID_PUBLIC_KEY=<your_generated_public_key>
+  ```
+
 
 ## Security Considerations
 
