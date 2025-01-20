@@ -2,32 +2,34 @@
 
 ## Overview
 
-Bidify is a real-time auction platform that allows users to create, manage, and participate in online auctions. The system includes user authentication, item management, bidding functionality, and real-time notifications through WebSocket integration.
+Bidify is a real-time auction platform that allows users to create, manage, and participate in online auctions. The system includes user authentication, item management, bidding functionality, and real-time notifications through WebSocket (Socket.io) integration.
 
 ## Tech Stack
 
 - Node.js with Express
 - MongoDB with Mongoose
-- WebSocket for real-time features
+- Socket.io for real-time features
 - JWT for authentication
+- Multer for File Upload
 
 ## Initial Project Setup Steps
 
-1. **Project Initialization**
+1. **Project Prerequisites**
+
+   - Node version >= 20
+
+2. **Install & Run**
 
    ```bash
-   yarn init
-   ```
+   # Clone and navigate to project
+   git clone https://github.com/hhe-wtag/bidify.git
+   cd bidify/backend
 
-2. **Install Required Packages**
+   # Install dependencies
+   yarn install
 
-   ```bash
-   # Core dependencies
-   yarn add express mongoose jsonwebtoken bcryptjs cors dotenv multer
-
-   # Development dependencies
-   yarn add -D eslint prettier
-   yarn add -D eslint-config-prettier eslint-plugin-prettier eslint-plugin-import
+   # Run Dev Server
+   yarn dev
    ```
 
 3. **Environment Setup**
@@ -82,7 +84,73 @@ Bidify is a real-time auction platform that allows users to create, manage, and 
    - Generate sample bids
    - Create corresponding notifications
 
-````
+## Project Structure
+
+The backend project is organized as follows:
+
+```
+backend/
+├── README.md
+├── eslint.config.js
+├── jsconfig.json
+├── package-lock.json
+├── package.json
+├── seedDatabase.js               # Script to populate data base with dummy
+├── yarn.lock
+├── .env.sample
+├── .prettierrc
+├── dummy_images/                 # Used in seedDatabase.js for items
+└── src/
+    ├── app.js                    # Main application file where middleware and routes are configured
+    ├── server.js                 # Entry point of the server where the app is initialized and listens to requests
+    ├── test.js                   # Test file for the application
+    ├── config/                    # Configuration files
+    │   ├── database.js           # Database connection setup
+    │   └── socket.js             # Socket configuration
+    ├── controllers/              # Handles requests and responses
+    │   ├── BaseController.js
+    │   ├── BidController.js
+    │   ├── ItemController.js
+    │   ├── NotificationController.js
+    │   └── UserController.js
+    ├── middleware/               # Middleware for authentication, error handling, etc.
+    │   ├── auth.js
+    │   ├── globalErrorHandler.js
+    │   └── multer.js
+    ├── models/                   # Mongoose schemas and models
+    │   ├── bid.model.js
+    │   ├── item.model.js
+    │   ├── notification.model.js
+    │   └── user.model.js
+    ├── repositories/             # Database interaction logic
+    │   ├── BaseRepository.js
+    │   ├── BidRepository.js
+    │   ├── BidSocketRepository.js
+    │   ├── ItemRepository.js
+    │   ├── NotificationRepository.js
+    │   └── UserRepository.js
+    ├── routes/                   # API endpoint routes
+    │   ├── auth.route.js
+    │   ├── bid.route.js
+    │   ├── item.route.js
+    │   ├── notification.route.js
+    │   ├── push.route.js
+    │   └── user.route.js
+    ├── socket_handlers/          # Real-time socket communication
+    │   ├── BaseSocketHandler.js
+    │   ├── BidSocketHandler.js
+    │   ├── NotificationSocketHandler.js
+    │   └── SocketConnection.js
+    └── utils/                    # Utility functions and classes
+        ├── ApiError.js
+        ├── ApiResponse.js
+        ├── asyncHandler.js
+        ├── handleValidationError.js
+        ├── httpStatus.js
+        ├── passwordValidation.js
+        ├── pushNotification.js
+        └── socketConstants.js
+```
 
 ## API Documentation
 
@@ -101,7 +169,7 @@ Content-Type: application/json
 "contactNumber": "1234567890",
 "password": "StrongPass123"
 }
-````
+```
 
 #### Login
 
@@ -542,7 +610,7 @@ To enable Web Push Notifications, you need to generate VAPID keys and configure 
 
 ## Error Handling
 
-The API uses standard HTTP status codes and global error handler to return errors in the following format:
+The API uses standard HTTP status codes and `gloabalErrorHander.js` middleware to return errors in the following format:
 
 ```json
 {

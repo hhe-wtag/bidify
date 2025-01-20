@@ -136,11 +136,14 @@ sequenceDiagram
         S->>DB: Save Bid Data
         S->>DB: Update Item's Latest Bid
         S->>DB: Create Notifications
+        C->>S: GET /api/bid/latest-10-bids?itemId=item_id
         Note over SK,C: Broadcast Events
         S-->>SK: Emit 'bid_placed' to Item Room
-        SK-->>C: Update Bid History (Last 10 bids)
         S-->>SK: Emit 'notification' (BID_PLACED) to Seller
         S-->>SK: Emit 'notification' (OUTBID) to Previous Bidders
+         alt Bid Placed Failed
+            SK-->>C: Emit 'bid_placed_result' to Bidder
+        end
     end
     rect rgb(255, 255, 240)
         Note over C,SK: Auction End
@@ -154,5 +157,13 @@ sequenceDiagram
         end
         S-->>SK: Emit 'notification' (AUCTION_ENDED) to All Bidders
     end
-
+    rect rgb(240, 240, 255)
+        Note over C,SK: Profile Management
+        C->>S: GET /api/user/profile (View Profile)
+        S->>DB: Fetch User Profile
+        S-->>C: Return User Profile Data
+        C->>S: PUT /api/users/profile/update (Update Profile)
+        S->>DB: Update User Profile Data
+        S-->>C: Return Updated Profile Data
+    end
 ```
