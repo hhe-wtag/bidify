@@ -12,8 +12,8 @@ const router = express.Router();
 
 webpush.setVapidDetails(
   'mailto: afnan.mumu@welldev.io',
-  'BDdTbQklov4-VHiMt6DUds3U6SuWSRi8dhzgYBFOrlkJbR3oFE48-3XDR2xkviruCUvsYEqgAa2VMp1AxYxyMlE',
-  'Q6NbQq-17Npkl2bm4nYx5I_HjSWJc_3fJYKsLThFCFA'
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
 );
 
 router.post(
@@ -34,7 +34,6 @@ router.post(
       }
 
       saveSubscription(userId, subscription);
-      //   console.log(`Push subscription saved for user: ${userId}`);
       res.status(201).json({ message: 'Subscription saved successfully' });
     } catch (error) {
       console.error('Error saving subscription:', error);
@@ -46,7 +45,6 @@ router.post(
 router.post(
   '/notify',
   asyncHandler(async (req, res) => {
-    // console.log('Received notification request:', req.body);
 
     try {
       const { userId, message, title } = req.body;
@@ -54,7 +52,6 @@ router.post(
       const payload = JSON.stringify({
         title: title || 'Notification Title',
         message: message || 'Notification Message',
-        //url: '/', // Optional: Specify a URL to open when the notification is clicked
       });
       await sendPushNotification(userId, payload);
       res.status(200).json({ message: 'Notification sent successfully' });

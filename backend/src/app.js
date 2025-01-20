@@ -7,8 +7,8 @@ import { AuthRoutes } from './routes/auth.route.js';
 import { BidRoutes } from './routes/bid.route.js';
 import { ItemRoutes } from './routes/item.route.js';
 import { NotificationRoutes } from './routes/notification.route.js';
-import { UserRoutes } from './routes/user.route.js';
 import { PushNotificationRoutes } from './routes/push.route.js';
+import { UserRoutes } from './routes/user.route.js';
 
 const app = express();
 

@@ -85,6 +85,12 @@ class BidSocketHandler extends BaseSocketHandler {
 
       if (outbidNotifications.length > 0) {
         outbidNotifications.forEach((notification) => {
+          const payload = {
+            title: 'Bid Placed',
+            message: notification.message,
+          };
+          sendPushNotification(notification.userId.toString(), payload);
+
           const userIdString = notification.userId.toString();
           if (!this.userSocketMap.has(userIdString)) {
             return;
@@ -96,12 +102,6 @@ class BidSocketHandler extends BaseSocketHandler {
             data: { notification },
             message: `You have been outbid by userId: ${notification.userId} on itemId: ${notification.itemId}.`,
           });
-
-          const payload = {
-            title: 'Bid Placed',
-            message: notification.message,
-          };
-          sendPushNotification(notification.userId.toString(), payload);
         });
       }
     }
@@ -139,10 +139,20 @@ class BidSocketHandler extends BaseSocketHandler {
           message: `You have won the auction`,
         });
       }
+      const payload = {
+        title: 'Auction Item Winner',
+        message: winnerNotify.message,
+      };
+      sendPushNotification(winnerNotify.userId.toString(), payload);
 
       if (auctionEndNotify.length > 0) {
         auctionEndNotify.forEach((notification) => {
           const userIdString = notification.userId.toString();
+          const payload = {
+            title: 'Auction End',
+            message: notification.message,
+          };
+          sendPushNotification(notification.userId.toString(), payload);
           if (!this.userSocketMap.has(userIdString)) {
             return;
           }
