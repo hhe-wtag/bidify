@@ -2,32 +2,34 @@
 
 ## Overview
 
-Bidify is a real-time auction platform that allows users to create, manage, and participate in online auctions. The system includes user authentication, item management, bidding functionality, and real-time notifications through WebSocket integration.
+Bidify is a real-time auction platform that allows users to create, manage, and participate in online auctions. The system includes user authentication, item management, bidding functionality, and real-time notifications through WebSocket (Socket.io) integration.
 
 ## Tech Stack
 
 - Node.js with Express
 - MongoDB with Mongoose
-- WebSocket for real-time features
+- Socket.io for real-time features
 - JWT for authentication
+- Multer for File Upload
 
 ## Initial Project Setup Steps
 
-1. **Project Initialization**
+1. **Project Prerequisites**
+
+   - Node version >= 20
+
+2. **Install & Run**
 
    ```bash
-   yarn init
-   ```
+   # Clone and navigate to project
+   git clone https://github.com/hhe-wtag/bidify.git
+   cd bidify/backend
 
-2. **Install Required Packages**
+   # Install dependencies
+   yarn install
 
-   ```bash
-   # Core dependencies
-   yarn add express mongoose jsonwebtoken bcryptjs cors dotenv multer
-
-   # Development dependencies
-   yarn add -D eslint prettier
-   yarn add -D eslint-config-prettier eslint-plugin-prettier eslint-plugin-import
+   # Run Dev Server
+   yarn dev
    ```
 
 3. **Environment Setup**
@@ -51,13 +53,104 @@ Bidify is a real-time auction platform that allows users to create, manage, and 
 
 4. **Datebase Connection & Seeding**
 
-   Datebase will connect using the environment variables, make sure you update your env.
-
-   If you want to populate documents on empty DB change the `const MONGODB_URI = 'your_secret_uri';` from the file `seedDatabase.js` in the root folder and run the follow
+   To seed the database with initial data, use the `seedDatabase.js` script. You have several options to run it:
 
    ```bash
+   # Using default configuration
    node seedDatabase.js
+
+   # Specify custom MongoDB URI and database name
+   node seedDatabase.js --uri mongodb+srv://username:password@cluster.mongodb.net --db db_name
+
+   # Force overwrite existing dummy images
+   node seedDatabase.js --force
+
+   # View all available options
+   node seedDatabase.js --help
    ```
+
+   The script supports the following options:
+
+   - --uri, -u: MongoDB URI (default: mongodb://localhost:27017)
+   - --db, -d: Database name (default: bidify_test)
+   - --force, -f: Force overwrite existing dummy images
+   - --help, -h: Show help message
+
+   The seeder will:
+
+   - Copy dummy images to the uploads directory
+   - Create 5 sample users with password "1234Asdf"
+   - Create 8 auction items with images
+   - Generate sample bids
+   - Create corresponding notifications
+
+## Project Structure
+
+The backend project is organized as follows:
+
+```
+backend/
+├── README.md
+├── eslint.config.js
+├── jsconfig.json
+├── package-lock.json
+├── package.json
+├── seedDatabase.js               # Script to populate data base with dummy
+├── yarn.lock
+├── .env.sample
+├── .prettierrc
+├── dummy_images/                 # Used in seedDatabase.js for items
+└── src/
+    ├── app.js                    # Main application file where middleware and routes are configured
+    ├── server.js                 # Entry point of the server where the app is initialized and listens to requests
+    ├── test.js                   # Test file for the application
+    ├── config/                    # Configuration files
+    │   ├── database.js           # Database connection setup
+    │   └── socket.js             # Socket configuration
+    ├── controllers/              # Handles requests and responses
+    │   ├── BaseController.js
+    │   ├── BidController.js
+    │   ├── ItemController.js
+    │   ├── NotificationController.js
+    │   └── UserController.js
+    ├── middleware/               # Middleware for authentication, error handling, etc.
+    │   ├── auth.js
+    │   ├── globalErrorHandler.js
+    │   └── multer.js
+    ├── models/                   # Mongoose schemas and models
+    │   ├── bid.model.js
+    │   ├── item.model.js
+    │   ├── notification.model.js
+    │   └── user.model.js
+    ├── repositories/             # Database interaction logic
+    │   ├── BaseRepository.js
+    │   ├── BidRepository.js
+    │   ├── BidSocketRepository.js
+    │   ├── ItemRepository.js
+    │   ├── NotificationRepository.js
+    │   └── UserRepository.js
+    ├── routes/                   # API endpoint routes
+    │   ├── auth.route.js
+    │   ├── bid.route.js
+    │   ├── item.route.js
+    │   ├── notification.route.js
+    │   ├── push.route.js
+    │   └── user.route.js
+    ├── socket_handlers/          # Real-time socket communication
+    │   ├── BaseSocketHandler.js
+    │   ├── BidSocketHandler.js
+    │   ├── NotificationSocketHandler.js
+    │   └── SocketConnection.js
+    └── utils/                    # Utility functions and classes
+        ├── ApiError.js
+        ├── ApiResponse.js
+        ├── asyncHandler.js
+        ├── handleValidationError.js
+        ├── httpStatus.js
+        ├── passwordValidation.js
+        ├── pushNotification.js
+        └── socketConstants.js
+```
 
 ## API Documentation
 
@@ -70,11 +163,11 @@ POST /api/auth/register
 Content-Type: application/json
 
 {
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "contactNumber": "1234567890",
-  "password": "StrongPass123"
+"firstName": "John",
+"lastName": "Doe",
+"email": "john@example.com",
+"contactNumber": "1234567890",
+"password": "StrongPass123"
 }
 ```
 
@@ -305,7 +398,7 @@ this.emitToRoom(`room-${roomId}`, 'user-joined', userData);
 // Server -> Individual
 this.emitToUser(socketId, 'private-message', message);
 ```
- 
+
 ```javascript
 // Client-side connection
 const socket = io('http://localhost:8080', {
@@ -455,25 +548,13 @@ notificationSocket.emit('mark-as-read', {
 
 #### Admin Monitoring
 
-```javascript
-// Connect to admin namespace
-const adminSocket = io('/admin', {
-  auth: { token: 'admin_token_here' },
-});
+We have created a basic setup for monitoring all the events in our server using the `https://admin.socket.io/` site.
 
-// Get active users
-adminSocket.emit('get-active-users');
-adminSocket.on('active-users-list', (users) => {
-  console.log('Active users:', users);
-});
+Steps to follow:
 
-// Monitor room users
-adminSocket.emit('get-room-users', { roomId: 'room_id_here' });
-adminSocket.on('room-users-list', (users) => {
-  console.log('Users in room:', users);
-});
-```
-
+1. Visit the site `https://admin.socket.io/`.
+2. Use this credentials to login
+   ![https://admin.socket.io](/backend/docs/admin_socket_io.png)
 
 ## Push Notification Service
 
@@ -508,7 +589,6 @@ To enable Web Push Notifications, you need to generate VAPID keys and configure 
   VITE_VAPID_PUBLIC_KEY=<your_generated_public_key>
   ```
 
-
 ## Security Considerations
 
 1. **Authentication**
@@ -530,7 +610,7 @@ To enable Web Push Notifications, you need to generate VAPID keys and configure 
 
 ## Error Handling
 
-The API uses standard HTTP status codes and global error handler to return errors in the following format:
+The API uses standard HTTP status codes and `gloabalErrorHander.js` middleware to return errors in the following format:
 
 ```json
 {

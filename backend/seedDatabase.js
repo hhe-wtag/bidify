@@ -7,9 +7,76 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Add command line argument parsing
+function parseArguments() {
+  const args = process.argv.slice(2);
+  const usage = `
+Usage: node seeder.js [options]
+
+💡 Options:
+  --uri, -u       MongoDB URI (default: mongodb://localhost:27017)
+  --db, -d        Database name (default: bidify_test)
+  --force, -f     Force overwrite existing dummy images
+  --help, -h      Show this help message
+
+Example:
+  node seeder.js --uri mongodb://localhost:27017 --db my_database --force
+`;
+
+  const options = {
+    uri: 'mongodb://localhost:27017',
+    db: 'bidify_test',
+    force: false,
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i].toLowerCase();
+
+    switch (arg) {
+      case '--help':
+      case '-h':
+        console.log(usage);
+        process.exit(0);
+        break;
+
+      case '--uri':
+      case '-u':
+        options.uri = args[++i];
+        if (!options.uri) {
+          console.error('Error: MongoDB URI is required when using --uri');
+          console.log(usage);
+          process.exit(1);
+        }
+        break;
+
+      case '--db':
+      case '-d':
+        options.db = args[++i];
+        if (!options.db) {
+          console.error('❗ Error: Database name is required when using --db');
+          console.log(usage);
+          process.exit(1);
+        }
+        break;
+
+      case '--force':
+      case '-f':
+        options.force = true;
+        break;
+
+      default:
+        console.error(`Unknown option: ${arg}`);
+        console.log(usage);
+        process.exit(1);
+    }
+  }
+
+  return options;
+}
+
 async function copyDummyImages(forceOverwrite = false) {
   const sourceDir = path.join(__dirname, 'dummy_images');
-  const targetDir = path.join(__dirname, 'public', 'uploads');
+  const targetDir = path.join(__dirname, 'uploads');
   let copied = 0,
     skipped = 0;
 
@@ -24,26 +91,30 @@ async function copyDummyImages(forceOverwrite = false) {
       const targetPath = path.join(targetDir, file);
 
       if (fs.existsSync(targetPath) && !forceOverwrite) {
-        console.log(`⚠️  Skipping ${file} (already exists)`);
+        console.log(`❗ Skipping ${file} (already exists)`);
         skipped++;
         continue;
       }
 
       fs.copyFileSync(sourcePath, targetPath);
-      console.log(`✓ Copied ${file}`);
+      console.log(`✅  Copied ${file}`);
       copied++;
     }
 
     console.log(`\n📁 Summary: ${copied} copied, ${skipped} skipped`);
   } catch (error) {
-    console.error('✗ Error copying dummy images:', error);
+    console.error('❌  Error copying dummy images:', error);
     process.exit(1);
   }
 }
 
 // MongoDB connection string
-const MONGODB_URI = 'your_secret_uri';
-const DB_NAME = 'bidify_test';
+const MONGODB_URI = process.argv[2] || 'mongodb://localhost:27017';
+const DB_NAME = process.argv[3] || 'bidify_test';
+
+if (!process.argv[2]) {
+  console.log('No MongoDB URI provided, using default:', MONGODB_URI);
+}
 
 const userSchema = new mongoose.Schema(
   {
@@ -112,11 +183,22 @@ const Bid = mongoose.model('Bid', bidSchema);
 const Notification = mongoose.model('Notification', notificationSchema);
 
 async function seedDatabase() {
+  const options = parseArguments();
+
   try {
-    await copyDummyImages();
-    console.log(MONGODB_URI, DB_NAME);
-    await mongoose.connect(`${MONGODB_URI}/${DB_NAME}`);
-    console.log('Connected to MongoDB');
+    console.log('\n🚀  Starting database seeder...');
+    console.log('📊  Using configuration:');
+    console.log(`   MongoDB URI: ${options.uri}`);
+    console.log(`   Database: ${options.db}`);
+    console.log(`   Force image overwrite: ${options.force}\n`);
+
+    await copyDummyImages(options.force);
+
+    const connectionString = `${options.uri}/${options.db}`;
+    console.log(`\n🔌  Connecting to MongoDB: ${connectionString}`);
+
+    await mongoose.connect(connectionString);
+    console.log('🔗  Connected to MongoDB\n');
 
     // Clear existing data
     await Promise.all([
@@ -406,16 +488,18 @@ async function seedDatabase() {
 
     await Notification.insertMany(notifications);
 
-    console.log('Database seeded successfully!');
-    console.log(`Created ${users.length} users`);
-    console.log(`Created ${items.length} items`);
-    console.log(`Created ${bids.length} bids`);
-    console.log(`Created ${await Notification.countDocuments()} notifications`);
+    console.log('🌱  Database seeded successfully!');
+    console.log(`📝  Created ${users.length} users`);
+    console.log(`📝  Created ${items.length} items`);
+    console.log(`📝  Created ${bids.length} bids`);
+    console.log(
+      `📝  Created ${await Notification.countDocuments()} notifications`
+    );
   } catch (error) {
-    console.error('Error seeding database:', error);
+    console.error('❗  Error seeding database:', error);
   } finally {
     await mongoose.connection.close();
-    console.log('Database connection closed');
+    console.log('\n⛓️‍💥  Database connection closed');
   }
 }
 
