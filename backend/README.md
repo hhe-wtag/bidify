@@ -305,6 +305,7 @@ this.emitToRoom(`room-${roomId}`, 'user-joined', userData);
 // Server -> Individual
 this.emitToUser(socketId, 'private-message', message);
 ```
+ 
 ```javascript
 // Client-side connection
 const socket = io('http://localhost:8080', {
